@@ -1,5 +1,6 @@
-package com.sjydvlp.elefx.component;
+package com.sjydvlp.elefx.theme;
 
+import com.sjydvlp.elefx.base.SceneBuilderIntegration;
 import javafx.scene.Parent;
 
 import java.nio.file.Files;
@@ -27,14 +28,23 @@ public interface Themable {
     }
 
     class Helper {
+
         public static final Path SB_WIN_PATH = Path.of(System.getenv("APPDATA") + "/Scene Builder");
-        public static final Path SB_MAC_PATH = Path.of(System.getProperty("user.home") + "/Library/Application Support/Scene Builder");
+
+        public static final Path SB_MAC_PATH = Path
+                .of(System.getProperty("user.home") + "/Library/Application Support/Scene Builder");
+
         public static final Path SB_LIN_PATH = Path.of(System.getProperty("user.home") + "/.scenebuilder");
+
         private static OSType os = null;
+
         private static Boolean inhibitSBSupport = null;
 
         public enum OSType {
-            Windows, MacOS, Linux, Other
+            Windows,
+            MacOS,
+            Linux,
+            Other
         }
 
         protected static void themeIt(Themable t) {
