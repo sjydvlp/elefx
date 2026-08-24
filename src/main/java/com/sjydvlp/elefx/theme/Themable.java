@@ -22,7 +22,10 @@ public interface Themable {
     Theme getTheme();
 
     default boolean sceneBuilderIntegration() {
-        if (!SceneBuilderIntegration.isInSceneBuilder() || Helper.isInhibitSBSupport()) return false;
+        if (!SceneBuilderIntegration.isInSceneBuilder() || Helper.isInhibitSBSupport()) {
+            return false;
+        }
+
         Helper.themeIt(this);
         return true;
     }
@@ -51,7 +54,9 @@ public interface Themable {
             Parent parent = t.toParent();
             Set<String> stylesheets = new HashSet<>(parent.getStylesheets());
             String theme = t.getTheme().toData();
-            if (stylesheets.contains(theme)) return;
+            if (stylesheets.contains(theme)) {
+                return;
+            }
             parent.getStylesheets().add(theme);
         }
 

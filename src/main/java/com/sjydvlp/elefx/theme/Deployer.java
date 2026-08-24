@@ -34,13 +34,20 @@ public class Deployer {
     }
 
     public void deploy(Theme theme) throws Exception {
-        if (!Files.isDirectory(tmpDir)) Files.createDirectories(tmpDir);
+        if (!Files.isDirectory(tmpDir)) {
+            Files.createDirectories(tmpDir);
+        }
 
         Path zipPath = null;
         try (InputStream in = theme.assets()) {
-            if (in == null) return;
+            if (in == null) {
+                return;
+            }
+
             Path destDir = tmpDir.resolve(theme.deployName());
-            if (!Files.isDirectory(destDir)) Files.createDirectories(destDir);
+            if (!Files.isDirectory(destDir)) {
+                Files.createDirectories(destDir);
+            }
 
             // Copy zip to file system
             zipPath = destDir.resolve("assets.zip");

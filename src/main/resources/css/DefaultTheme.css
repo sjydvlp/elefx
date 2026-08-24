@@ -1,0 +1,84 @@
+.ele-button {
+    -fx-min-height: 32px;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.ele-button--default {
+    -fx-text-fill: #606266;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdfe6;
+}
+
+.ele-button--default:hover {
+    -fx-text-fill: #409eff;
+    -fx-background-color: #ecf5ff;
+    -fx-border-color: #c6e2ff;
+}
+
+.ele-button--primary {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #409eff;
+    -fx-border-color: #409eff;
+}
+
+.ele-button--primary:hover {
+    -fx-background-color: #66b1ff;
+    -fx-border-color: #66b1ff;
+}
+
+.ele-button--success {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #67c23a;
+    -fx-border-color: #67c23a;
+}
+
+.ele-button--success:hover {
+    -fx-background-color: #85ce61;
+    -fx-border-color: #85ce61;
+}
+
+.ele-button--info {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #909399;
+    -fx-border-color: #909399;
+}
+
+.ele-button--info:hover {
+    -fx-background-color: #a6a9ad;
+    -fx-border-color: #a6a9ad;
+}
+
+.ele-button--warning {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #e6a23c;
+    -fx-border-color: #e6a23c;
+}
+
+.ele-button--warning:hover {
+    -fx-background-color: #ebb563;
+    -fx-border-color: #ebb563;
+}
+
+.ele-button--danger {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #f56c6c;
+    -fx-border-color: #f56c6c;
+}
+
+.ele-button--danger:hover {
+    -fx-background-color: #f78989;
+    -fx-border-color: #f78989;
+}
+
+.ele-button:pressed {
+    -fx-opacity: 0.85;
+}
+
+.ele-button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}

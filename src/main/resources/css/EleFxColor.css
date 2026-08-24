@@ -1,0 +1,16 @@
+* {
+  -elefx-blue: #2196f3;
+  -elefx-charcoal: #445055;
+  -elefx-green: #4caf50;
+  -elefx-onyx: #353935;
+  -elefx-orange: #ff9800;
+  -elefx-purple: #7a0ed9;
+  -elefx-red: #EF6E6B;
+  -elefx-yellow: #FFEA00;
+  /* High Emphasis */
+  -elefx-text-he: rgba(0, 0, 0, 0.87);
+  /* Medium Emphasis*/
+  -elefx-text-me: rgba(0, 0, 0, 0.60);
+  /* Disabled */
+  -elefx-text-disabled: rgba(0, 0, 0, 0.38);
+}

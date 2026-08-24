@@ -16,22 +16,11 @@ public interface Theme {
 
     String path();
 
-    default String root() {
-        return "";
-    }
-
-    default String resourcePath() {
-        String root = root();
-        if (root == null || root.isBlank()) {
-            return path();
-        }
-        return root.endsWith("/") ? root + path() : root + "/" + path();
-    }
-
     default URL get() {
-        if (Helper.isCached(this) && Helper.getCachedTheme(this) != null)
+        if (Helper.isCached(this) && Helper.getCachedTheme(this) != null) {
             return Helper.getCachedTheme(this);
-        return Helper.cacheTheme(this, ResourceUtil.getResource(resourcePath()));
+        }
+        return Helper.cacheTheme(this, ResourceUtil.getResource(path()));
     }
 
     default String toData() {

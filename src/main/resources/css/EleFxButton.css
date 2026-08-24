@@ -1,3 +1,7 @@
+@import "Fonts.css";
+
+@import "EleFxColor.css";
+
 .ele-button {
     -fx-min-height: 32px;
     -fx-padding: 8px 15px;

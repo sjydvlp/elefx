@@ -1,6 +1,6 @@
 package com.sjydvlp.elefx.button;
 
-import com.sjydvlp.elefx.theme.EleStylesheet;
+import com.sjydvlp.elefx.theme.EleFxTheme;
 import com.sjydvlp.elefx.theme.Themable;
 import com.sjydvlp.elefx.theme.Theme;
 import javafx.beans.property.ObjectProperty;
@@ -16,49 +16,50 @@ import javafx.scene.control.Button;
  * @author sjydvlp@163.com
  * @date 2026/8/18 23:33
  */
-public class EleButton extends Button implements Themable {
+public class EleFxButton extends Button implements Themable {
 
     private static final String STYLE_CLASS = "ele-button";
 
-    private final ObjectProperty<EleButtonType> type = new SimpleObjectProperty<>(this, "type", EleButtonType.DEFAULT);
+    private final ObjectProperty<EleFxButtonType> type = new SimpleObjectProperty<>(this, "type",
+            EleFxButtonType.DEFAULT);
 
-    public EleButton() {
+    public EleFxButton() {
         super("Button");
         initialize();
     }
 
-    public EleButton(String text) {
+    public EleFxButton(String text) {
         super(text);
         initialize();
     }
 
-    public EleButton(String text, EleButtonType type) {
+    public EleFxButton(String text, EleFxButtonType type) {
         super(text);
         setType(type);
         initialize();
     }
 
-    public EleButton(String text, double prefWidth, double prefHeight) {
+    public EleFxButton(String text, double prefWidth, double prefHeight) {
         super(text);
         setPrefSize(prefWidth, prefHeight);
         initialize();
     }
 
-    public EleButton(String text, Node graphic) {
+    public EleFxButton(String text, Node graphic) {
         super(text, graphic);
         initialize();
     }
 
-    public EleButtonType getType() {
+    public EleFxButtonType getType() {
         return type.get();
     }
 
-    public ObjectProperty<EleButtonType> typeProperty() {
+    public ObjectProperty<EleFxButtonType> typeProperty() {
         return type;
     }
 
-    public void setType(EleButtonType type) {
-        this.type.set(type == null ? EleButtonType.DEFAULT : type);
+    public void setType(EleFxButtonType type) {
+        this.type.set(type == null ? EleFxButtonType.DEFAULT : type);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class EleButton extends Button implements Themable {
 
     @Override
     public Theme getTheme() {
-        return EleStylesheet.BUTTON;
+        return EleFxTheme.BUTTON;
     }
 
     @Override
@@ -84,10 +85,10 @@ public class EleButton extends Button implements Themable {
         sceneBuilderIntegration();
     }
 
-    private void updateTypeStyleClass(EleButtonType oldType, EleButtonType newType) {
+    private void updateTypeStyleClass(EleFxButtonType oldType, EleFxButtonType newType) {
         if (oldType != null) {
             getStyleClass().remove(oldType.styleClass());
         }
-        getStyleClass().add((newType == null ? EleButtonType.DEFAULT : newType).styleClass());
+        getStyleClass().add((newType == null ? EleFxButtonType.DEFAULT : newType).styleClass());
     }
 }

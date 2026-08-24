@@ -6,7 +6,7 @@ package com.sjydvlp.elefx.button;
  * @author sjydvlp@163.com
  * @date 2026/8/20 23:45
  */
-public enum EleButtonType {
+public enum EleFxButtonType {
 
     DEFAULT("default"),
     PRIMARY("primary"),
@@ -17,7 +17,7 @@ public enum EleButtonType {
 
     private final String styleClass;
 
-    EleButtonType(String styleClass) {
+    EleFxButtonType(String styleClass) {
         this.styleClass = styleClass;
     }
 
