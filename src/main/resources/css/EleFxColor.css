@@ -1,16 +1,16 @@
 * {
-  -elefx-blue: #2196f3;
-  -elefx-charcoal: #445055;
-  -elefx-green: #4caf50;
-  -elefx-onyx: #353935;
-  -elefx-orange: #ff9800;
-  -elefx-purple: #7a0ed9;
-  -elefx-red: #EF6E6B;
-  -elefx-yellow: #FFEA00;
-  /* High Emphasis */
-  -elefx-text-he: rgba(0, 0, 0, 0.87);
-  /* Medium Emphasis*/
-  -elefx-text-me: rgba(0, 0, 0, 0.60);
-  /* Disabled */
-  -elefx-text-disabled: rgba(0, 0, 0, 0.38);
+  -elefx-white-he: #ffffff;
+  -elefx-white-me: #f5f5f5;
+  -elefx-white-le: #dcdfe6;
+  -elefx-blue-me: #409eff;
+  -elefx-blue-le: #66b1ff;
+  -elefx-green-me: #67c23a;
+  -elefx-green-le: #85ce61;
+  -elefx-charcoal-he: #606266;
+  -elefx-charcoal-me: #909399;
+  -elefx-charcoal-le: #a6a9ad;
+  -elefx-yellow-me: #e6a23c;
+  -elefx-yellow-le: #ebb563;
+  -elefx-red-me: #f56c6c;
+  -elefx-red-le: #f78989;
 }
