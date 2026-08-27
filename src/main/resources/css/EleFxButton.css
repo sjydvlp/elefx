@@ -11,73 +11,73 @@
 
 .ele-button--default,
 .ele-button--default:focused {
-    -fx-text-fill: -elefx-charcoal-he;
-    -fx-background-color: -elefx-white-he;
-    -fx-border-color: -elefx-white-le;
+    -fx-text-fill: -elefx-ct-regular;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-darker;
 }
 
 .ele-button--default:hover {
-    -fx-background-color: -elefx-white-me;
+    -fx-background-color: -elefx-co-base-bg;
 }
 
 .ele-button--primary,
 .ele-button--primary:focused {
-    -fx-text-fill: -elefx-white-he;
-    -fx-background-color: -elefx-blue-me;
-    -fx-border-color: -elefx-blue-me;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-cp-1;
+    -fx-border-color: -elefx-cp-1;
 }
 
 .ele-button--primary:hover {
-    -fx-background-color: -elefx-blue-le;
-    -fx-border-color: -elefx-blue-le;
+    -fx-background-color: -elefx-cp-l3;
+    -fx-border-color: -elefx-cp-l3;
 }
 
 .ele-button--success,
 .ele-button--success:focused {
-    -fx-text-fill: -elefx-white-he;
-    -fx-background-color: -elefx-green-me;
-    -fx-border-color: -elefx-green-me;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-cs-1;
+    -fx-border-color: -elefx-cs-1;
 }
 
 .ele-button--success:hover {
-    -fx-background-color: -elefx-green-le;
-    -fx-border-color: -elefx-green-le;
+    -fx-background-color: -elefx-cs-l3;
+    -fx-border-color: -elefx-cs-l3;
 }
 
 .ele-button--info,
 .ele-button--info:focused {
-    -fx-text-fill: -elefx-white-he;
-    -fx-background-color: -elefx-charcoal-me;
-    -fx-border-color: -elefx-charcoal-me;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-ci-1;
+    -fx-border-color: -elefx-ci-1;
 }
 
 .ele-button--info:hover {
-    -fx-background-color: -elefx-charcoal-le;
-    -fx-border-color: -elefx-charcoal-le;
+    -fx-background-color: -elefx-ci-l3;
+    -fx-border-color: -elefx-ci-l3;
 }
 
 .ele-button--warning,
 .ele-button--warning:focused {
-    -fx-text-fill: -elefx-white-he;
-    -fx-background-color: -elefx-yellow-me;
-    -fx-border-color: -elefx-yellow-me;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-cw-1;
+    -fx-border-color: -elefx-cw-1;
 }
 
 .ele-button--warning:hover {
-    -fx-background-color: -elefx-yellow-le;
-    -fx-border-color: -elefx-yellow-le;
+    -fx-background-color: -elefx-cw-l3;
+    -fx-border-color: -elefx-cw-l3;
 }
 
 .ele-button--danger,
 .ele-button--danger:focused {
-    -fx-text-fill: -elefx-white-he;
-    -fx-background-color: -elefx-red-me;
-    -fx-border-color: -elefx-red-me;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-cd-1;
+    -fx-border-color: -elefx-cd-1;
 }
 
 .ele-button--danger:hover {
-    -fx-background-color: -elefx-red-le;
-    -fx-border-color: -elefx-red-le;
+    -fx-background-color: -elefx-cd-l3;
+    -fx-border-color: -elefx-cd-l3;
 }
 
 .ele-button:pressed {
