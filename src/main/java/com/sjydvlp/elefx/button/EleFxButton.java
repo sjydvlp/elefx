@@ -3,7 +3,9 @@ package com.sjydvlp.elefx.button;
 import com.sjydvlp.elefx.theme.EleFxTheme;
 import com.sjydvlp.elefx.theme.Themable;
 import com.sjydvlp.elefx.theme.Theme;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -20,8 +22,12 @@ public class EleFxButton extends Button implements Themable {
 
     private static final String STYLE_CLASS = "ele-button";
 
+    private static final String CIRCLE_STYLE_CLASS = "ele-button--circle";
+
     private final ObjectProperty<EleFxButtonType> type = new SimpleObjectProperty<>(this, "type",
             EleFxButtonType.DEFAULT);
+
+    private final BooleanProperty circle = new SimpleBooleanProperty(this, "circle", false);
 
     public EleFxButton() {
         super("Button");
@@ -50,6 +56,30 @@ public class EleFxButton extends Button implements Themable {
         initialize();
     }
 
+    public EleFxButton(String text, Node icon, EleFxButtonType type) {
+        super(text, icon);
+        setType(type);
+        initialize();
+    }
+
+    public EleFxButton(Node icon) {
+        super(null, icon);
+        initialize();
+    }
+
+    public EleFxButton(Node icon, EleFxButtonType type) {
+        super(null, icon);
+        setType(type);
+        initialize();
+    }
+
+    public EleFxButton(Node icon, EleFxButtonType type, boolean circle) {
+        super(null, icon);
+        setType(type);
+        setCircle(circle);
+        initialize();
+    }
+
     public EleFxButtonType getType() {
         return type.get();
     }
@@ -60,6 +90,30 @@ public class EleFxButton extends Button implements Themable {
 
     public void setType(EleFxButtonType type) {
         this.type.set(type == null ? EleFxButtonType.DEFAULT : type);
+    }
+
+    public boolean isCircle() {
+        return circle.get();
+    }
+
+    public BooleanProperty circleProperty() {
+        return circle;
+    }
+
+    public void setCircle(boolean circle) {
+        this.circle.set(circle);
+    }
+
+    public Node getIcon() {
+        return getGraphic();
+    }
+
+    public ObjectProperty<Node> iconProperty() {
+        return graphicProperty();
+    }
+
+    public void setIcon(Node icon) {
+        setGraphic(icon);
     }
 
     @Override
@@ -81,6 +135,8 @@ public class EleFxButton extends Button implements Themable {
         getStyleClass().add(STYLE_CLASS);
         updateTypeStyleClass(null, getType());
         type.addListener((observable, oldType, newType) -> updateTypeStyleClass(oldType, newType));
+        updateCircleStyleClass(isCircle());
+        circle.addListener((observable, oldCircle, newCircle) -> updateCircleStyleClass(newCircle));
         setAlignment(Pos.CENTER);
         sceneBuilderIntegration();
     }
@@ -90,5 +146,15 @@ public class EleFxButton extends Button implements Themable {
             getStyleClass().remove(oldType.styleClass());
         }
         getStyleClass().add((newType == null ? EleFxButtonType.DEFAULT : newType).styleClass());
+    }
+
+    private void updateCircleStyleClass(boolean circle) {
+        if (circle) {
+            if (!getStyleClass().contains(CIRCLE_STYLE_CLASS)) {
+                getStyleClass().add(CIRCLE_STYLE_CLASS);
+            }
+        } else {
+            getStyleClass().remove(CIRCLE_STYLE_CLASS);
+        }
     }
 }

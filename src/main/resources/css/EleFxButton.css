@@ -9,6 +9,18 @@
     -fx-background-insets: 0px;
 }
 
+.ele-button--circle {
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-padding: 8px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+}
+
 .ele-button--default,
 .ele-button--default:focused {
     -fx-text-fill: -elefx-ct-regular;
