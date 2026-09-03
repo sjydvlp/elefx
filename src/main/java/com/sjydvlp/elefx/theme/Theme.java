@@ -1,6 +1,6 @@
 package com.sjydvlp.elefx.theme;
 
-import cn.hutool.core.io.resource.ResourceUtil;
+import com.sjydvlp.elefx.EleFXResourcesLoader;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,7 +20,7 @@ public interface Theme {
         if (Helper.isCached(this) && Helper.getCachedTheme(this) != null) {
             return Helper.getCachedTheme(this);
         }
-        return Helper.cacheTheme(this, ResourceUtil.getResource(path()));
+        return Helper.cacheTheme(this, EleFXResourcesLoader.loadURL(path()));
     }
 
     default String toData() {

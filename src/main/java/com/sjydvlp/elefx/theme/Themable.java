@@ -1,6 +1,5 @@
 package com.sjydvlp.elefx.theme;
 
-import com.sjydvlp.elefx.base.SceneBuilderIntegration;
 import javafx.scene.Parent;
 
 import java.nio.file.Files;

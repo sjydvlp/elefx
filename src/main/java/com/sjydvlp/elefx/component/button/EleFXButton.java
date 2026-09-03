@@ -1,6 +1,6 @@
-package com.sjydvlp.elefx.button;
+package com.sjydvlp.elefx.component.button;
 
-import com.sjydvlp.elefx.theme.EleFxTheme;
+import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Themable;
 import com.sjydvlp.elefx.theme.Theme;
 import javafx.beans.property.BooleanProperty;
@@ -18,78 +18,78 @@ import javafx.scene.control.Button;
  * @author sjydvlp@163.com
  * @date 2026/8/18 23:33
  */
-public class EleFxButton extends Button implements Themable {
+public class EleFXButton extends Button implements Themable {
 
     private static final String STYLE_CLASS = "ele-button";
 
     private static final String CIRCLE_STYLE_CLASS = "ele-button--circle";
 
-    private final ObjectProperty<EleFxButtonType> type = new SimpleObjectProperty<>(this, "type",
-            EleFxButtonType.DEFAULT);
+    private final ObjectProperty<EleFXButtonType> type = new SimpleObjectProperty<>(this, "type",
+            EleFXButtonType.DEFAULT);
 
     private final BooleanProperty circle = new SimpleBooleanProperty(this, "circle", false);
 
-    public EleFxButton() {
+    public EleFXButton() {
         super("Button");
         initialize();
     }
 
-    public EleFxButton(String text) {
+    public EleFXButton(String text) {
         super(text);
         initialize();
     }
 
-    public EleFxButton(String text, EleFxButtonType type) {
+    public EleFXButton(String text, EleFXButtonType type) {
         super(text);
         setType(type);
         initialize();
     }
 
-    public EleFxButton(String text, double prefWidth, double prefHeight) {
+    public EleFXButton(String text, double prefWidth, double prefHeight) {
         super(text);
         setPrefSize(prefWidth, prefHeight);
         initialize();
     }
 
-    public EleFxButton(String text, Node graphic) {
+    public EleFXButton(String text, Node graphic) {
         super(text, graphic);
         initialize();
     }
 
-    public EleFxButton(String text, Node icon, EleFxButtonType type) {
+    public EleFXButton(String text, Node icon, EleFXButtonType type) {
         super(text, icon);
         setType(type);
         initialize();
     }
 
-    public EleFxButton(Node icon) {
+    public EleFXButton(Node icon) {
         super(null, icon);
         initialize();
     }
 
-    public EleFxButton(Node icon, EleFxButtonType type) {
+    public EleFXButton(Node icon, EleFXButtonType type) {
         super(null, icon);
         setType(type);
         initialize();
     }
 
-    public EleFxButton(Node icon, EleFxButtonType type, boolean circle) {
+    public EleFXButton(Node icon, EleFXButtonType type, boolean circle) {
         super(null, icon);
         setType(type);
         setCircle(circle);
         initialize();
     }
 
-    public EleFxButtonType getType() {
+    public EleFXButtonType getType() {
         return type.get();
     }
 
-    public ObjectProperty<EleFxButtonType> typeProperty() {
+    public ObjectProperty<EleFXButtonType> typeProperty() {
         return type;
     }
 
-    public void setType(EleFxButtonType type) {
-        this.type.set(type == null ? EleFxButtonType.DEFAULT : type);
+    public void setType(EleFXButtonType type) {
+        this.type.set(type == null ? EleFXButtonType.DEFAULT : type);
     }
 
     public boolean isCircle() {
@@ -123,7 +123,7 @@ public class EleFxButton extends Button implements Themable {
 
     @Override
     public Theme getTheme() {
-        return EleFxTheme.BUTTON;
+        return EleFXThemes.BUTTON;
     }
 
     @Override
@@ -141,11 +141,11 @@ public class EleFxButton extends Button implements Themable {
         sceneBuilderIntegration();
     }
 
-    private void updateTypeStyleClass(EleFxButtonType oldType, EleFxButtonType newType) {
+    private void updateTypeStyleClass(EleFXButtonType oldType, EleFXButtonType newType) {
         if (oldType != null) {
             getStyleClass().remove(oldType.styleClass());
         }
-        getStyleClass().add((newType == null ? EleFxButtonType.DEFAULT : newType).styleClass());
+        getStyleClass().add((newType == null ? EleFXButtonType.DEFAULT : newType).styleClass());
     }
 
     private void updateCircleStyleClass(boolean circle) {

@@ -1,5 +1,5 @@
-@import "Fonts.css";
-@import "EleFxColor.css";
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
 
 .ele-button {
     -fx-padding: 2px 12px;

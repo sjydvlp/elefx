@@ -1,22 +1,20 @@
 package com.sjydvlp.elefx.theme;
 
-import cn.hutool.core.io.resource.ResourceUtil;
+import com.sjydvlp.elefx.EleFXResourcesLoader;
 
 import java.io.InputStream;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
-public enum EleFxTheme implements Theme {
+public enum EleFXThemes implements Theme {
 
-    DEFAULT("css/DefaultTheme.css"),
+    DEFAULT("css/self/EleFXDefault.css"),
+    BUTTON("css/component/button/EleFXButton.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
-    BUTTON("css/EleFxButton.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
     // CHECK_LIST_VIEW("css/MFXCheckListView.css"),
     // CHECK_TREE_CELL("css/MFXCheckTreeCell.css"),
     // CIRCLE_TOGGLE_NODE("css/MFXCircleToggleNode.css"),
-    // COLORS("css/EleFxColor.css"),
+    // COLORS("css/EleFXColor.css"),
     // COMBO_BOX("css/MFXComboBox.css"),
     // COMBO_BOX_CELL("css/MFXComboBoxCell.css"),
     // CONTEXT_MENU("css/MFXContextMenu.css"),
@@ -58,7 +56,7 @@ public enum EleFxTheme implements Theme {
 
     private final String path;;
 
-    EleFxTheme(String path) {
+    EleFXThemes(String path) {
         this.path = path;
     }
 
@@ -69,17 +67,11 @@ public enum EleFxTheme implements Theme {
 
     @Override
     public InputStream assets() {
-        return ResourceUtil.getStream("css/elefx-assets.zip");
+        return EleFXResourcesLoader.loadStream("css/self/elefx-assets.zip");
     }
 
     @Override
     public String deployName() {
-        return "ex-assets";
-    }
-
-    public static Set<EleFxTheme> forAssemble() {
-        Set<EleFxTheme> css = new LinkedHashSet<>();
-        css.add(DEFAULT);
-        return css;
+        return "elefx-assets";
     }
 }

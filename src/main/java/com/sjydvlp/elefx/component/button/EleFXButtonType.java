@@ -1,4 +1,4 @@
-package com.sjydvlp.elefx.button;
+package com.sjydvlp.elefx.component.button;
 
 /**
  * Element Plus style semantic button types.
@@ -6,7 +6,7 @@ package com.sjydvlp.elefx.button;
  * @author sjydvlp@163.com
  * @date 2026/8/20 23:45
  */
-public enum EleFxButtonType {
+public enum EleFXButtonType {
 
     DEFAULT("default"),
     PRIMARY("primary"),
@@ -17,7 +17,7 @@ public enum EleFxButtonType {
 
     private final String styleClass;
 
-    EleFxButtonType(String styleClass) {
+    EleFXButtonType(String styleClass) {
         this.styleClass = styleClass;
     }
 

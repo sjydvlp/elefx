@@ -1,16 +1,16 @@
 package com.sjydvlp.elefx.theme;
 
-import cn.hutool.core.io.resource.ResourceUtil;
+import com.sjydvlp.elefx.EleFXResourcesLoader;
 
 import java.io.InputStream;
 
-public enum JavaFXTheme implements Theme {
+public enum JavaFXThemes implements Theme {
 
     MODENA("css/jfx/modena.css");
 
     private final String path;
 
-    JavaFXTheme(String path) {
+    JavaFXThemes(String path) {
         this.path = path;
     }
 
@@ -21,7 +21,6 @@ public enum JavaFXTheme implements Theme {
 
     @Override
     public InputStream assets() {
-        String path = path().substring(0, path().lastIndexOf("/") + 1) + "assets.zip";
-        return ResourceUtil.getStream(path);
+        return EleFXResourcesLoader.loadStream("css/jfx/assets.zip");
     }
 }
