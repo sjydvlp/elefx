@@ -173,3 +173,36 @@
     -fx-opacity: 0.5;
     -fx-cursor: default;
 }
+
+.ele-icon {
+    -fx-alignment: center;
+}
+
+.ele-icon .ele-icon__svg {
+    -fx-fill: -elefx-ct-regular;
+}
+
+.ele-icon--outlined .ele-icon__svg {
+    -fx-fill: transparent;
+    -fx-stroke: -elefx-ct-regular;
+    -fx-stroke-width: 1.75px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.ele-button--primary .ele-icon--filled .ele-icon__svg,
+.ele-button--success .ele-icon--filled .ele-icon__svg,
+.ele-button--info .ele-icon--filled .ele-icon__svg,
+.ele-button--warning .ele-icon--filled .ele-icon__svg,
+.ele-button--danger .ele-icon--filled .ele-icon__svg {
+    -fx-fill: -elefx-cf-blank;
+}
+
+.ele-button--primary .ele-icon--outlined .ele-icon__svg,
+.ele-button--success .ele-icon--outlined .ele-icon__svg,
+.ele-button--info .ele-icon--outlined .ele-icon__svg,
+.ele-button--warning .ele-icon--outlined .ele-icon__svg,
+.ele-button--danger .ele-icon--outlined .ele-icon__svg {
+    -fx-fill: transparent;
+    -fx-stroke: -elefx-cf-blank;
+}

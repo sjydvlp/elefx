@@ -9,7 +9,8 @@
     -fx-background-insets: 0px;
 }
 
-.ele-button--circle {
+.ele-button--circle,
+.ele-button--circle:focused {
     -fx-min-width: 32px;
     -fx-min-height: 32px;
     -fx-pref-width: 32px;
