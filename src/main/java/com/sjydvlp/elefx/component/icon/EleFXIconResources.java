@@ -1,5 +1,7 @@
 package com.sjydvlp.elefx.component.icon;
 
+import com.sjydvlp.elefx.EleFXResourcesLoader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -8,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Internal SVG resource loader. */
 final class EleFXIconResources {
 
     private static final Pattern PATH_DATA_PATTERN = Pattern.compile(
@@ -25,7 +26,7 @@ final class EleFXIconResources {
 
     private static String readPathData(EleFXIconType type) {
         String resourcePath = type.svgResourcePath();
-        try (InputStream stream = EleFXIconResources.class.getResourceAsStream(resourcePath)) {
+        try (InputStream stream = EleFXResourcesLoader.loadStream(resourcePath)) {
             if (stream == null) {
                 throw new IllegalStateException("SVG icon resource does not exist: " + resourcePath);
             }

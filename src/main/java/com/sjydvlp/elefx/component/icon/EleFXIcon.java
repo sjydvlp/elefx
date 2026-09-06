@@ -1,8 +1,8 @@
 package com.sjydvlp.elefx.component.icon;
 
 import com.sjydvlp.elefx.theme.EleFXThemes;
-import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import com.sjydvlp.elefx.theme.Theme;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
 
@@ -19,7 +18,7 @@ import javafx.scene.shape.SVGPath;
  *
  * <p>
  * 图标的 {@link #sizeProperty() size} 以像素计，默认值为 16。通过
- * {@link #setColor(Paint)} 设置图标颜色，或使用 CSS 选择器
+ * {@link #setFill(Paint)} 设置图标颜色，或使用 CSS 选择器
  * {@code .ele-icon .ele-icon__svg} 进行全局定制。
  * </p>
  *
@@ -37,14 +36,10 @@ public class EleFXIcon extends StackPane implements Themable {
 
     private static final String SVG_STYLE_CLASS = "ele-icon__svg";
 
-    private static final String FILLED_STYLE_CLASS = "ele-icon--filled";
-
-    private static final String OUTLINED_STYLE_CLASS = "ele-icon--outlined";
-
     private final SVGPath svgPath = new SVGPath();
 
     private final ObjectProperty<EleFXIconType> type = new SimpleObjectProperty<>(this, "type",
-            EleFXFilledIconType.SEARCH);
+            EleFXIconType.SEARCH);
 
     private final DoubleProperty size = new SimpleDoubleProperty(this, "size", DEFAULT_SIZE);
 
@@ -56,7 +51,7 @@ public class EleFXIcon extends StackPane implements Themable {
     /**
      * Creates a 16px icon of the given type.
      *
-     * @param type the icon definition; {@code null} selects {@link EleFXFilledIconType#SEARCH}
+     * @param type the icon type; {@code null} selects {@link EleFXIconType#SEARCH}
      */
     public EleFXIcon(EleFXIconType type) {
         setType(type);
@@ -66,7 +61,7 @@ public class EleFXIcon extends StackPane implements Themable {
     /**
      * Creates an icon of the given type and size.
      *
-     * @param type the icon definition; {@code null} selects {@link EleFXFilledIconType#SEARCH}
+     * @param type the icon type; {@code null} selects {@link EleFXIconType#SEARCH}
      * @param size icon size in pixels
      */
     public EleFXIcon(EleFXIconType type, double size) {
@@ -84,7 +79,7 @@ public class EleFXIcon extends StackPane implements Themable {
     }
 
     public void setType(EleFXIconType type) {
-        this.type.set(type == null ? EleFXFilledIconType.SEARCH : type);
+        this.type.set(type == null ? EleFXIconType.SEARCH : type);
     }
 
     public double getSize() {
@@ -118,23 +113,6 @@ public class EleFXIcon extends StackPane implements Themable {
 
     public void setFill(Paint fill) {
         svgPath.setFill(fill);
-    }
-
-    /**
-     * Sets the icon's visible color. For outlined icons, this sets the stroke
-     * color and keeps the inside transparent.
-     *
-     * @param color the color to apply
-     */
-    public void setColor(Paint color) {
-        EleFXIconType iconType = getType() == null ? EleFXFilledIconType.SEARCH : getType();
-        if (iconType.isFilled()) {
-            svgPath.setFill(color);
-            svgPath.setStroke(null);
-        } else {
-            svgPath.setFill(Color.TRANSPARENT);
-            svgPath.setStroke(color);
-        }
     }
 
     /**
@@ -178,12 +156,10 @@ public class EleFXIcon extends StackPane implements Themable {
             getStyleClass().remove(oldType.styleClass());
         }
 
-        EleFXIconType resolvedType = newType == null ? EleFXFilledIconType.SEARCH : newType;
+        EleFXIconType resolvedType = newType == null ? EleFXIconType.SEARCH : newType;
         if (!getStyleClass().contains(resolvedType.styleClass())) {
             getStyleClass().add(resolvedType.styleClass());
         }
-        getStyleClass().removeAll(FILLED_STYLE_CLASS, OUTLINED_STYLE_CLASS);
-        getStyleClass().add(resolvedType.isFilled() ? FILLED_STYLE_CLASS : OUTLINED_STYLE_CLASS);
         svgPath.setContent(resolvedType.svgPathData());
     }
 
