@@ -30,7 +30,8 @@ public class EleFXIcon extends StackPane implements Themable {
     /** Default icon size in pixels. */
     public static final double DEFAULT_SIZE = 16.0;
 
-    private static final double VIEW_BOX_SIZE = 24.0;
+    // Element Plus paths use a 1024 by 1024 source coordinate system.
+    private static final double VIEW_BOX_SIZE = 1024.0;
 
     private static final String STYLE_CLASS = "ele-icon";
 

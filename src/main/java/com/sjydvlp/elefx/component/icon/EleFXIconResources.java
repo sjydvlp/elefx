@@ -33,10 +33,17 @@ final class EleFXIconResources {
 
             String svg = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             Matcher matcher = PATH_DATA_PATTERN.matcher(svg);
-            if (!matcher.find()) {
+            StringBuilder pathData = new StringBuilder();
+            while (matcher.find()) {
+                if (pathData.length() > 0) {
+                    pathData.append(' ');
+                }
+                pathData.append(matcher.group(1));
+            }
+            if (pathData.length() == 0) {
                 throw new IllegalStateException("SVG icon resource has no path data: " + resourcePath);
             }
-            return matcher.group(1);
+            return pathData.toString();
         } catch (IOException exception) {
             throw new IllegalStateException("Failed to read SVG icon resource: " + resourcePath, exception);
         }
