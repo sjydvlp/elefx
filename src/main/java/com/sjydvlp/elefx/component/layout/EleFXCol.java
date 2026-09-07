@@ -8,10 +8,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
@@ -19,7 +15,8 @@ import javafx.scene.shape.Rectangle;
 
 /**
  * 24 栅格布局中的列，内容使用 {@link StackPane} 的对齐与边距约束。
- * 与 {@link EleFXRow} 配合使用；列间距在原有 padding 之外增加左右各一半的留白。
+ * 与 {@link EleFXRow} 配合使用；行在列的外侧保留 gutter，不修改列的 padding。
+ * 背景和边框可直接设置在列上，列内尺寸与对齐由 StackPane 处理。
  *
  * <p>
  * 响应式配置使用场景宽度（无场景时使用行宽度）：xs &lt; 768，sm &gt;= 768，
@@ -57,8 +54,6 @@ public class EleFXCol extends StackPane implements Themable {
     private final ObjectProperty<EleFXColSize> lg = new SimpleObjectProperty<>(this, "lg");
 
     private final ObjectProperty<EleFXColSize> xl = new SimpleObjectProperty<>(this, "xl");
-
-    private double rowGutter;
 
     private boolean gridHidden;
 
@@ -257,86 +252,9 @@ public class EleFXCol extends StackPane implements Themable {
         return result;
     }
 
-    void setRowGutter(double gutter) {
-        double value = Double.isFinite(gutter) ? Math.max(0, gutter) : 0;
-        if (rowGutter != value) {
-            rowGutter = value;
-            requestLayout();
-        }
-    }
-
     void setGridHidden(boolean hidden) {
         gridHidden = hidden;
         updateGridHidden();
-    }
-
-    @Override
-    protected double computeMinWidth(double height) {
-        return super.computeMinWidth(height) + horizontalGutter();
-    }
-
-    @Override
-    protected double computePrefWidth(double height) {
-        return super.computePrefWidth(height) + horizontalGutter();
-    }
-
-    @Override
-    protected double computeMinHeight(double width) {
-        return super.computeMinHeight(contentWidth(width));
-    }
-
-    @Override
-    protected double computePrefHeight(double width) {
-        return super.computePrefHeight(contentWidth(width));
-    }
-
-    @Override
-    protected void layoutChildren() {
-        double left = snappedLeftInset() + snapSpaceX(rowGutter / 2);
-        double top = snappedTopInset();
-        double width = Math.max(0, getWidth() - left - snappedRightInset()
-                - snapSpaceX(rowGutter / 2));
-        double height = Math.max(0, getHeight() - top - snappedBottomInset());
-        Pos alignment = getAlignment() == null ? Pos.CENTER : getAlignment();
-        double baseline = alignment.getVpos() == VPos.BASELINE ? computeAreaBaseline(height) : 0;
-        for (Node child : getManagedChildren()) {
-            Pos childAlignment = StackPane.getAlignment(child);
-            if (childAlignment == null) {
-                childAlignment = alignment;
-            }
-            Insets margin = StackPane.getMargin(child);
-            layoutInArea(child, left, top, width, height, baseline, margin,
-                    childAlignment.getHpos(), childAlignment.getVpos());
-        }
-    }
-
-    private double computeAreaBaseline(double areaHeight) {
-        // StackPane reserves the largest minimum descent before sizing children whose baseline is their height.
-        double minimumDescent = 0;
-        for (Node child : getManagedChildren()) {
-            double baseline = child.getBaselineOffset();
-            if (baseline != Node.BASELINE_OFFSET_SAME_AS_HEIGHT) {
-                double minimumHeight = child.isResizable() ? child.minHeight(-1)
-                        : child.getLayoutBounds().getHeight();
-                minimumDescent = Math.max(minimumDescent, minimumHeight - baseline);
-            }
-        }
-        double areaBaseline = 0;
-        for (Node child : getManagedChildren()) {
-            Insets margin = StackPane.getMargin(child);
-            double top = margin == null ? 0 : snapSpaceY(margin.getTop());
-            double childBaseline = child.getBaselineOffset();
-            if (childBaseline == Node.BASELINE_OFFSET_SAME_AS_HEIGHT) {
-                double bottom = margin == null ? 0 : snapSpaceY(margin.getBottom());
-                // Like StackPane, use the pane width when a child's height depends on its width.
-                double width = child.getContentBias() == Orientation.HORIZONTAL ? getWidth() : -1;
-                double minimumHeight = child.minHeight(width);
-                double availableHeight = areaHeight - minimumDescent - top - bottom;
-                childBaseline = Math.max(minimumHeight, Math.min(availableHeight, child.maxHeight(width)));
-            }
-            areaBaseline = Math.max(areaBaseline, top + childBaseline);
-        }
-        return areaBaseline;
     }
 
     private void initialize() {
@@ -363,14 +281,6 @@ public class EleFXCol extends StackPane implements Themable {
         if (getParent() != null) {
             getParent().requestLayout();
         }
-    }
-
-    private double horizontalGutter() {
-        return snapSpaceX(rowGutter / 2) * 2;
-    }
-
-    private double contentWidth(double width) {
-        return width < 0 ? width : Math.max(0, width - horizontalGutter());
     }
 
     private boolean hiddenAt(double width) {

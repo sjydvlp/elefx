@@ -22,8 +22,8 @@ import java.util.List;
  *
  * <p>
  * 列的 span 与 offset 合计超过 24 时自动换行，push/pull 只改变显示位置。
- * gutter 在每列内容的左右各保留一半间距，不改变列占用的栅格宽度。
- * 行宽包含两端各半个 gutter；JavaFX 父容器不支持 CSS 的负外边距。
+ * gutter 在每列外侧左右各保留一半间距，列的实际宽度为栅格宽度减去 gutter。
+ * 背景和边框可直接设置在列上；行的两端也各保留半个 gutter，不使用负外边距。
  * 响应式断点采用 Scene 宽度，未加入 Scene 时采用行宽。
  * </p>
  *
@@ -134,7 +134,8 @@ public class EleFXRow extends Pane implements Themable {
         for (Node child : getManagedChildren()) {
             int span = child instanceof EleFXCol col ? col.resolveSize(viewport).getSpan() : COLUMN_COUNT;
             if (span > 0) {
-                width = Math.max(width, child.prefWidth(-1) * COLUMN_COUNT / span);
+                double spacing = child instanceof EleFXCol ? resolvedGutter() : 0;
+                width = Math.max(width, (child.prefWidth(-1) + spacing) * COLUMN_COUNT / span);
             }
         }
         return snappedLeftInset() + width + snappedRightInset();
@@ -170,27 +171,10 @@ public class EleFXRow extends Pane implements Themable {
         // 与 flex 的 align-content: stretch 一致，将多余高度平分给各行。
         double extra = lines.isEmpty() ? 0 : Math.max(0, height - preferredHeight) / lines.size();
         double y = snappedTopInset();
-        EleFXRowJustify resolvedJustify = getJustify() == null ? EleFXRowJustify.START : getJustify();
         EleFXRowAlign resolvedAlign = getAlign() == null ? EleFXRowAlign.STRETCH : getAlign();
         for (Line line : lines) {
             double lineHeight = line.height + extra;
-            double freeWidth = Math.max(0, width - width * line.columns / COLUMN_COUNT);
-            int count = line.items.size();
-            double gap = switch (resolvedJustify) {
-                case SPACE_BETWEEN -> count > 1 ? freeWidth / (count - 1) : 0;
-                case SPACE_AROUND -> freeWidth / count;
-                case SPACE_EVENLY -> freeWidth / (count + 1);
-                default -> 0;
-            };
-            double x = snappedLeftInset() + switch (resolvedJustify) {
-                case CENTER -> freeWidth / 2;
-                case END -> freeWidth;
-                case SPACE_AROUND -> gap / 2;
-                case SPACE_EVENLY -> gap;
-                default -> 0;
-            };
             for (Item item : line.items) {
-                x += width * item.offset / COLUMN_COUNT;
                 double childHeight = resolvedAlign == EleFXRowAlign.STRETCH
                         ? Math.max(item.node.minHeight(item.width),
                                 Math.min(lineHeight, item.node.maxHeight(item.width)))
@@ -200,13 +184,9 @@ public class EleFXRow extends Pane implements Themable {
                     case BOTTOM -> lineHeight - childHeight;
                     default -> 0;
                 };
-                double childX = x + width * item.shift / COLUMN_COUNT;
-                double left = snapPositionX(childX);
-                double right = snapPositionX(childX + item.width);
                 double top = snapPositionY(childY);
                 double bottom = snapPositionY(childY + childHeight);
-                item.node.resizeRelocate(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
-                x += item.width + gap;
+                item.node.resizeRelocate(item.x, top, item.width, Math.max(0, bottom - top));
             }
             y += lineHeight;
         }
@@ -216,10 +196,7 @@ public class EleFXRow extends Pane implements Themable {
         getStyleClass().add(STYLE_CLASS);
         updateJustifyStyleClass(null, getJustify());
         updateAlignStyleClass(null, getAlign());
-        gutter.addListener(observable -> {
-            updateGutters();
-            requestLayout();
-        });
+        gutter.addListener(observable -> requestLayout());
         justify.addListener((observable, oldValue, newValue) -> {
             updateJustifyStyleClass(oldValue, newValue);
             requestLayout();
@@ -232,12 +209,10 @@ public class EleFXRow extends Pane implements Themable {
             while (change.next()) {
                 for (Node removed : change.getRemoved()) {
                     if (removed instanceof EleFXCol col) {
-                        col.setRowGutter(0);
                         col.setGridHidden(false);
                     }
                 }
             }
-            updateGutters();
             requestLayout();
         });
         sceneProperty().addListener((observable, oldScene, newScene) -> {
@@ -252,14 +227,9 @@ public class EleFXRow extends Pane implements Themable {
         sceneBuilderIntegration();
     }
 
-    private void updateGutters() {
+    private double resolvedGutter() {
         double value = getGutter();
-        double resolved = Double.isFinite(value) && value >= 0 ? value : 0;
-        for (Node child : getChildren()) {
-            if (child instanceof EleFXCol col) {
-                col.setRowGutter(resolved);
-            }
-        }
+        return Double.isFinite(value) && value >= 0 ? value : 0;
     }
 
     private void updateJustifyStyleClass(EleFXRowJustify oldValue, EleFXRowJustify newValue) {
@@ -299,20 +269,51 @@ public class EleFXRow extends Pane implements Themable {
                 lines.add(line);
                 line = new Line();
             }
-            double childWidth = width * span / COLUMN_COUNT;
-            double childHeight = minimum
-                    ? child.minHeight(childWidth)
-                    : Math.max(child.minHeight(childWidth),
-                            Math.min(child.prefHeight(childWidth), child.maxHeight(childWidth)));
-            line.items.add(new Item(child, childWidth, Math.max(0, childHeight), size.getOffset(),
+            double slotWidth = width * span / COLUMN_COUNT;
+            line.items.add(new Item(child, slotWidth, size.getOffset(),
                     size.getPush() - size.getPull()));
             line.columns += occupied;
-            line.height = Math.max(line.height, childHeight);
         }
         if (!line.items.isEmpty()) {
             lines.add(line);
         }
+        for (Line measuredLine : lines) {
+            measureLine(measuredLine, width, minimum);
+        }
         return lines;
+    }
+
+    private void measureLine(Line line, double width, boolean minimum) {
+        EleFXRowJustify resolvedJustify = getJustify() == null ? EleFXRowJustify.START : getJustify();
+        double freeWidth = Math.max(0, width - width * line.columns / COLUMN_COUNT);
+        int count = line.items.size();
+        double gap = switch (resolvedJustify) {
+            case SPACE_BETWEEN -> count > 1 ? freeWidth / (count - 1) : 0;
+            case SPACE_AROUND -> freeWidth / count;
+            case SPACE_EVENLY -> freeWidth / (count + 1);
+            default -> 0;
+        };
+        double x = snappedLeftInset() + switch (resolvedJustify) {
+            case CENTER -> freeWidth / 2;
+            case END -> freeWidth;
+            case SPACE_AROUND -> gap / 2;
+            case SPACE_EVENLY -> gap;
+            default -> 0;
+        };
+        for (Item item : line.items) {
+            x += width * item.offset / COLUMN_COUNT;
+            double spacing = item.node instanceof EleFXCol ? Math.min(resolvedGutter(), item.slotWidth) : 0;
+            double childX = x + width * item.shift / COLUMN_COUNT + spacing / 2;
+            item.x = snapPositionX(childX);
+            item.width = Math.max(0, snapPositionX(childX + item.slotWidth - spacing) - item.x);
+            // Measure with the exact width that will be assigned, including pixel snapping.
+            item.height = Math.max(0, minimum
+                    ? item.node.minHeight(item.width)
+                    : Math.max(item.node.minHeight(item.width),
+                            Math.min(item.node.prefHeight(item.width), item.node.maxHeight(item.width))));
+            line.height = Math.max(line.height, item.height);
+            x += item.slotWidth + gap;
+        }
     }
 
     private static class Line {
@@ -324,6 +325,27 @@ public class EleFXRow extends Pane implements Themable {
         private double height;
     }
 
-    private record Item(Node node, double width, double height, int offset, int shift) {
+    private static class Item {
+
+        private final Node node;
+
+        private final double slotWidth;
+
+        private final int offset;
+
+        private final int shift;
+
+        private double x;
+
+        private double width;
+
+        private double height;
+
+        private Item(Node node, double slotWidth, int offset, int shift) {
+            this.node = node;
+            this.slotWidth = slotWidth;
+            this.offset = offset;
+            this.shift = shift;
+        }
     }
 }
