@@ -8,15 +8,23 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
+import java.util.List;
+
 /**
  * 24 栅格布局中的列，内容使用 {@link StackPane} 的对齐与边距约束。
- * 与 {@link EleFXRow} 配合使用；行在列的外侧保留 gutter，不修改列的 padding。
- * 背景和边框可直接设置在列上，列内尺寸与对齐由 StackPane 处理。
+ * 与 {@link EleFXRow} 配合使用；列本身占完整栅格宽度，gutter 只缩进列内内容。
+ * 这与 Element Plus 的列 padding 语义一致。
  *
  * <p>
  * 响应式配置使用场景宽度（无场景时使用行宽度）：xs &lt; 768，sm &gt;= 768，
@@ -37,6 +45,8 @@ public class EleFXCol extends StackPane implements Themable {
 
     private static final String STYLE_CLASS = "ele-col";
 
+    private static final String CONTENT_STYLE_CLASS = "ele-col__content";
+
     private final IntegerProperty span = new SimpleIntegerProperty(this, "span", 24);
 
     private final IntegerProperty offset = new SimpleIntegerProperty(this, "offset", 0);
@@ -54,6 +64,12 @@ public class EleFXCol extends StackPane implements Themable {
     private final ObjectProperty<EleFXColSize> lg = new SimpleObjectProperty<>(this, "lg");
 
     private final ObjectProperty<EleFXColSize> xl = new SimpleObjectProperty<>(this, "xl");
+
+    private final StringProperty contentStyle = new SimpleStringProperty(this, "contentStyle", "");
+
+    private double gridGutter;
+
+    private final StackPane contentBackground = new StackPane();
 
     private boolean gridHidden;
 
@@ -214,6 +230,22 @@ public class EleFXCol extends StackPane implements Themable {
         setXl(new EleFXColSize(span));
     }
 
+    /**
+     * Styles the gutter-aware content background. Unlike {@link #setStyle(String)},
+     * this style is confined to the column's inner content area.
+     */
+    public String getContentStyle() {
+        return contentStyle.get();
+    }
+
+    public StringProperty contentStyleProperty() {
+        return contentStyle;
+    }
+
+    public void setContentStyle(String contentStyle) {
+        this.contentStyle.set(contentStyle == null ? "" : contentStyle);
+    }
+
     @Override
     public Parent toParent() {
         return this;
@@ -257,8 +289,60 @@ public class EleFXCol extends StackPane implements Themable {
         updateGridHidden();
     }
 
+    void setGridGutter(double gutter) {
+        double resolvedGutter = Double.isFinite(gutter) && gutter >= 0 ? gutter : 0;
+        if (Double.compare(gridGutter, resolvedGutter) != 0) {
+            gridGutter = resolvedGutter;
+            requestLayout();
+        }
+    }
+
+    @Override
+    protected double computeMinWidth(double height) {
+        return super.computeMinWidth(height) + gridGutter;
+    }
+
+    @Override
+    protected double computePrefWidth(double height) {
+        return super.computePrefWidth(height) + gridGutter;
+    }
+
+    @Override
+    protected double computeMinHeight(double width) {
+        return super.computeMinHeight(contentWidth(width));
+    }
+
+    @Override
+    protected double computePrefHeight(double width) {
+        return super.computePrefHeight(contentWidth(width));
+    }
+
+    @Override
+    protected void layoutChildren() {
+        List<Node> managed = getManagedChildren();
+        Pos alignment = getAlignment() == null ? Pos.CENTER : getAlignment();
+        HPos horizontalAlignment = alignment.getHpos();
+        VPos verticalAlignment = alignment.getVpos();
+        Insets insets = getInsets();
+        double left = insets.getLeft() + gridGutter / 2;
+        double top = insets.getTop();
+        double contentWidth = Math.max(0, getWidth() - left - insets.getRight() - gridGutter / 2);
+        double contentHeight = Math.max(0, getHeight() - top - insets.getBottom());
+        contentBackground.resizeRelocate(left, top, contentWidth, contentHeight);
+        for (Node child : managed) {
+            Pos childAlignment = StackPane.getAlignment(child);
+            layoutInArea(child, left, top, contentWidth, contentHeight, 0, StackPane.getMargin(child),
+                    childAlignment == null ? horizontalAlignment : childAlignment.getHpos(),
+                    childAlignment == null ? verticalAlignment : childAlignment.getVpos());
+        }
+    }
+
     private void initialize() {
         getStyleClass().add(STYLE_CLASS);
+        contentBackground.getStyleClass().add(CONTENT_STYLE_CLASS);
+        contentBackground.setManaged(false);
+        contentBackground.setMouseTransparent(true);
+        getChildren().add(0, contentBackground);
         InvalidationListener layoutListener = observable -> requestGridLayout();
         span.addListener(layoutListener);
         offset.addListener(layoutListener);
@@ -269,6 +353,9 @@ public class EleFXCol extends StackPane implements Themable {
         md.addListener(layoutListener);
         lg.addListener(layoutListener);
         xl.addListener(layoutListener);
+        contentStyle.addListener(
+                (observable, oldValue, newValue) -> contentBackground.setStyle(newValue == null ? "" : newValue));
+        contentBackground.setStyle(getContentStyle() == null ? "" : getContentStyle());
         getStyleClass().addListener(layoutListener);
         clipProperty().addListener(observable -> updateGridHidden());
         visibleProperty().addListener(observable -> updateGridHidden());
@@ -281,6 +368,10 @@ public class EleFXCol extends StackPane implements Themable {
         if (getParent() != null) {
             getParent().requestLayout();
         }
+    }
+
+    private double contentWidth(double width) {
+        return width < 0 ? width : Math.max(0, width - gridGutter);
     }
 
     private boolean hiddenAt(double width) {

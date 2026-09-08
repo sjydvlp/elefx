@@ -7,11 +7,3 @@
 .ele-icon .ele-icon__svg {
     -fx-fill: -elefx-ct-regular;
 }
-
-.ele-button--primary .ele-icon .ele-icon__svg,
-.ele-button--success .ele-icon .ele-icon__svg,
-.ele-button--info .ele-icon .ele-icon__svg,
-.ele-button--warning .ele-icon .ele-icon__svg,
-.ele-button--danger .ele-icon .ele-icon__svg {
-    -fx-fill: -elefx-cf-blank;
-}

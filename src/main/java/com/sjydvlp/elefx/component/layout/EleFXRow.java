@@ -22,8 +22,8 @@ import java.util.List;
  *
  * <p>
  * 列的 span 与 offset 合计超过 24 时自动换行，push/pull 只改变显示位置。
- * gutter 在每列外侧左右各保留一半间距，列的实际宽度为栅格宽度减去 gutter。
- * 背景和边框可直接设置在列上；行的两端也各保留半个 gutter，不使用负外边距。
+ * gutter 使行左右各使用负半个 gutter，并让每列内容左右各缩进半个 gutter。
+ * 列外盒按 {@code (行宽 + gutter) / 24} 计算，与 Element Plus 的 row/col 模型一致。
  * 响应式断点采用 Scene 宽度，未加入 Scene 时采用行宽。
  * </p>
  *
@@ -72,10 +72,7 @@ public class EleFXRow extends Pane implements Themable {
     }
 
     public void setGutter(double gutter) {
-        if (!Double.isFinite(gutter) || gutter < 0) {
-            throw new IllegalArgumentException("Gutter must be a non-negative finite number");
-        }
-        this.gutter.set(gutter);
+        this.gutter.set(validateGutter(gutter));
     }
 
     public EleFXRowJustify getJustify() {
@@ -135,7 +132,10 @@ public class EleFXRow extends Pane implements Themable {
             int span = child instanceof EleFXCol col ? col.resolveSize(viewport).getSpan() : COLUMN_COUNT;
             if (span > 0) {
                 double spacing = child instanceof EleFXCol ? resolvedGutter() : 0;
-                width = Math.max(width, (child.prefWidth(-1) + spacing) * COLUMN_COUNT / span);
+                if (child instanceof EleFXCol col) {
+                    col.setGridGutter(spacing);
+                }
+                width = Math.max(width, Math.max(0, child.prefWidth(-1) * COLUMN_COUNT / span - spacing));
             }
         }
         return snappedLeftInset() + width + snappedRightInset();
@@ -155,9 +155,11 @@ public class EleFXRow extends Pane implements Themable {
     protected void layoutChildren() {
         double width = Math.max(0, getWidth() - snappedLeftInset() - snappedRightInset());
         double height = Math.max(0, getHeight() - snappedTopInset() - snappedBottomInset());
+        double gridWidth = width + resolvedGutter();
         double viewport = viewportWidth(getWidth());
         for (Node child : getChildren()) {
             if (child instanceof EleFXCol col) {
+                col.setGridGutter(resolvedGutter());
                 boolean hidden = col.isManaged() && col.resolveSize(viewport).getSpan() == 0;
                 col.setGridHidden(hidden);
                 if (hidden) {
@@ -166,7 +168,7 @@ public class EleFXRow extends Pane implements Themable {
             }
         }
 
-        List<Line> lines = createLines(width, viewport, false);
+        List<Line> lines = createLines(gridWidth, viewport, false);
         double preferredHeight = lines.stream().mapToDouble(line -> line.height).sum();
         // 与 flex 的 align-content: stretch 一致，将多余高度平分给各行。
         double extra = lines.isEmpty() ? 0 : Math.max(0, height - preferredHeight) / lines.size();
@@ -180,8 +182,8 @@ public class EleFXRow extends Pane implements Themable {
                                 Math.min(lineHeight, item.node.maxHeight(item.width)))
                         : item.height;
                 double childY = y + switch (resolvedAlign) {
-                    case MIDDLE -> (lineHeight - childHeight) / 2;
-                    case BOTTOM -> lineHeight - childHeight;
+                    case MIDDLE, CENTER -> (lineHeight - childHeight) / 2;
+                    case BOTTOM, END -> lineHeight - childHeight;
                     default -> 0;
                 };
                 double top = snapPositionY(childY);
@@ -210,6 +212,7 @@ public class EleFXRow extends Pane implements Themable {
                 for (Node removed : change.getRemoved()) {
                     if (removed instanceof EleFXCol col) {
                         col.setGridHidden(false);
+                        col.setGridGutter(0);
                     }
                 }
             }
@@ -228,8 +231,7 @@ public class EleFXRow extends Pane implements Themable {
     }
 
     private double resolvedGutter() {
-        double value = getGutter();
-        return Double.isFinite(value) && value >= 0 ? value : 0;
+        return resolvedGutter(getGutter());
     }
 
     private void updateJustifyStyleClass(EleFXRowJustify oldValue, EleFXRowJustify newValue) {
@@ -249,8 +251,10 @@ public class EleFXRow extends Pane implements Themable {
     private double computeHeight(double width, boolean minimum) {
         double resolvedWidth = width < 0 ? computePrefWidth(-1) : width;
         double contentWidth = Math.max(0, resolvedWidth - snappedLeftInset() - snappedRightInset());
-        return snappedTopInset() + createLines(contentWidth, viewportWidth(resolvedWidth), minimum).stream()
-                .mapToDouble(line -> line.height).sum() + snappedBottomInset();
+        return snappedTopInset()
+                + createLines(contentWidth + resolvedGutter(), viewportWidth(resolvedWidth), minimum).stream()
+                        .mapToDouble(line -> line.height).sum()
+                + snappedBottomInset();
     }
 
     private List<Line> createLines(double width, double viewport, boolean minimum) {
@@ -293,7 +297,7 @@ public class EleFXRow extends Pane implements Themable {
             case SPACE_EVENLY -> freeWidth / (count + 1);
             default -> 0;
         };
-        double x = snappedLeftInset() + switch (resolvedJustify) {
+        double x = snappedLeftInset() - resolvedGutter() / 2 + switch (resolvedJustify) {
             case CENTER -> freeWidth / 2;
             case END -> freeWidth;
             case SPACE_AROUND -> gap / 2;
@@ -302,10 +306,12 @@ public class EleFXRow extends Pane implements Themable {
         };
         for (Item item : line.items) {
             x += width * item.offset / COLUMN_COUNT;
-            double spacing = item.node instanceof EleFXCol ? Math.min(resolvedGutter(), item.slotWidth) : 0;
-            double childX = x + width * item.shift / COLUMN_COUNT + spacing / 2;
+            if (item.node instanceof EleFXCol col) {
+                col.setGridGutter(resolvedGutter());
+            }
+            double childX = x + width * item.shift / COLUMN_COUNT;
             item.x = snapPositionX(childX);
-            item.width = Math.max(0, snapPositionX(childX + item.slotWidth - spacing) - item.x);
+            item.width = Math.max(0, snapPositionX(childX + item.slotWidth) - item.x);
             // Measure with the exact width that will be assigned, including pixel snapping.
             item.height = Math.max(0, minimum
                     ? item.node.minHeight(item.width)
@@ -314,6 +320,17 @@ public class EleFXRow extends Pane implements Themable {
             line.height = Math.max(line.height, item.height);
             x += item.slotWidth + gap;
         }
+    }
+
+    private static double validateGutter(double value) {
+        if (!Double.isFinite(value) || value < 0) {
+            throw new IllegalArgumentException("Gutter must be a non-negative finite number");
+        }
+        return value;
+    }
+
+    private static double resolvedGutter(double value) {
+        return Double.isFinite(value) && value >= 0 ? value : 0;
     }
 
     private static class Line {

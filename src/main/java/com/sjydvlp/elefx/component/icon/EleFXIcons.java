@@ -1,5 +1,7 @@
 package com.sjydvlp.elefx.component.icon;
 
+import javafx.scene.paint.Paint;
+
 /**
  * EleFX 内置 SVG 图标的便捷工厂。
  *
@@ -30,5 +32,14 @@ public final class EleFXIcons {
      */
     public static EleFXIcon of(EleFXIconType type, double size) {
         return new EleFXIcon(type, size);
+    }
+
+    /**
+     * Creates an icon with an explicit Element-style color.
+     */
+    public static EleFXIcon of(EleFXIconType type, double size, Paint color) {
+        EleFXIcon icon = new EleFXIcon(type, size);
+        icon.setColor(color);
+        return icon;
     }
 }

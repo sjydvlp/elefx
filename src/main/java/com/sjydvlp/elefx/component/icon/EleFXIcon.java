@@ -3,15 +3,20 @@ package com.sjydvlp.elefx.component.icon;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Themable;
 import com.sjydvlp.elefx.theme.Theme;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
+import javafx.util.Duration;
 
 /**
  * 基于 SVGPath 的 EleFX 图标。
@@ -37,12 +42,18 @@ public class EleFXIcon extends StackPane implements Themable {
 
     private static final String SVG_STYLE_CLASS = "ele-icon__svg";
 
+    private static final String LOADING_STYLE_CLASS = "ele-icon--loading";
+
     private final SVGPath svgPath = new SVGPath();
 
     private final ObjectProperty<EleFXIconType> type = new SimpleObjectProperty<>(this, "type",
             EleFXIconType.SEARCH);
 
     private final DoubleProperty size = new SimpleDoubleProperty(this, "size", DEFAULT_SIZE);
+
+    private final BooleanProperty loading = new SimpleBooleanProperty(this, "loading", false);
+
+    private RotateTransition loadingAnimation;
 
     /** Creates a 16px search icon. */
     public EleFXIcon() {
@@ -117,6 +128,38 @@ public class EleFXIcon extends StackPane implements Themable {
     }
 
     /**
+     * Element Plus-compatible name for {@link #fillProperty()}. A color set
+     * here takes precedence over CSS, just as a JavaFX {@link SVGPath} fill.
+     */
+    public Paint getColor() {
+        return getFill();
+    }
+
+    public ObjectProperty<Paint> colorProperty() {
+        return fillProperty();
+    }
+
+    public void setColor(Paint color) {
+        setFill(color);
+    }
+
+    /**
+     * Rotates the icon continuously while enabled. This mirrors Element Plus's
+     * loading icon state using JavaFX animation rather than web CSS animation.
+     */
+    public boolean isLoading() {
+        return loading.get();
+    }
+
+    public BooleanProperty loadingProperty() {
+        return loading;
+    }
+
+    public void setLoading(boolean loading) {
+        this.loading.set(loading);
+    }
+
+    /**
      * Returns the SVGPath used to render this icon.
      *
      * @return the rendered SVG path
@@ -147,8 +190,10 @@ public class EleFXIcon extends StackPane implements Themable {
         setAlignment(Pos.CENTER);
         updateType(null, getType());
         updateSize(getSize());
+        updateLoading(isLoading());
         type.addListener((observable, oldType, newType) -> updateType(oldType, newType));
         size.addListener((observable, oldSize, newSize) -> updateSize(newSize.doubleValue()));
+        loading.addListener((observable, oldValue, newValue) -> updateLoading(newValue));
         sceneBuilderIntegration();
     }
 
@@ -175,5 +220,26 @@ public class EleFXIcon extends StackPane implements Themable {
         double scale = size / VIEW_BOX_SIZE;
         svgPath.setScaleX(scale);
         svgPath.setScaleY(scale);
+    }
+
+    private void updateLoading(boolean loading) {
+        if (loading) {
+            if (!getStyleClass().contains(LOADING_STYLE_CLASS)) {
+                getStyleClass().add(LOADING_STYLE_CLASS);
+            }
+            if (loadingAnimation == null) {
+                loadingAnimation = new RotateTransition(Duration.seconds(2), this);
+                loadingAnimation.setByAngle(360);
+                loadingAnimation.setCycleCount(RotateTransition.INDEFINITE);
+                loadingAnimation.setInterpolator(Interpolator.LINEAR);
+            }
+            loadingAnimation.play();
+        } else {
+            getStyleClass().remove(LOADING_STYLE_CLASS);
+            if (loadingAnimation != null) {
+                loadingAnimation.stop();
+            }
+            setRotate(0);
+        }
     }
 }

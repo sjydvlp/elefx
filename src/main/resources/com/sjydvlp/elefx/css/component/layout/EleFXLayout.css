@@ -5,3 +5,7 @@
 .ele-col {
     -fx-alignment: center;
 }
+
+.ele-col__content {
+    -fx-background-color: transparent;
+}

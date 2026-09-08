@@ -4,6 +4,12 @@ package com.sjydvlp.elefx.component.layout;
 public enum EleFXRowAlign {
 
     STRETCH("stretch"),
+    /** Element Plus-compatible alias for {@link #TOP}. */
+    START("start"),
+    /** Element Plus-compatible alias for {@link #MIDDLE}. */
+    CENTER("center"),
+    /** Element Plus-compatible alias for {@link #BOTTOM}. */
+    END("end"),
     TOP("top"),
     MIDDLE("middle"),
     BOTTOM("bottom");

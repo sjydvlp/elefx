@@ -47,7 +47,7 @@
     -elefx-ct-primary: #303133;
     -elefx-ct-regular: #606266;
     -elefx-ct-secondary: #909399;
-    -elefx-ct-placeholder : #A8ABB2;
+    -elefx-ct-placeholder: #A8ABB2;
     -elefx-ct-disabled: #C0C4CC;
 
     -elefx-cb-darker: #CDD0D6;
@@ -67,112 +67,10 @@
 
     -elefx-co-basic-black: #000000;
     -elefx-co-basic-white: #FFFFFF;
-    -elefx-co-transparent: Transparent;
+    -elefx-co-transparent: transparent;
     -elefx-co-base-bg: #F2F3F5;
     -elefx-co-white-bg: #FFFFFF;
     -elefx-co-overlay-bg: #FFFFFF;
-}
-
-/* ------------------------------ button ------------------------------ */
-.ele-button {
-    -fx-padding: 2px 12px;
-    -fx-background-radius: 3px;
-    -fx-border-radius: 3px;
-    -fx-font-size: 14px;
-    -fx-background-insets: 0px;
-}
-
-.ele-button--circle,
-.ele-button--circle:focused {
-    -fx-min-width: 32px;
-    -fx-min-height: 32px;
-    -fx-pref-width: 32px;
-    -fx-pref-height: 32px;
-    -fx-max-width: 32px;
-    -fx-max-height: 32px;
-    -fx-padding: 8px;
-    -fx-background-radius: 999px;
-    -fx-border-radius: 999px;
-}
-
-.ele-button--default,
-.ele-button--default:focused {
-    -fx-text-fill: -elefx-ct-regular;
-    -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
-}
-
-.ele-button--default:hover {
-    -fx-background-color: -elefx-co-base-bg;
-}
-
-.ele-button--primary,
-.ele-button--primary:focused {
-    -fx-text-fill: -elefx-cf-blank;
-    -fx-background-color: -elefx-cp-1;
-    -fx-border-color: -elefx-cp-1;
-}
-
-.ele-button--primary:hover {
-    -fx-background-color: -elefx-cp-l3;
-    -fx-border-color: -elefx-cp-l3;
-}
-
-.ele-button--success,
-.ele-button--success:focused {
-    -fx-text-fill: -elefx-cf-blank;
-    -fx-background-color: -elefx-cs-1;
-    -fx-border-color: -elefx-cs-1;
-}
-
-.ele-button--success:hover {
-    -fx-background-color: -elefx-cs-l3;
-    -fx-border-color: -elefx-cs-l3;
-}
-
-.ele-button--info,
-.ele-button--info:focused {
-    -fx-text-fill: -elefx-cf-blank;
-    -fx-background-color: -elefx-ci-1;
-    -fx-border-color: -elefx-ci-1;
-}
-
-.ele-button--info:hover {
-    -fx-background-color: -elefx-ci-l3;
-    -fx-border-color: -elefx-ci-l3;
-}
-
-.ele-button--warning,
-.ele-button--warning:focused {
-    -fx-text-fill: -elefx-cf-blank;
-    -fx-background-color: -elefx-cw-1;
-    -fx-border-color: -elefx-cw-1;
-}
-
-.ele-button--warning:hover {
-    -fx-background-color: -elefx-cw-l3;
-    -fx-border-color: -elefx-cw-l3;
-}
-
-.ele-button--danger,
-.ele-button--danger:focused {
-    -fx-text-fill: -elefx-cf-blank;
-    -fx-background-color: -elefx-cd-1;
-    -fx-border-color: -elefx-cd-1;
-}
-
-.ele-button--danger:hover {
-    -fx-background-color: -elefx-cd-l3;
-    -fx-border-color: -elefx-cd-l3;
-}
-
-.ele-button:pressed {
-    -fx-opacity: 0.85;
-}
-
-.ele-button:disabled {
-    -fx-opacity: 0.5;
-    -fx-cursor: default;
 }
 
 /* ------------------------------ icon ------------------------------ */
@@ -184,13 +82,203 @@
     -fx-fill: -elefx-ct-regular;
 }
 
-.ele-button--primary .ele-icon .ele-icon__svg,
-.ele-button--success .ele-icon .ele-icon__svg,
-.ele-button--info .ele-icon .ele-icon__svg,
-.ele-button--warning .ele-icon .ele-icon__svg,
-.ele-button--danger .ele-icon .ele-icon__svg {
-    -fx-fill: -elefx-cf-blank;
+/* ------------------------------ button ------------------------------ */
+.ele-button {
+    -fx-padding: 7px 15px;
+    -fx-min-height: 32px;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-width: 1px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
 }
+
+.ele-button--size-large { -fx-padding: 10px 19px; -fx-min-height: 40px; }
+.ele-button--size-small { -fx-padding: 5px 11px; -fx-min-height: 24px; -fx-font-size: 12px; }
+
+.ele-button--default {
+    -elefx-button-main: -elefx-ct-regular;
+    -elefx-button-hover: -elefx-co-base-bg;
+    -elefx-button-light: -elefx-cf-light;
+    -elefx-button-solid-text: -elefx-ct-regular;
+    -elefx-button-icon-color: -elefx-ct-regular;
+    -fx-text-fill: -elefx-button-solid-text;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-darker;
+}
+
+.ele-button--primary {
+    -elefx-button-main: -elefx-cp-1; -elefx-button-hover: -elefx-cp-l3; -elefx-button-light: -elefx-cp-l8;
+    -elefx-button-solid-text: -elefx-cf-blank; -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--success {
+    -elefx-button-main: -elefx-cs-1; -elefx-button-hover: -elefx-cs-l3; -elefx-button-light: -elefx-cs-l8;
+    -elefx-button-solid-text: -elefx-cf-blank; -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--info {
+    -elefx-button-main: -elefx-ci-1; -elefx-button-hover: -elefx-ci-l3; -elefx-button-light: -elefx-ci-l8;
+    -elefx-button-solid-text: -elefx-cf-blank; -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--warning {
+    -elefx-button-main: -elefx-cw-1; -elefx-button-hover: -elefx-cw-l3; -elefx-button-light: -elefx-cw-l8;
+    -elefx-button-solid-text: -elefx-cf-blank; -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--danger {
+    -elefx-button-main: -elefx-cd-1; -elefx-button-hover: -elefx-cd-l3; -elefx-button-light: -elefx-cd-l8;
+    -elefx-button-solid-text: -elefx-cf-blank; -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
+}
+
+.ele-button:hover { -fx-background-color: -elefx-button-hover; -fx-border-color: -elefx-button-hover; }
+.ele-button:pressed { -fx-opacity: 0.86; }
+
+.ele-button--plain {
+    -elefx-button-icon-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -fx-background-color: -elefx-button-light;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--plain:hover {
+    -elefx-button-icon-color: -elefx-cf-blank;
+    -fx-text-fill: -elefx-cf-blank;
+    -fx-background-color: -elefx-button-main;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--dashed { -fx-border-style: dashed; }
+.ele-button--round { -fx-background-radius: 999px; -fx-border-radius: 999px; }
+
+.ele-button--circle {
+    -fx-min-width: 32px; -fx-pref-width: 32px; -fx-max-width: 32px;
+    -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px;
+    -fx-padding: 0; -fx-background-radius: 999px; -fx-border-radius: 999px;
+}
+
+.ele-button--size-large.ele-button--circle {
+    -fx-min-width: 40px; -fx-pref-width: 40px; -fx-max-width: 40px;
+    -fx-min-height: 40px; -fx-pref-height: 40px; -fx-max-height: 40px;
+}
+
+.ele-button--size-small.ele-button--circle {
+    -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px;
+    -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px;
+}
+
+.ele-button--link,
+.ele-button--text {
+    -elefx-button-icon-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.ele-button--link { -fx-padding: 2px 4px; }
+.ele-button--link:hover,
+.ele-button--text:hover {
+    -fx-text-fill: -elefx-button-hover;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.ele-button--text-bg { -fx-background-color: -elefx-button-light; }
+.ele-button--text-bg:hover { -fx-background-color: -elefx-button-light; }
+.ele-button--loading { -fx-opacity: 0.72; -fx-cursor: wait; }
+.ele-button:disabled { -fx-opacity: 0.5; -fx-cursor: default; }
+
+.ele-button .ele-icon .ele-icon__svg { -fx-fill: -elefx-button-icon-color; }
+
+.ele-button__loading-indicator {
+    -fx-pref-width: 1em; -fx-pref-height: 1em;
+    -fx-min-width: 1em; -fx-min-height: 1em;
+    -fx-max-width: 1em; -fx-max-height: 1em;
+    -fx-progress-color: -elefx-button-icon-color;
+}
+
+.ele-button-group { -fx-hgap: 0; -fx-vgap: 0; }
+.ele-button-group__horizontal-first { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; }
+.ele-button-group__horizontal-last { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; }
+.ele-button-group__vertical-first { -fx-background-radius: 4px 4px 0 0; -fx-border-radius: 4px 4px 0 0; }
+.ele-button-group__vertical-last { -fx-background-radius: 0 0 4px 4px; -fx-border-radius: 0 0 4px 4px; }
+
+/*
+ * Modena replaces a focused Button's background with a five-layer focus ring.
+ * EleFX keeps the component's own geometry and semantic colours instead.
+ */
+.ele-button:focused {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.ele-button--default:focused {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-darker;
+}
+
+.ele-button--primary:focused,
+.ele-button--success:focused,
+.ele-button--info:focused,
+.ele-button--warning:focused,
+.ele-button--danger:focused {
+    -fx-background-color: -elefx-button-main;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--plain:focused {
+    -elefx-button-icon-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -fx-background-color: -elefx-button-light;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--link:focused,
+.ele-button--text:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.ele-button--text-bg:focused {
+    -fx-background-color: -elefx-button-light;
+}
+
+.ele-button--round:focused,
+.ele-button--circle:focused {
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+}
+
+.ele-button-group__horizontal-first:focused {
+    -fx-background-radius: 4px 0 0 4px;
+    -fx-border-radius: 4px 0 0 4px;
+}
+
+.ele-button-group__horizontal-last:focused {
+    -fx-background-radius: 0 4px 4px 0;
+    -fx-border-radius: 0 4px 4px 0;
+}
+
+.ele-button-group__vertical-first:focused {
+    -fx-background-radius: 4px 4px 0 0;
+    -fx-border-radius: 4px 4px 0 0;
+}
+
+.ele-button-group__vertical-last:focused {
+    -fx-background-radius: 0 0 4px 4px;
+    -fx-border-radius: 0 0 4px 4px;
+}
+
 
 /* ------------------------------ layout ------------------------------ */
 .ele-row {
@@ -199,4 +287,8 @@
 
 .ele-col {
     -fx-alignment: center;
+}
+
+.ele-col__content {
+    -fx-background-color: transparent;
 }
