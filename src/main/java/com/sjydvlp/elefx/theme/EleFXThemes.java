@@ -11,6 +11,7 @@ public enum EleFXThemes implements Theme {
     ICON("css/component/icon/EleFXIcon.css"),
     LAYOUT("css/component/layout/EleFXLayout.css"),
     CONTAINER("css/component/container/EleFXContainer.css"),
+    LINK("css/component/link/EleFXLink.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),

@@ -1,0 +1,35 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-link {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-insets: 0;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.ele-link--default { -elefx-link-main: -elefx-ct-regular; -elefx-link-hover: -elefx-cp-1; }
+.ele-link--primary { -elefx-link-main: -elefx-cp-1; -elefx-link-hover: -elefx-cp-l3; }
+.ele-link--success { -elefx-link-main: -elefx-cs-1; -elefx-link-hover: -elefx-cs-l3; }
+.ele-link--info { -elefx-link-main: -elefx-ci-1; -elefx-link-hover: -elefx-ci-l3; }
+.ele-link--warning { -elefx-link-main: -elefx-cw-1; -elefx-link-hover: -elefx-cw-l3; }
+.ele-link--danger { -elefx-link-main: -elefx-cd-1; -elefx-link-hover: -elefx-cd-l3; }
+
+.ele-link { -fx-text-fill: -elefx-link-main; }
+.ele-link:hover { -fx-text-fill: -elefx-link-hover; -fx-underline: true; }
+.ele-link:focused {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-insets: 0;
+}
+.ele-link--underline-always { -fx-underline: true; }
+.ele-link--underline-never:hover { -fx-underline: false; }
+.ele-link:disabled { -fx-text-fill: -elefx-ct-disabled; -fx-opacity: 1; -fx-cursor: default; }
+.ele-link .ele-icon .ele-icon__svg { -fx-fill: -elefx-link-main; }
+.ele-link:hover .ele-icon .ele-icon__svg { -fx-fill: -elefx-link-hover; }
+.ele-link:disabled .ele-icon .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
