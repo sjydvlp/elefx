@@ -1,0 +1,7 @@
+.ele-container,
+.ele-header,
+.ele-aside,
+.ele-main,
+.ele-footer {
+    -fx-background-color: transparent;
+}
