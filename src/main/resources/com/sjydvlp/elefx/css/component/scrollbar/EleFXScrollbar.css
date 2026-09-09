@@ -1,0 +1,15 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-scrollbar { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.ele-scrollbar:focused { -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-scrollbar > .viewport { -fx-background-color: transparent; }
+.ele-scrollbar--custom > .scroll-bar { -fx-background-color: transparent; -fx-padding: 1px; }
+.ele-scrollbar--custom > .scroll-bar:vertical { -fx-pref-width: 6px; }
+.ele-scrollbar--custom > .scroll-bar:horizontal { -fx-pref-height: 6px; }
+.ele-scrollbar--custom > .scroll-bar > .track { -fx-background-color: transparent; }
+.ele-scrollbar--custom > .scroll-bar > .thumb { -fx-background-color: rgba(144, 147, 153, 0.3); -fx-background-insets: 0; -fx-background-radius: 999px; }
+.ele-scrollbar--custom > .scroll-bar > .thumb:hover { -fx-background-color: rgba(144, 147, 153, 0.5); }
+.ele-scrollbar--custom > .scroll-bar > .increment-button,
+.ele-scrollbar--custom > .scroll-bar > .decrement-button { -fx-padding: 0; -fx-opacity: 0; }
+.ele-scrollbar--custom > .corner { -fx-background-color: transparent; }
