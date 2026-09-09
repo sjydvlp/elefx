@@ -334,3 +334,21 @@
 .ele-link .ele-icon .ele-icon__svg { -fx-fill: -elefx-link-main; }
 .ele-link:hover .ele-icon .ele-icon__svg { -fx-fill: -elefx-link-hover; }
 .ele-link:disabled .ele-icon .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
+
+/* ------------------------------ text ------------------------------ */
+.ele-text { -elefx-text-color: -elefx-ct-regular; -fx-text-fill: -elefx-text-color; -fx-font-size: 14px; }
+.ele-text--primary { -elefx-text-color: -elefx-cp-1; -fx-text-fill: -elefx-text-color; }
+.ele-text--success { -elefx-text-color: -elefx-cs-1; -fx-text-fill: -elefx-text-color; }
+.ele-text--info { -elefx-text-color: -elefx-ci-1; -fx-text-fill: -elefx-text-color; }
+.ele-text--warning { -elefx-text-color: -elefx-cw-1; -fx-text-fill: -elefx-text-color; }
+.ele-text--danger { -elefx-text-color: -elefx-cd-1; -fx-text-fill: -elefx-text-color; }
+.ele-text--size-large { -fx-font-size: 18px; }
+.ele-text--size-small { -fx-font-size: 12px; }
+.ele-text--tag-p { -fx-padding: 0 0 14px 0; }
+.ele-text--tag-b { -fx-font-weight: bold; }
+.ele-text--tag-i { -fx-font-style: italic; }
+.ele-text--tag-sub { -fx-font-size: 0.8em; -fx-translate-y: 3px; }
+.ele-text--tag-sup { -fx-font-size: 0.8em; -fx-translate-y: -3px; }
+.ele-text--tag-ins { -fx-border-color: transparent transparent -elefx-text-color transparent; -fx-border-width: 0 0 1px 0; }
+.ele-text--tag-del { -fx-strikethrough: true; }
+.ele-text--tag-mark { -fx-background-color: #FEF08A; -fx-padding: 1px 3px; }
