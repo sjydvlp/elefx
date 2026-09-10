@@ -1,0 +1,29 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-checkbox { -fx-min-height: 32px; -fx-padding: 0; -fx-spacing: 8px; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-cursor: hand; }
+.ele-checkbox > .box { -fx-min-width: 14px; -fx-pref-width: 14px; -fx-max-width: 14px; -fx-min-height: 14px; -fx-pref-height: 14px; -fx-max-height: 14px; -fx-padding: 0; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 2px; -fx-border-radius: 2px; -fx-effect: null; }
+.ele-checkbox:hover > .box, .ele-checkbox:focused > .box { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 2px; -fx-border-radius: 2px; -fx-effect: null; }
+.ele-checkbox:selected > .box, .ele-checkbox:indeterminate > .box, .ele-checkbox:selected:focused > .box, .ele-checkbox:indeterminate:focused > .box { -fx-background-color: -elefx-cp-1; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-effect: null; }
+.ele-checkbox:selected > .box > .mark, .ele-checkbox:indeterminate > .box > .mark { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; }
+.ele-checkbox:disabled { -fx-opacity: 1; -fx-text-fill: -elefx-ct-disabled; -fx-cursor: default; }
+.ele-checkbox:disabled > .box { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
+.ele-checkbox:disabled:selected > .box, .ele-checkbox:disabled:indeterminate > .box { -fx-background-color: -elefx-cp-l5; -fx-border-color: -elefx-cp-l5; }
+.ele-checkbox--size-large { -fx-min-height: 40px; -fx-font-size: 14px; }
+.ele-checkbox--size-small { -fx-min-height: 24px; -fx-font-size: 12px; }
+.ele-checkbox--border { -fx-min-height: 32px; -fx-padding: 0 15px 0 9px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-checkbox--border.ele-checkbox--size-large { -fx-min-height: 40px; }
+.ele-checkbox--border.ele-checkbox--size-small { -fx-min-height: 24px; -fx-padding: 0 11px 0 7px; }
+.ele-checkbox-group { -fx-hgap: 30px; -fx-vgap: 8px; }
+.ele-checkbox-button { -fx-min-height: 32px; -fx-padding: 0 15px; -fx-alignment: center; -fx-content-display: text-only; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-cursor: hand; }
+.ele-checkbox-button:hover { -fx-text-fill: -elefx-cp-1; }
+.ele-checkbox-button:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; }
+.ele-checkbox-button:selected, .ele-checkbox-button:selected:focused { -fx-background-color: -elefx-cp-1; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-text-fill: -elefx-co-white-bg; }
+.ele-checkbox-button:disabled { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }
+.ele-checkbox-button:disabled:selected { -fx-background-color: -elefx-cp-l5; -fx-border-color: -elefx-cp-l5; -fx-text-fill: -elefx-co-white-bg; }
+.ele-checkbox-button.ele-checkbox--size-large { -fx-min-height: 40px; }
+.ele-checkbox-button.ele-checkbox--size-small { -fx-min-height: 24px; -fx-padding: 0 11px; -fx-font-size: 12px; }
+.ele-checkbox-group--button { -fx-hgap: 0; -fx-vgap: 0; }
+.ele-checkbox-group--button > .ele-checkbox-button { -fx-background-radius: 0; -fx-border-radius: 0; }
+.ele-checkbox-group--button > .ele-checkbox-button--first { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; }
+.ele-checkbox-group--button > .ele-checkbox-button--last { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; }

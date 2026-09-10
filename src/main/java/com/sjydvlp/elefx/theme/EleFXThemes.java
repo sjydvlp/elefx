@@ -19,6 +19,7 @@ public enum EleFXThemes implements Theme {
     TYPOGRAPHY("css/component/typography/EleFXTypography.css"),
     AUTOCOMPLETE("css/component/autocomplete/EleFXAutocomplete.css"),
     CASCADER("css/component/cascader/EleFXCascader.css"),
+    CHECKBOX("css/component/checkbox/EleFXCheckbox.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
