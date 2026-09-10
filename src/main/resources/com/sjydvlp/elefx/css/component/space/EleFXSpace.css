@@ -1,0 +1,9 @@
+.ele-space {
+    -fx-background-color: transparent;
+}
+
+.ele-space__spacer {
+    -fx-text-fill: -elefx-ct-regular;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
+}

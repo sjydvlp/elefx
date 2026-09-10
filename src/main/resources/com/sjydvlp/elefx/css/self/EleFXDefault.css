@@ -366,3 +366,7 @@
 .ele-scrollbar--custom > .scroll-bar > .increment-button,
 .ele-scrollbar--custom > .scroll-bar > .decrement-button { -fx-padding: 0; -fx-opacity: 0; }
 .ele-scrollbar--custom > .corner { -fx-background-color: transparent; }
+
+/* ------------------------------ space ------------------------------ */
+.ele-space { -fx-background-color: transparent; }
+.ele-space__spacer { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-alignment: center; }

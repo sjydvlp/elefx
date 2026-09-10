@@ -14,6 +14,7 @@ public enum EleFXThemes implements Theme {
     LINK("css/component/link/EleFXLink.css"),
     TEXT("css/component/text/EleFXText.css"),
     SCROLLBAR("css/component/scrollbar/EleFXScrollbar.css"),
+    SPACE("css/component/space/EleFXSpace.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
