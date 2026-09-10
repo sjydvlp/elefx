@@ -376,3 +376,16 @@
 .ele-splitter > .split-pane-divider { -fx-background-color: -elefx-cb-light; -fx-padding: 0 1px; }
 .ele-splitter > .split-pane-divider:hover { -fx-background-color: -elefx-cp-1; }
 .ele-splitter-panel { -fx-background-color: transparent; }
+
+/* ------------------------------ typography ------------------------------ */
+.ele-typography { -fx-font-family: "Roboto"; -fx-font-size: 14px; -fx-text-fill: -elefx-ct-regular; }
+.ele-typography--extra-small { -fx-font-size: 12px; }
+.ele-typography--small { -fx-font-size: 13px; }
+.ele-typography--base { -fx-font-size: 14px; }
+.ele-typography--medium { -fx-font-size: 16px; }
+.ele-typography--large { -fx-font-size: 18px; }
+.ele-typography--extra-large { -fx-font-size: 20px; }
+.ele-typography--line-none { -fx-line-spacing: 0px; }
+.ele-typography--line-compact { -fx-line-spacing: 4px; }
+.ele-typography--line-regular { -fx-line-spacing: 7px; }
+.ele-typography--line-loose { -fx-line-spacing: 10px; }
