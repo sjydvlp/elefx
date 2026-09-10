@@ -18,6 +18,7 @@ public enum EleFXThemes implements Theme {
     SPLITTER("css/component/splitter/EleFXSplitter.css"),
     TYPOGRAPHY("css/component/typography/EleFXTypography.css"),
     AUTOCOMPLETE("css/component/autocomplete/EleFXAutocomplete.css"),
+    CASCADER("css/component/cascader/EleFXCascader.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
