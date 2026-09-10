@@ -206,9 +206,9 @@ public class EleFXCascader<T> extends HBox implements Themable {
         popup.getScene().setRoot(popupContent);
         popup.setAutoHide(true);
         // A click on an unfocusable area closes the popup but otherwise leaves the
-        // trigger button focused. Move focus to the composite control on close so
-        // its input-style focus border is cleared as well.
-        popup.setOnHidden(event -> requestFocus());
+        // trigger button focused. Move focus to the composite control only for
+        // that auto-hide case, while retaining focus after a normal selection.
+        popup.setOnAutoHide(event -> requestFocus());
         clearable.addListener((observable, oldValue, value) -> updateClearButton());
         multiple.addListener((observable, oldValue, value) -> {
             if (!value && values.size() > 1) values.remove(1, values.size());

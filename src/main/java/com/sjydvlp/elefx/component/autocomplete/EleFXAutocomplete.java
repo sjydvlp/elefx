@@ -305,6 +305,10 @@ public class EleFXAutocomplete<T> extends HBox implements Themable {
         getChildren().addAll(input, clearButton);
         HBox.setHgrow(input, Priority.ALWAYS);
         popup.getStyleClass().add("ele-autocomplete__popup");
+        // JavaFX does not transfer focus when the user clicks an unfocusable
+        // background area. Mirror normal input blur behavior when the popup
+        // auto-hides, without blurring after selecting a suggestion.
+        popup.setOnAutoHide(event -> requestFocus());
         input.textProperty().addListener((observable, oldValue, value) -> scheduleSuggestions(value));
         input.focusedProperty().addListener((observable, oldValue, focused) -> {
             if (focused && isTriggerOnFocus()) requestSuggestions();

@@ -392,8 +392,8 @@
 
 /* ------------------------------ autocomplete ------------------------------ */
 .ele-autocomplete { -fx-alignment: center-left; -fx-spacing: -1px; }
-.ele-autocomplete__input { -fx-min-height: 32px; -fx-padding: 7px 11px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-border-color: -elefx-cb-darker; -fx-font-size: 14px; }
-.ele-autocomplete__input:focused { -fx-border-color: -elefx-cp-1; }
+.ele-autocomplete__input { -fx-min-height: 32px; -fx-padding: 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; }
+.ele-autocomplete__input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-autocomplete__clear { -fx-padding: 2px 7px; -fx-background-color: transparent; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 16px; -fx-cursor: hand; }
 .ele-autocomplete__popup { -fx-background-color: -elefx-co-white-bg; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-radius: 4px; }
 .ele-autocomplete__suggestion { -fx-padding: 7px 12px; }
