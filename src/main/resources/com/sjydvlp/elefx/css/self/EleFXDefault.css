@@ -370,3 +370,9 @@
 /* ------------------------------ space ------------------------------ */
 .ele-space { -fx-background-color: transparent; }
 .ele-space__spacer { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-alignment: center; }
+
+/* ------------------------------ splitter ------------------------------ */
+.ele-splitter { -fx-background-color: transparent; -fx-padding: 0; }
+.ele-splitter > .split-pane-divider { -fx-background-color: -elefx-cb-light; -fx-padding: 0 1px; }
+.ele-splitter > .split-pane-divider:hover { -fx-background-color: -elefx-cp-1; }
+.ele-splitter-panel { -fx-background-color: transparent; }
