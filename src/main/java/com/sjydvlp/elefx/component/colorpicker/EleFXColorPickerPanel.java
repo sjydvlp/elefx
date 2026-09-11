@@ -52,6 +52,10 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
 
     private static final double SLIDER_HEIGHT = 12;
 
+    private static final double SLIDER_HANDLE_THICKNESS = 6;
+
+    private static final double MAX_HUE = 359;
+
     private static final double PANEL_WIDTH = PALETTE_WIDTH + HUE_WIDTH + 8 + 24;
 
     private static final double DEFAULT_OPACITY = 0.8;
@@ -274,7 +278,10 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
 
     private void selectHue(MouseEvent event) {
         if (isDisable()) return;
-        hue = clamp(event.getY() / hueCanvas.getHeight() * 360, 0, 360);
+        // JavaFX normalizes 360° to 0° when constructing the Color. Keep the
+        // bottom endpoint just below it so its handle stays at the bottom
+        // rather than jumping to the visually equivalent top red.
+        hue = clamp(event.getY() / hueCanvas.getHeight() * 360, 0, MAX_HUE);
         commit(Color.hsb(hue, saturation / 100, brightness / 100, getColor().getOpacity()));
     }
 
@@ -318,9 +325,16 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
 
     private void syncFromColor(Color selected, boolean updateValue) {
         Color safe = selected == null ? Color.TRANSPARENT : selected;
-        if (safe.getSaturation() > 0.0001) hue = safe.getHue();
-        saturation = safe.getSaturation() * 100;
-        brightness = safe.getBrightness() * 100;
+        double selectedBrightness = safe.getBrightness();
+        // Pure black has no representable hue or saturation in JavaFX Color.
+        // Preserve the editor coordinates in that case, so a selection made
+        // at the lower-right of the palette remains at the lower-right.
+        if (selectedBrightness > 0.0001) {
+            if (safe.getSaturation() > 0.0001) hue = safe.getHue();
+            saturation = safe.getSaturation() * 100;
+        }
+        brightness = selectedBrightness * 100;
+        updatePredefinedColorSelection();
         repaint();
         if (updateValue)
             syncValueFromColor();
@@ -397,23 +411,21 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
     }
 
     private void drawVerticalHandle(GraphicsContext graphics, double x, double height) {
-        graphics.setStroke(Color.WHITE);
-        graphics.setLineWidth(2);
-        graphics.strokeLine(x, 0, x, height);
+        double left = clamp(x - SLIDER_HANDLE_THICKNESS / 2, 0, alphaCanvas.getWidth() - SLIDER_HANDLE_THICKNESS);
+        graphics.setFill(Color.WHITE);
+        graphics.fillRect(left, 0, SLIDER_HANDLE_THICKNESS, height);
         graphics.setStroke(Color.rgb(48, 49, 51));
         graphics.setLineWidth(1);
-        graphics.strokeLine(x - 1.5, 0, x - 1.5, height);
-        graphics.strokeLine(x + 1.5, 0, x + 1.5, height);
+        graphics.strokeRect(left + .5, .5, SLIDER_HANDLE_THICKNESS - 1, height - 1);
     }
 
     private void drawHorizontalHandle(GraphicsContext graphics, double y, double width) {
-        graphics.setStroke(Color.WHITE);
-        graphics.setLineWidth(2);
-        graphics.strokeLine(0, y, width, y);
+        double top = clamp(y - SLIDER_HANDLE_THICKNESS / 2, 0, hueCanvas.getHeight() - SLIDER_HANDLE_THICKNESS);
+        graphics.setFill(Color.WHITE);
+        graphics.fillRect(0, top, width, SLIDER_HANDLE_THICKNESS);
         graphics.setStroke(Color.rgb(48, 49, 51));
         graphics.setLineWidth(1);
-        graphics.strokeLine(0, y - 1.5, width, y - 1.5);
-        graphics.strokeLine(0, y + 1.5, width, y + 1.5);
+        graphics.strokeRect(.5, top + .5, width - 1, SLIDER_HANDLE_THICKNESS - 1);
     }
 
     private void updateAlphaVisibility() {
@@ -443,6 +455,25 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
         }
         predefinedColorsPane.setVisible(!predefinedColors.isEmpty());
         predefinedColorsPane.setManaged(!predefinedColors.isEmpty());
+        updatePredefinedColorSelection();
+    }
+
+    /**
+     * A predefined-colour swatch is selected only when it represents the
+     * current value. Keyboard focus must not be presented as a selection.
+     */
+    private void updatePredefinedColorSelection() {
+        Color selected = getColor();
+        for (int index = 0; index < predefinedColorsPane.getChildren().size(); index++) {
+            Button swatch = (Button) predefinedColorsPane.getChildren().get(index);
+            boolean matches = selected != null && selected.equals(predefinedColors.get(index));
+            if (matches) {
+                if (!swatch.getStyleClass().contains("ele-color-picker-panel__swatch--selected"))
+                    swatch.getStyleClass().add("ele-color-picker-panel__swatch--selected");
+            } else {
+                swatch.getStyleClass().remove("ele-color-picker-panel__swatch--selected");
+            }
+        }
     }
 
     private void fireChange() {

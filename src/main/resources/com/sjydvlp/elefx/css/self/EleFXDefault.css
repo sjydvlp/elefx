@@ -470,4 +470,4 @@
 .ele-color-picker-panel__input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-color-picker-panel__predefine { -fx-pref-width: 280px; -fx-padding: 0; }
 .ele-color-picker-panel__swatch { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-min-height: 20px; -fx-pref-height: 20px; -fx-max-height: 20px; -fx-padding: 0; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; -fx-cursor: hand; }
-.ele-color-picker-panel__swatch:focused { -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 2px; -fx-background-radius: 3px; -fx-border-radius: 3px; }
+.ele-color-picker-panel__swatch--selected { -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 2px; -fx-background-radius: 3px; -fx-border-radius: 3px; }
