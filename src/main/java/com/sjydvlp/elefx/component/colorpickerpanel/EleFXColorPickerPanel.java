@@ -1,5 +1,6 @@
-package com.sjydvlp.elefx.component.colorpicker;
+package com.sjydvlp.elefx.component.colorpickerpanel;
 
+import com.sjydvlp.elefx.component.colorpicker.EleFXColorFormat;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
@@ -67,6 +68,8 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
     private final Canvas alphaCanvas = new Canvas(PALETTE_WIDTH, SLIDER_HEIGHT);
 
     private final TextField valueInput = new TextField();
+
+    private final HBox valueRow = new HBox();
 
     private final HBox alphaRow = new HBox(8);
 
@@ -201,6 +204,11 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
         onChange.set(handler);
     }
 
+    /** Footer containing the colour-code input and optional picker actions. */
+    public HBox getFooter() {
+        return valueRow;
+    }
+
     @Override
     public Parent toParent() {
         return this;
@@ -233,7 +241,7 @@ public class EleFXColorPickerPanel extends VBox implements Themable {
         valueInput.focusedProperty().addListener((observable, oldValue, focused) -> {
             if (!focused) applyInputValue();
         });
-        HBox valueRow = new HBox(valueInput);
+        valueRow.getChildren().setAll(valueInput);
         valueRow.getStyleClass().add("ele-color-picker-panel__footer");
         valueRow.setAlignment(Pos.CENTER_LEFT);
 
