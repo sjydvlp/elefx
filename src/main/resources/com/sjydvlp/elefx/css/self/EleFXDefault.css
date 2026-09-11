@@ -457,3 +457,17 @@
 .ele-cascader__option-content > .label { -fx-text-fill: -elefx-ct-regular; }
 .ele-cascader__option--selected, .ele-cascader__option--active-path { -fx-text-fill: -elefx-cp-1; }
 .ele-cascader__option--selected > .label, .ele-cascader__option--active-path > .label, .ele-cascader__option--selected .label, .ele-cascader__option--active-path .label { -fx-text-fill: -elefx-cp-1; }
+
+/* ------------------------------ color picker panel ------------------------------ */
+.ele-color-picker-panel { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-lighter; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-color-picker-panel--borderless { -fx-border-color: transparent; -fx-border-width: 0; }
+.ele-color-picker-panel__palette, .ele-color-picker-panel__slider { -fx-cursor: hand; }
+.ele-color-picker-panel:disabled .ele-color-picker-panel__palette, .ele-color-picker-panel:disabled .ele-color-picker-panel__slider { -fx-opacity: 0.55; -fx-cursor: default; }
+.ele-color-picker-panel__wrapper { -fx-spacing: 8px; }
+.ele-color-picker-panel__alpha-row { -fx-alignment: center-left; }
+.ele-color-picker-panel__footer { -fx-alignment: center-left; }
+.ele-color-picker-panel__input { -fx-min-height: 26px; -fx-pref-height: 26px; -fx-max-height: 26px; -fx-padding: 3px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-co-basic-black; -fx-font-size: 12px; }
+.ele-color-picker-panel__input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-color-picker-panel__predefine { -fx-pref-width: 280px; -fx-padding: 0; }
+.ele-color-picker-panel__swatch { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-min-height: 20px; -fx-pref-height: 20px; -fx-max-height: 20px; -fx-padding: 0; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; -fx-cursor: hand; }
+.ele-color-picker-panel__swatch:focused { -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 2px; -fx-background-radius: 3px; -fx-border-radius: 3px; }
