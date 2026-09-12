@@ -63,6 +63,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private static final DateTimeFormatter DATE_INPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private static final DateTimeFormatter TIME_INPUT_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+
     private final ObjectProperty<LocalDate> value = new SimpleObjectProperty<>(this, "value");
 
     private final ObjectProperty<LocalDateTime> dateTimeValue = new SimpleObjectProperty<>(this, "dateTimeValue");
@@ -107,6 +109,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
             "onPanelChange");
 
     private final ObjectProperty<EventHandler<ActionEvent>> onClear = new SimpleObjectProperty<>(this, "onClear");
+
+    private final ObjectProperty<EventHandler<ActionEvent>> onConfirm = new SimpleObjectProperty<>(this, "onConfirm");
 
     private final Label title = new Label();
 
@@ -157,6 +161,10 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     private boolean synchronizingTime;
 
     private LocalTime pendingTime;
+
+    private LocalTime rangeStartTime = LocalTime.MIDNIGHT;
+
+    private LocalTime rangeEndTime = LocalTime.MIDNIGHT;
 
     private String pendingTimeText;
 
@@ -387,6 +395,35 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         onClear.set(value);
     }
 
+    public EventHandler<ActionEvent> getOnConfirm() {
+        return onConfirm.get();
+    }
+
+    public ObjectProperty<EventHandler<ActionEvent>> onConfirmProperty() {
+        return onConfirm;
+    }
+
+    public void setOnConfirm(EventHandler<ActionEvent> value) {
+        onConfirm.set(value);
+    }
+
+    public LocalTime getRangeStartTime() {
+        return rangeStartTime;
+    }
+
+    public LocalTime getRangeEndTime() {
+        return rangeEndTime;
+    }
+
+    public void setRangeTimes(LocalTime start, LocalTime end) {
+        rangeStartTime = start == null ? LocalTime.MIDNIGHT : start;
+        rangeEndTime = end == null ? LocalTime.MIDNIGHT : end;
+        if (getType() == EleFXDatePickerPanelType.DATETIME_RANGE) {
+            timeInput.setText(TIME_INPUT_FORMATTER.format(rangeStartTime));
+            rangeEndTimeInput.setText(TIME_INPUT_FORMATTER.format(rangeEndTime));
+        }
+    }
+
     public void clear() {
         if (values.isEmpty() && getValue() == null) return;
         setSelectedValues(List.of());
@@ -525,7 +562,6 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         cellClassName.addListener(o -> repaint());
         disableProperty().addListener(o -> repaint());
         bordered.addListener(o -> updateBorder());
-        clearable.addListener(o -> updateFooter());
         showFooter.addListener(o -> updateFooter());
         showConfirm.addListener(o -> updateFooter());
         showWeekNumber.addListener(o -> repaint());
@@ -575,6 +611,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private void showTimePicker(TextField input) {
         activeTimeInput = input;
+        if (getType() == EleFXDatePickerPanelType.DATETIME_RANGE)
+            setTime(input == rangeEndTimeInput ? rangeEndTime : rangeStartTime);
         pendingTime = selectedTime();
         pendingTimeText = input.getText();
         javafx.geometry.Bounds bounds = input.localToScreen(input.getBoundsInLocal());
@@ -623,7 +661,15 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     }
 
     private void confirmTimeSelection() {
-        if (updateDateTime()) fireChange();
+        boolean changed = updateDateTime();
+        if (getType() == EleFXDatePickerPanelType.DATETIME_RANGE) {
+            if (activeTimeInput == rangeEndTimeInput)
+                rangeEndTime = selectedTime();
+            else
+                rangeStartTime = selectedTime();
+            changed = true;
+        }
+        if (changed) fireChange();
         pendingTime = selectedTime();
         timePopup.hide();
     }
@@ -651,6 +697,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     }
 
     private void resetRangeTimes() {
+        rangeStartTime = LocalTime.MIDNIGHT;
+        rangeEndTime = LocalTime.MIDNIGHT;
         synchronizingTime = true;
         try {
             selectTime(hourSpinner, 0);
@@ -1020,8 +1068,12 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         if (isInSelectedRange(date) || isRangeEndpointPeriod(date))
             cell.getStyleClass().add("ele-date-picker-panel__cell--in-range");
         if ((getType().isRange() || getType() == EleFXDatePickerPanelType.WEEK) && values.size() == 2) {
-            if (date.equals(values.get(0))) cell.getStyleClass().add("ele-date-picker-panel__cell--range-start");
-            if (date.equals(values.get(1))) cell.getStyleClass().add("ele-date-picker-panel__cell--range-end");
+            LocalDate first = values.get(0);
+            LocalDate second = values.get(1);
+            LocalDate start = first.isBefore(second) ? first : second;
+            LocalDate end = first.isBefore(second) ? second : first;
+            if (date.equals(start)) cell.getStyleClass().add("ele-date-picker-panel__cell--range-start");
+            if (date.equals(end)) cell.getStyleClass().add("ele-date-picker-panel__cell--range-end");
         }
         if (getType() == EleFXDatePickerPanelType.WEEK && weekStart(date).equals(hoveredWeekStart)) {
             cell.getStyleClass().add("ele-date-picker-panel__cell--week-hover");
@@ -1072,8 +1124,13 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     }
 
     private boolean isInSelectedRange(LocalDate date) {
-        return (getType().isRange() || getType() == EleFXDatePickerPanelType.WEEK) && values.size() == 2
-                && date.isAfter(values.get(0)) && date.isBefore(values.get(1));
+        if (!(getType().isRange() || getType() == EleFXDatePickerPanelType.WEEK) || values.size() != 2)
+            return false;
+        LocalDate first = values.get(0);
+        LocalDate second = values.get(1);
+        LocalDate start = first.isBefore(second) ? first : second;
+        LocalDate end = first.isBefore(second) ? second : first;
+        return date.isAfter(start) && date.isBefore(end);
     }
 
     private boolean isRangeEndpointPeriod(LocalDate date) {
@@ -1099,7 +1156,6 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
                 next.remove(date);
             else
                 next.add(date);
-            next.sort(Comparator.naturalOrder());
         } else
             next = new ArrayList<>(List.of(date));
         setSelectedValues(next);
@@ -1171,18 +1227,16 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private void updateFooter() {
         footer.getChildren().clear();
-        if (isClearable()) {
-            Button clear = new Button("Clear");
-            clear.getStyleClass().add("ele-date-picker-panel__action");
-            clear.setOnAction(e -> clear());
-            footer.getChildren().add(clear);
-        }
         if (isShowConfirm()) {
             Button ok = new Button("OK");
             ok.getStyleClass().addAll("ele-date-picker-panel__action", "ele-date-picker-panel__action--primary");
+            ok.setOnAction(e -> {
+                fireChange();
+                fire(onConfirm.get());
+            });
             footer.getChildren().add(ok);
         }
-        boolean visible = isShowFooter() || isShowConfirm();
+        boolean visible = isShowFooter() && isShowConfirm();
         footer.setVisible(visible);
         footer.setManaged(visible);
     }

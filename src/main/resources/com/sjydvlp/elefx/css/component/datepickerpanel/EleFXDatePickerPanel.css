@@ -80,5 +80,8 @@
 .ele-date-picker-panel__footer { -fx-padding: 8px 0 0 0; }
 .ele-date-picker-panel__action { -fx-min-height: 24px; -fx-padding: 3px 10px; -fx-background-color: -elefx-co-white-bg; -fx-border-color: -elefx-cb-base; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; -fx-font-size: 12px; }
 .ele-date-picker-panel__action:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 3px; -fx-border-color: -elefx-cp-1; }
-.ele-date-picker-panel__action--primary { -fx-background-color: -elefx-cp-1; -fx-border-color: -elefx-cp-1; -fx-text-fill: -elefx-co-white-bg; }
-.ele-date-picker-panel__action--primary:focused { -fx-background-color: -elefx-cp-1; -fx-background-insets: 0; -fx-background-radius: 3px; -fx-border-color: -elefx-cp-1; }
+.ele-date-picker-panel__action--primary { -fx-min-height: 24px; -fx-padding: 3px 10px; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; -fx-font-size: 12px; -fx-text-fill: -elefx-ct-regular; -fx-cursor: hand; }
+.ele-date-picker-panel__action--primary:hover { -fx-background-color: transparent; -fx-border-color: -elefx-cp-1; -fx-text-fill: -elefx-cp-1; }
+.ele-date-picker-panel__action--primary:pressed { -fx-background-color: transparent; -fx-border-color: -elefx-cp-d2; -fx-text-fill: -elefx-cp-d2; }
+.ele-date-picker-panel__action--primary:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; }
+.ele-date-picker-panel__action--primary:disabled { -fx-opacity: 1; -fx-background-color: transparent; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }

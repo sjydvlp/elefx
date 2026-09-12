@@ -4,34 +4,31 @@ import com.sjydvlp.elefx.component.datepickerpanel.EleFXDatePickerPanel;
 import com.sjydvlp.elefx.component.icon.EleFXIcon;
 import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
-import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import com.sjydvlp.elefx.theme.Theme;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PopupControl;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -60,13 +57,17 @@ public class EleFXDatePicker extends HBox implements Themable {
 
     private final Label separator = new Label("-");
 
-    private final Button clearButton = new Button("×");
+    private final EleFXIcon calendarIcon = new EleFXIcon(EleFXIconType.CALENDAR, 16);
 
-    private final Button trigger = new Button();
+    private final Button clearButton = new Button();
 
     private final EleFXDatePickerPanel panel = new EleFXDatePickerPanel();
 
     private final PopupControl popup = new PopupControl();
+
+    private final EventHandler<MouseEvent> outsideMousePressHandler = event -> {
+        if (!popup.isShowing() && !isInsideDatePicker(event.getTarget())) resetInputViewport();
+    };
 
     private final ObjectProperty<EleFXDatePickerType> type = new SimpleObjectProperty<>(this, "type",
             EleFXDatePickerType.DATE);
@@ -74,6 +75,10 @@ public class EleFXDatePicker extends HBox implements Themable {
     private final ObjectProperty<LocalDate> value = new SimpleObjectProperty<>(this, "value");
 
     private final ObjectProperty<LocalDateTime> dateTimeValue = new SimpleObjectProperty<>(this, "dateTimeValue");
+
+    private LocalTime rangeStartTime = LocalTime.MIDNIGHT;
+
+    private LocalTime rangeEndTime = LocalTime.MIDNIGHT;
 
     private final ObservableList<LocalDate> values = FXCollections.observableArrayList();
 
@@ -486,6 +491,7 @@ public class EleFXDatePicker extends HBox implements Themable {
     /** Opens the calendar popup. Equivalent to Element Plus {@code handleOpen}. */
     public void show() {
         if (isDisable() || popup.isShowing() || getScene() == null) return;
+        configurePanel();
         Bounds bounds = localToScreen(getBoundsInLocal());
         if (bounds != null) popup.show(this, bounds.getMinX(), bounds.getMaxY() + 4);
     }
@@ -545,19 +551,15 @@ public class EleFXDatePicker extends HBox implements Themable {
         startInput.getStyleClass().add("ele-date-picker__input");
         endInput.getStyleClass().add("ele-date-picker__input");
         separator.getStyleClass().add("ele-date-picker__separator");
+        calendarIcon.getStyleClass().add("ele-date-picker__calendar");
+        calendarIcon.setOnMouseClicked(event -> show());
         clearButton.getStyleClass().add("ele-date-picker__clear");
-        trigger.getStyleClass().add("ele-date-picker__trigger");
-        trigger.setGraphic(new EleFXIcon(EleFXIconType.ARROW_DOWN, 14));
-        trigger.setOnAction(event -> {
-            if (popup.isShowing())
-                hide();
-            else
-                show();
-        });
+        clearButton.setGraphic(new EleFXIcon(EleFXIconType.CIRCLE_CLOSE, 16));
+        clearButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, event -> event.consume());
         clearButton.setOnAction(event -> clear());
         HBox.setHgrow(startInput, Priority.ALWAYS);
         HBox.setHgrow(endInput, Priority.ALWAYS);
-        getChildren().addAll(startInput, separator, endInput, clearButton, trigger);
+        getChildren().addAll(calendarIcon, startInput, separator, endInput, clearButton);
 
         StackPane popupRoot = new StackPane(panel);
         popupRoot.getStyleClass().add("ele-date-picker__popup");
@@ -570,21 +572,43 @@ public class EleFXDatePicker extends HBox implements Themable {
             if (popupVisible == showing) return;
             popupVisible = showing;
             fire(onVisibleChange.get());
-            if (!showing) refreshInputs();
+            if (showing) {
+                updateFocusStyle();
+            } else {
+                getStyleClass().remove("ele-date-picker--focused");
+                configurePanel();
+                refreshInputs();
+                resetInputViewport();
+            }
         });
 
         startInput.setOnAction(event -> parseInputs());
         endInput.setOnAction(event -> parseInputs());
+        startInput.setOnMouseClicked(event -> show());
+        endInput.setOnMouseClicked(event -> show());
         startInput.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) hide();
         });
         endInput.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) hide();
         });
-        startInput.focusedProperty().addListener((obs, oldValue, focused) -> inputFocusChanged(focused));
-        endInput.focusedProperty().addListener((obs, oldValue, focused) -> inputFocusChanged(focused));
+        startInput.focusedProperty().addListener((obs, oldValue, focused) -> {
+            inputFocusChanged(focused);
+            updateFocusStyle();
+        });
+        endInput.focusedProperty().addListener((obs, oldValue, focused) -> {
+            inputFocusChanged(focused);
+            updateFocusStyle();
+        });
+        sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (oldScene != null) oldScene.removeEventFilter(MouseEvent.MOUSE_PRESSED, outsideMousePressHandler);
+            if (newScene != null) newScene.addEventFilter(MouseEvent.MOUSE_PRESSED, outsideMousePressHandler);
+        });
 
-        type.addListener((obs, oldValue, current) -> configurePanel());
+        type.addListener((obs, oldValue, current) -> {
+            if (current != null && current.isRange() && current != oldValue) clearRangeSelection();
+            configurePanel();
+        });
         defaultValue.addListener((obs, oldValue, current) -> panel.setDefaultValue(current));
         locale.addListener((obs, oldValue, current) -> panel.setLocale(current));
         disabledDate.addListener((obs, oldValue, current) -> panel.setDisabledDate(current));
@@ -610,17 +634,22 @@ public class EleFXDatePicker extends HBox implements Themable {
             refreshInputs();
         });
         shortcuts.addListener((ListChangeListener<EleFXDatePickerShortcut>) change -> syncShortcuts());
-        panel.getValues().addListener((ListChangeListener<LocalDate>) change -> syncFromPanel());
-        panel.dateTimeValueProperty().addListener((obs, oldValue, current) -> {
-            if (!synchronizing && current != null) dateTimeValue.set(current);
-        });
         panel.setOnChange(event -> {
-            syncFromPanel();
-            fire(onChange.get());
+            refreshPreviewFromPanel();
+            if (!isShowConfirm()) {
+                syncFromPanel();
+                fire(onChange.get());
+                if (shouldCloseAfterSelection()) hide();
+            }
         });
         panel.setOnClear(event -> {
             syncFromPanel();
             fire(onClear.get());
+        });
+        panel.setOnConfirm(event -> {
+            syncFromPanel();
+            fire(onChange.get());
+            hide();
         });
         panel.setOnCalendarChange(event -> fire(onCalendarChange.get()));
         panel.setOnPanelChange(event -> fire(onPanelChange.get()));
@@ -644,10 +673,25 @@ public class EleFXDatePicker extends HBox implements Themable {
             panel.setShowWeekNumber(isShowWeekNumber());
             panel.setSinglePanel(isSinglePanel());
             panel.getValues().setAll(values);
+            panel.setDateTimeValue(getDateTimeValue());
+            panel.setRangeTimes(rangeStartTime, rangeEndTime);
         } finally {
             synchronizing = false;
         }
         refreshInputs();
+    }
+
+    private void clearRangeSelection() {
+        synchronizing = true;
+        try {
+            values.clear();
+            value.set(null);
+            dateTimeValue.set(null);
+            rangeStartTime = LocalTime.MIDNIGHT;
+            rangeEndTime = LocalTime.MIDNIGHT;
+        } finally {
+            synchronizing = false;
+        }
     }
 
     private void syncPanelValues() {
@@ -684,11 +728,21 @@ public class EleFXDatePicker extends HBox implements Themable {
             values.setAll(panel.getValues());
             value.set(values.isEmpty() ? null : values.get(0));
             if (panel.getDateTimeValue() != null) dateTimeValue.set(panel.getDateTimeValue());
+            if (getType() == EleFXDatePickerType.DATETIME_RANGE) {
+                rangeStartTime = panel.getRangeStartTime();
+                rangeEndTime = panel.getRangeEndTime();
+            }
         } finally {
             synchronizing = false;
         }
         refreshInputs();
-        if (!getType().isRange() && !getType().isMultiple() && getType() != EleFXDatePickerType.DATETIME) hide();
+    }
+
+    private boolean shouldCloseAfterSelection() {
+        if (getType() == null || getType().isMultiple() || getType() == EleFXDatePickerType.DATETIME
+                || getType() == EleFXDatePickerType.DATETIME_RANGE)
+            return false;
+        return !getType().isRange() || panel.getValues().size() == 2;
     }
 
     private void syncShortcuts() {
@@ -705,9 +759,37 @@ public class EleFXDatePicker extends HBox implements Themable {
             fire(onFocus.get());
             if (isAutomaticDropdown()) show();
         } else {
-            parseInputs();
+            if (!popup.isShowing()) {
+                parseInputs();
+                resetInputViewport();
+            }
             fire(onBlur.get());
         }
+    }
+
+    private void updateFocusStyle() {
+        boolean focused = popup.isShowing() || startInput.isFocused() || endInput.isFocused();
+        if (focused) {
+            if (!getStyleClass().contains("ele-date-picker--focused"))
+                getStyleClass().add("ele-date-picker--focused");
+        } else {
+            getStyleClass().remove("ele-date-picker--focused");
+        }
+    }
+
+    private void resetInputViewport() {
+        Platform.runLater(() -> {
+            startInput.positionCaret(0);
+            if (endInput.isVisible()) endInput.positionCaret(0);
+        });
+    }
+
+    private boolean isInsideDatePicker(Object target) {
+        if (!(target instanceof Node node)) return false;
+        for (Node current = node; current != null; current = current.getParent()) {
+            if (current == this) return true;
+        }
+        return false;
     }
 
     private void parseInputs() {
@@ -743,6 +825,7 @@ public class EleFXDatePicker extends HBox implements Themable {
             case YEAR, YEARS, YEAR_RANGE -> Year.parse(candidate, formatter()).atDay(1);
             case MONTH, MONTHS, MONTH_RANGE -> YearMonth.parse(candidate, formatter()).atDay(1);
             case QUARTER, QUARTERS, QUARTER_RANGE -> parseQuarter(candidate);
+            case DATETIME_RANGE -> LocalDateTime.parse(candidate, formatter()).toLocalDate();
             default -> LocalDate.parse(candidate, formatter());
         };
     }
@@ -775,20 +858,45 @@ public class EleFXDatePicker extends HBox implements Themable {
         List<LocalDate> selected = List.copyOf(values);
         if (getType() == EleFXDatePickerType.DATETIME && getDateTimeValue() != null)
             startInput.setText(formatter().format(getDateTimeValue()));
-        else if (getType().isMultiple())
+        else if (getType() == EleFXDatePickerType.DATETIME_RANGE) {
+            startInput.setText(selected.isEmpty() ? "" : formatDateTime(selected.get(0), rangeStartTime));
+            endInput.setText(selected.size() < 2 ? "" : formatDateTime(selected.get(1), rangeEndTime));
+        } else if (getType().isMultiple())
             startInput.setText(selected.stream().map(this::formatDate).collect(Collectors.joining(", ")));
         else
             startInput.setText(selected.isEmpty() ? "" : formatDate(selected.get(0)));
-        if (range) endInput.setText(selected.size() < 2 ? "" : formatDate(selected.get(1)));
+        if (range && getType() != EleFXDatePickerType.DATETIME_RANGE)
+            endInput.setText(selected.size() < 2 ? "" : formatDate(selected.get(1)));
         boolean hasValue = !selected.isEmpty() || getDateTimeValue() != null;
         clearButton.setVisible(isClearable() && hasValue && !isDisable());
-        clearButton.setManaged(clearButton.isVisible());
+        clearButton.setManaged(isClearable() && !isDisable());
+    }
+
+    private void refreshPreviewFromPanel() {
+        boolean range = getType() != null && getType().isRange();
+        List<LocalDate> selected = List.copyOf(panel.getValues());
+        LocalDateTime selectedDateTime = panel.getDateTimeValue();
+        if (getType() == EleFXDatePickerType.DATETIME && selectedDateTime != null)
+            startInput.setText(formatter().format(selectedDateTime));
+        else if (getType() == EleFXDatePickerType.DATETIME_RANGE) {
+            startInput.setText(selected.isEmpty() ? "" : formatDateTime(selected.get(0), panel.getRangeStartTime()));
+            endInput.setText(selected.size() < 2 ? "" : formatDateTime(selected.get(1), panel.getRangeEndTime()));
+        } else if (getType().isMultiple())
+            startInput.setText(selected.stream().map(this::formatDate).collect(Collectors.joining(", ")));
+        else
+            startInput.setText(selected.isEmpty() ? "" : formatDate(selected.get(0)));
+        if (range && getType() != EleFXDatePickerType.DATETIME_RANGE)
+            endInput.setText(selected.size() < 2 ? "" : formatDate(selected.get(1)));
     }
 
     private String formatDate(LocalDate date) {
         if (date == null) return "";
-        if (getType().usesQuarter()) return date.getYear() + " Q" + ((date.getMonthValue() - 1) / 3 + 1);
-        return formatter().format(date);
+        if (getType().usesQuarter()) return date.getYear() + "-Q" + ((date.getMonthValue() - 1) / 3 + 1);
+        return formatter().format(date.atStartOfDay());
+    }
+
+    private String formatDateTime(LocalDate date, LocalTime time) {
+        return formatter().format(LocalDateTime.of(date, time == null ? LocalTime.MIDNIGHT : time));
     }
 
     private DateTimeFormatter formatter() {
@@ -802,7 +910,7 @@ public class EleFXDatePicker extends HBox implements Themable {
             case YEAR, YEARS, YEAR_RANGE -> "yyyy";
             case MONTH, MONTHS, MONTH_RANGE -> "yyyy-MM";
             case WEEK -> "YYYY-'W'ww";
-            case QUARTER, QUARTERS, QUARTER_RANGE -> "yyyy 'Q'Q";
+            case QUARTER, QUARTERS, QUARTER_RANGE -> "yyyy-'Q'Q";
             case DATETIME, DATETIME_RANGE -> "yyyy-MM-dd HH:mm:ss";
             default -> "yyyy-MM-dd";
         };

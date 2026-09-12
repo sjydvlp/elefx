@@ -2,12 +2,15 @@
 @import "../../common/EleFXColor.css";
 
 .ele-date-picker { -fx-alignment: center-left; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-padding: 0 7px 0 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
-.ele-date-picker:hover { -fx-border-color: -elefx-cp-1; }
+.ele-date-picker.ele-date-picker--focused { -fx-border-color: -elefx-cp-1; }
 .ele-date-picker:disabled { -fx-opacity: 0.6; }
-.ele-date-picker__input { -fx-min-width: 88px; -fx-pref-width: 118px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; }
+.ele-date-picker__input { -fx-min-width: 88px; -fx-pref-width: 118px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; -fx-display-caret: false; }
 .ele-date-picker__input:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; }
+.ele-date-picker__calendar { -fx-cursor: hand; }
+.ele-date-picker__calendar .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
 .ele-date-picker__separator { -fx-text-fill: -elefx-ct-secondary; -fx-padding: 0 2px; }
-.ele-date-picker__clear, .ele-date-picker__trigger { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; -fx-text-fill: -elefx-ct-secondary; }
-.ele-date-picker__clear:hover, .ele-date-picker__trigger:hover { -fx-text-fill: -elefx-cp-1; }
-.ele-date-picker__clear:focused, .ele-date-picker__trigger:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; }
+.ele-date-picker__clear { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; -fx-text-fill: -elefx-ct-secondary; }
+.ele-date-picker__clear .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
+.ele-date-picker__clear:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }
+.ele-date-picker__clear:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; }
 .ele-date-picker__popup { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-lighter; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, .12), 12, .12, 0, 2); }
