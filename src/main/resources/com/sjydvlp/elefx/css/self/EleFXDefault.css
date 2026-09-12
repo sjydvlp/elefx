@@ -587,3 +587,16 @@
 .ele-date-picker-panel__action--primary:pressed { -fx-background-color: transparent; -fx-border-color: -elefx-cp-d2; -fx-text-fill: -elefx-cp-d2; }
 .ele-date-picker-panel__action--primary:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; }
 .ele-date-picker-panel__action--primary:disabled { -fx-opacity: 1; -fx-background-color: transparent; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }
+
+/* ------------------------------ form ------------------------------ */
+.ele-form { -fx-padding: 0; -fx-alignment: top-left; }
+.ele-form-item__row { -fx-alignment: top-left; }
+.ele-form-item__label { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-padding: 0 12px 0 0; -fx-alignment: center-right; }
+.ele-form-item__label-text { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }
+.ele-form-item__required { -fx-text-fill: -elefx-cd-1; -fx-font-size: 14px; }
+.ele-form-item--label-top .ele-form-item__label { -fx-min-height: 22px; -fx-pref-height: 22px; -fx-padding: 0; -fx-alignment: center-left; }
+.ele-form-item__content { -fx-min-height: 32px; -fx-alignment: center-left; }
+.ele-form-item__error { -fx-padding: 2px 0 0 0; -fx-text-fill: -elefx-cd-1; -fx-font-size: 12px; }
+.ele-form-item--error .text-input, .ele-form-item--error .combo-box-base { -fx-border-color: -elefx-cd-1; }
+.ele-form-item--error .text-input:focused, .ele-form-item--error .combo-box-base:focused { -fx-border-color: -elefx-cd-1; }
+.ele-form-item--error .ele-date-picker { -fx-border-color: -elefx-cd-1; }
