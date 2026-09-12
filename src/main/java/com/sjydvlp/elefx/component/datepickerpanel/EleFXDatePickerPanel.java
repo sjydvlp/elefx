@@ -757,6 +757,12 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         boolean dateTimeRangeView = getType() == EleFXDatePickerPanelType.DATETIME_RANGE;
         timeBar.setVisible(dateTimeView);
         timeBar.setManaged(dateTimeView);
+        boolean compactDateTimeRange = dateTimeRangeView && isSinglePanel();
+        if (compactDateTimeRange) {
+            if (!timeBar.getStyleClass().contains("ele-date-picker-panel__time--compact-range"))
+                timeBar.getStyleClass().add("ele-date-picker-panel__time--compact-range");
+        } else
+            timeBar.getStyleClass().remove("ele-date-picker-panel__time--compact-range");
         rangeEndDateInput.setVisible(dateTimeRangeView);
         rangeEndDateInput.setManaged(dateTimeRangeView);
         rangeEndTimeInput.setVisible(dateTimeRangeView);
