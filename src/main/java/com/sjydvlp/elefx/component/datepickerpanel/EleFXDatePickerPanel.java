@@ -989,6 +989,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
             cell.getStyleClass().add("ele-date-picker-panel__period-cell--quarter");
         if (getType().isRange())
             cell.getStyleClass().add("ele-date-picker-panel__period-cell--range");
+        if (isCurrentPeriod(date)) cell.getStyleClass().add("ele-date-picker-panel__cell--today");
         // A range background must cover the whole grid column; otherwise the narrower
         // month/year button leaves a visible gap between adjacent periods.
         double cellWidth = getType().isRange() ? PERIOD_COLUMN_WIDTH : width;
@@ -997,6 +998,16 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         cell.setPrefSize(cellWidth, cellHeight);
         cell.setMaxSize(cellWidth, cellHeight);
         return cell;
+    }
+
+    private boolean isCurrentPeriod(LocalDate date) {
+        LocalDate today = LocalDate.now();
+        if (getType().usesYearGrid()) return date.getYear() == today.getYear();
+        if (getType().usesMonthGrid()) return date.getYear() == today.getYear()
+                && date.getMonthValue() == today.getMonthValue();
+        return getType().usesQuarterGrid()
+                && date.getYear() == today.getYear()
+                && (date.getMonthValue() - 1) / 3 == (today.getMonthValue() - 1) / 3;
     }
 
     private Button createCell(String text, LocalDate date) {
