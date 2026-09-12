@@ -22,7 +22,7 @@ public enum EleFXThemes implements Theme {
     CHECKBOX("css/component/checkbox/EleFXCheckbox.css"),
     COLOR_PICKER("css/component/colorpicker/EleFXColorPicker.css"),
     COLOR_PICKER_PANEL("css/component/colorpickerpanel/EleFXColorPickerPanel.css"),
-    // Date-picker styling is distributed through the public default stylesheet.
+    DATE_PICKER("css/component/datepicker/EleFXDatePicker.css"),
     DATE_PICKER_PANEL("css/component/datepickerpanel/EleFXDatePickerPanel.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),

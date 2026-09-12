@@ -1,7 +1,7 @@
 package com.sjydvlp.elefx.component.datepickerpanel;
 
 /** Selection modes supported by {@link EleFXDatePickerPanel}. */
-public enum EleFXDatePickerType {
+public enum EleFXDatePickerPanelType {
 
     YEAR,
     YEARS,

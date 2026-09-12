@@ -69,8 +69,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private final ObservableList<LocalDate> values = FXCollections.observableArrayList();
 
-    private final ObjectProperty<EleFXDatePickerType> type = new SimpleObjectProperty<>(this, "type",
-            EleFXDatePickerType.DATE);
+    private final ObjectProperty<EleFXDatePickerPanelType> type = new SimpleObjectProperty<>(this, "type",
+            EleFXDatePickerPanelType.DATE);
 
     private final ObjectProperty<YearMonth> displayedMonth = new SimpleObjectProperty<>(this, "displayedMonth",
             YearMonth.now());
@@ -203,16 +203,16 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         return values;
     }
 
-    public EleFXDatePickerType getType() {
+    public EleFXDatePickerPanelType getType() {
         return type.get();
     }
 
-    public ObjectProperty<EleFXDatePickerType> typeProperty() {
+    public ObjectProperty<EleFXDatePickerPanelType> typeProperty() {
         return type;
     }
 
-    public void setType(EleFXDatePickerType value) {
-        type.set(value == null ? EleFXDatePickerType.DATE : value);
+    public void setType(EleFXDatePickerPanelType value) {
+        type.set(value == null ? EleFXDatePickerPanelType.DATE : value);
     }
 
     public YearMonth getDisplayedMonth() {
@@ -639,7 +639,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     private void updateDateInput() {
         LocalDate selected = getValue();
         dateInput.setText(selected == null ? "" : DATE_INPUT_FORMATTER.format(selected));
-        boolean dateTimeRange = getType() == EleFXDatePickerType.DATETIME_RANGE;
+        boolean dateTimeRange = getType() == EleFXDatePickerPanelType.DATETIME_RANGE;
         if (dateTimeRange && selected != null) {
             rangeEndDateInput.setText(DATE_INPUT_FORMATTER.format(values.size() == 2 ? values.get(1) : selected));
             if (values.size() == 1) resetRangeTimes();
@@ -665,7 +665,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     }
 
     private boolean updateDateTime() {
-        if (getType() != EleFXDatePickerType.DATETIME || getValue() == null) return false;
+        if (getType() != EleFXDatePickerPanelType.DATETIME || getValue() == null) return false;
         LocalDateTime next = LocalDateTime.of(getValue(), selectedTime());
         if (next.equals(getDateTimeValue())) return false;
         dateTimeValue.set(next);
@@ -683,7 +683,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     }
 
     private void shiftPanel(int direction) {
-        EleFXDatePickerType current = getType();
+        EleFXDatePickerPanelType current = getType();
         int months = current.usesYearGrid()
                 ? direction * 120
                 : (current.usesMonthGrid() || current.usesQuarterGrid()) ? direction * 12 : direction;
@@ -693,20 +693,20 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     private void repaint() {
         grid.getChildren().clear();
         weekCells.clear();
-        boolean dualPanelView = (getType() == EleFXDatePickerType.QUARTER_RANGE
-                || getType() == EleFXDatePickerType.DATE_RANGE
-                || getType() == EleFXDatePickerType.DATETIME_RANGE
-                || getType() == EleFXDatePickerType.MONTH_RANGE
-                || getType() == EleFXDatePickerType.YEAR_RANGE) && !isSinglePanel();
+        boolean dualPanelView = (getType() == EleFXDatePickerPanelType.QUARTER_RANGE
+                || getType() == EleFXDatePickerPanelType.DATE_RANGE
+                || getType() == EleFXDatePickerPanelType.DATETIME_RANGE
+                || getType() == EleFXDatePickerPanelType.MONTH_RANGE
+                || getType() == EleFXDatePickerPanelType.YEAR_RANGE) && !isSinglePanel();
         header.setVisible(!dualPanelView);
         header.setManaged(!dualPanelView);
         grid.setVisible(!dualPanelView);
         grid.setManaged(!dualPanelView);
         quarterRange.setVisible(dualPanelView);
         quarterRange.setManaged(dualPanelView);
-        boolean dateTimeView = getType() == EleFXDatePickerType.DATETIME
-                || getType() == EleFXDatePickerType.DATETIME_RANGE;
-        boolean dateTimeRangeView = getType() == EleFXDatePickerType.DATETIME_RANGE;
+        boolean dateTimeView = getType() == EleFXDatePickerPanelType.DATETIME
+                || getType() == EleFXDatePickerPanelType.DATETIME_RANGE;
+        boolean dateTimeRangeView = getType() == EleFXDatePickerPanelType.DATETIME_RANGE;
         timeBar.setVisible(dateTimeView);
         timeBar.setManaged(dateTimeView);
         rangeEndDateInput.setVisible(dateTimeRangeView);
@@ -715,12 +715,12 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         rangeEndTimeInput.setManaged(dateTimeRangeView);
         setPrefWidth(dualPanelView ? 596 : 322);
         if (dualPanelView) {
-            if (getType() == EleFXDatePickerType.DATE_RANGE
-                    || getType() == EleFXDatePickerType.DATETIME_RANGE)
+            if (getType() == EleFXDatePickerPanelType.DATE_RANGE
+                    || getType() == EleFXDatePickerPanelType.DATETIME_RANGE)
                 paintDateTimeRange();
-            else if (getType() == EleFXDatePickerType.MONTH_RANGE)
+            else if (getType() == EleFXDatePickerPanelType.MONTH_RANGE)
                 paintMonthRange();
-            else if (getType() == EleFXDatePickerType.YEAR_RANGE)
+            else if (getType() == EleFXDatePickerPanelType.YEAR_RANGE)
                 paintYearRange();
             else
                 paintQuarterRange();
@@ -840,8 +840,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         GridPane rangeGrid = new GridPane();
         rangeGrid.setAlignment(Pos.CENTER);
         rangeGrid.setHgap(0);
-        rangeGrid.setVgap(getType() == EleFXDatePickerType.DATE_RANGE
-                || getType() == EleFXDatePickerType.DATETIME_RANGE ? 6 : 2);
+        rangeGrid.setVgap(getType() == EleFXDatePickerPanelType.DATE_RANGE
+                || getType() == EleFXDatePickerPanelType.DATETIME_RANGE ? 6 : 2);
         for (int column = 0; column < 7; column++) {
             Label label = new Label(DayOfWeek.of(column == 0 ? 7 : column)
                     .getDisplayName(TextStyle.SHORT, getLocale()));
@@ -945,8 +945,8 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     private GridPane periodRangeGrid(int rows) {
         GridPane rangeGrid = new GridPane();
         rangeGrid.setAlignment(Pos.CENTER);
-        rangeGrid.setVgap(getType() == EleFXDatePickerType.MONTH_RANGE
-                || getType() == EleFXDatePickerType.YEAR_RANGE ? 6 : 0);
+        rangeGrid.setVgap(getType() == EleFXDatePickerPanelType.MONTH_RANGE
+                || getType() == EleFXDatePickerPanelType.YEAR_RANGE ? 6 : 0);
         for (int column = 0; column < 4; column++)
             rangeGrid.getColumnConstraints().add(new ColumnConstraints(68));
         for (int row = 0; row < rows; row++)
@@ -967,9 +967,9 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private Button dateCell(String text, LocalDate date) {
         Button cell = createCell(text, date);
-        double width = getType() == EleFXDatePickerType.WEEK || getType().isRange() ? DAY_COLUMN_WIDTH : 24;
-        boolean expandedRangeDate = getType() == EleFXDatePickerType.DATE_RANGE
-                || getType() == EleFXDatePickerType.DATETIME_RANGE;
+        double width = getType() == EleFXDatePickerPanelType.WEEK || getType().isRange() ? DAY_COLUMN_WIDTH : 24;
+        boolean expandedRangeDate = getType() == EleFXDatePickerPanelType.DATE_RANGE
+                || getType() == EleFXDatePickerPanelType.DATETIME_RANGE;
         double height = expandedRangeDate ? 30 : 24;
         if (expandedRangeDate)
             cell.getStyleClass().add("ele-date-picker-panel__cell--expanded-range-date");
@@ -1013,17 +1013,17 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
     private Button createCell(String text, LocalDate date) {
         Button cell = new Button(text);
         cell.getStyleClass().add("ele-date-picker-panel__cell");
-        if (getType() == EleFXDatePickerType.WEEK) cell.getStyleClass().add("ele-date-picker-panel__cell--week");
+        if (getType() == EleFXDatePickerPanelType.WEEK) cell.getStyleClass().add("ele-date-picker-panel__cell--week");
         cell.setFocusTraversable(false);
         GridPane.setHalignment(cell, HPos.CENTER);
         if (values.contains(date)) cell.getStyleClass().add("ele-date-picker-panel__cell--selected");
         if (isInSelectedRange(date) || isRangeEndpointPeriod(date))
             cell.getStyleClass().add("ele-date-picker-panel__cell--in-range");
-        if ((getType().isRange() || getType() == EleFXDatePickerType.WEEK) && values.size() == 2) {
+        if ((getType().isRange() || getType() == EleFXDatePickerPanelType.WEEK) && values.size() == 2) {
             if (date.equals(values.get(0))) cell.getStyleClass().add("ele-date-picker-panel__cell--range-start");
             if (date.equals(values.get(1))) cell.getStyleClass().add("ele-date-picker-panel__cell--range-end");
         }
-        if (getType() == EleFXDatePickerType.WEEK && weekStart(date).equals(hoveredWeekStart)) {
+        if (getType() == EleFXDatePickerPanelType.WEEK && weekStart(date).equals(hoveredWeekStart)) {
             cell.getStyleClass().add("ele-date-picker-panel__cell--week-hover");
             if (date.equals(hoveredWeekStart))
                 cell.getStyleClass().add("ele-date-picker-panel__cell--week-hover-start");
@@ -1038,15 +1038,15 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
             fire(onCalendarChange.get());
             fireChange();
         });
-        if (getType() == EleFXDatePickerType.WEEK) weekCells.put(date, cell);
+        if (getType() == EleFXDatePickerPanelType.WEEK) weekCells.put(date, cell);
         cell.setOnMouseEntered(e -> {
-            if (getType() == EleFXDatePickerType.WEEK && !weekStart(date).equals(hoveredWeekStart)) {
+            if (getType() == EleFXDatePickerPanelType.WEEK && !weekStart(date).equals(hoveredWeekStart)) {
                 hoveredWeekStart = weekStart(date);
                 applyWeekHover();
             }
         });
         cell.setOnMouseExited(e -> {
-            if (getType() == EleFXDatePickerType.WEEK && hoveredWeekStart != null) {
+            if (getType() == EleFXDatePickerPanelType.WEEK && hoveredWeekStart != null) {
                 hoveredWeekStart = null;
                 applyWeekHover();
             }
@@ -1063,16 +1063,16 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
             grid.getRowConstraints().add(new RowConstraints(rowHeight));
         boolean dayTable = columns >= 7;
         boolean periodGrid = getType().usesMonthGrid() || getType().usesYearGrid();
-        boolean expandedDaySpacing = getType() == EleFXDatePickerType.DATE
-                || getType() == EleFXDatePickerType.DATES
-                || getType() == EleFXDatePickerType.DATETIME
-                || getType() == EleFXDatePickerType.WEEK;
+        boolean expandedDaySpacing = getType() == EleFXDatePickerPanelType.DATE
+                || getType() == EleFXDatePickerPanelType.DATES
+                || getType() == EleFXDatePickerPanelType.DATETIME
+                || getType() == EleFXDatePickerPanelType.WEEK;
         grid.setHgap(dayTable && !getType().isRange() ? 2 : 0);
         grid.setVgap(dayTable ? expandedDaySpacing ? 6 : 2 : periodGrid ? 6 : 0);
     }
 
     private boolean isInSelectedRange(LocalDate date) {
-        return (getType().isRange() || getType() == EleFXDatePickerType.WEEK) && values.size() == 2
+        return (getType().isRange() || getType() == EleFXDatePickerPanelType.WEEK) && values.size() == 2
                 && date.isAfter(values.get(0)) && date.isBefore(values.get(1));
     }
 
@@ -1084,7 +1084,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
 
     private void select(LocalDate date) {
         List<LocalDate> next = new ArrayList<>(values);
-        if (getType() == EleFXDatePickerType.WEEK) {
+        if (getType() == EleFXDatePickerPanelType.WEEK) {
             LocalDate start = weekStart(date);
             next = new ArrayList<>(List.of(start, start.plusDays(6)));
         } else if (getType().isRange()) {
@@ -1103,7 +1103,7 @@ public class EleFXDatePickerPanel extends VBox implements Themable {
         } else
             next = new ArrayList<>(List.of(date));
         setSelectedValues(next);
-        if (getType() == EleFXDatePickerType.DATETIME) updateDateTime();
+        if (getType() == EleFXDatePickerPanelType.DATETIME) updateDateTime();
     }
 
     private LocalDate weekStart(LocalDate date) {
