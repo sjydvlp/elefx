@@ -1,0 +1,46 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-input { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-size: 14px; }
+.ele-input:hover { -fx-border-color: -elefx-ct-placeholder; }
+.ele-input:focused, .ele-input:focused:hover { -fx-border-color: -elefx-cp-1; }
+.ele-input:disabled { -fx-opacity: 1; -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
+.ele-input:disabled .ele-input__inner { -fx-text-fill: -elefx-ct-disabled; -fx-prompt-text-fill: -elefx-ct-placeholder; }
+.ele-input--size-large { -fx-min-height: 40px; -fx-pref-height: 40px; -fx-max-height: 40px; -fx-padding: 0 15px; }
+.ele-input--size-small { -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0 7px; -fx-font-size: 12px; }
+.ele-input--textarea { -fx-min-height: 0; -fx-pref-height: -1; -fx-max-height: -1; -fx-padding: 0; -fx-spacing: 0; -fx-alignment: top-left; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; }
+.ele-input__inner, .ele-input__inner:focused { -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }
+.ele-input__prefix, .ele-input__suffix { -fx-text-fill: -elefx-ct-secondary; }
+.ele-input__clear { -fx-padding: 0; -fx-alignment: center; -fx-cursor: hand; }
+.ele-input__clear .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
+.ele-input__clear:hover .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
+.ele-input__password-toggle { -fx-padding: 0; -fx-alignment: center; -fx-cursor: hand; }
+.ele-input__password-toggle .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
+.ele-input__password-toggle:hover .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
+.ele-input__count { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 12px; }
+.ele-input__textarea-wrapper { -fx-min-height: 60px; -fx-alignment: top-left; }
+.ele-input__textarea { -fx-padding: 0; -fx-wrap-text: true; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input__textarea:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input--textarea:hover .ele-input__textarea { -fx-border-color: -elefx-ct-placeholder; }
+.ele-input--textarea:focused .ele-input__textarea { -fx-border-color: -elefx-cp-1; }
+.ele-input__textarea .scroll-pane, .ele-input__textarea .scroll-pane .viewport { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.ele-input__textarea .content, .ele-input__textarea:focused .content { -fx-padding: 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 0 0 4px 4px; }
+.ele-input__textarea .scroll-bar:vertical { -fx-pref-width: 8px; -fx-padding: 2px 1px; }
+.ele-input__textarea .scroll-bar > .track { -fx-background-color: transparent; }
+.ele-input__textarea .scroll-bar > .thumb { -fx-background-color: rgba(144, 147, 153, 0.35); -fx-background-insets: 0; -fx-background-radius: 999px; }
+.ele-input__textarea .scroll-bar > .increment-button, .ele-input__textarea .scroll-bar > .decrement-button { -fx-padding: 0; -fx-opacity: 0; -fx-min-width: 0; -fx-pref-width: 0; -fx-max-width: 0; -fx-min-height: 0; -fx-pref-height: 0; -fx-max-height: 0; }
+.ele-input--textarea-autosize .scroll-bar { -fx-padding: 0; -fx-opacity: 0; -fx-min-width: 0; -fx-pref-width: 0; -fx-max-width: 0; -fx-min-height: 0; -fx-pref-height: 0; -fx-max-height: 0; }
+.ele-input:disabled .ele-input__textarea, .ele-input:disabled .ele-input__textarea .content { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
+.ele-input--textarea .ele-input__clear { -fx-translate-x: -11px; }
+.ele-input--textarea .ele-input__count { -fx-padding: 0 11px 7px 0; }
+.ele-input--group, .ele-input--group:hover, .ele-input--group:focused { -fx-padding: 0; -fx-spacing: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; }
+.ele-input__group-wrapper { -fx-min-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input--group:hover .ele-input__group-wrapper { -fx-border-color: -elefx-ct-placeholder; }
+.ele-input--group:focused .ele-input__group-wrapper { -fx-border-color: -elefx-cp-1; }
+.ele-input--group:disabled .ele-input__group-wrapper { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
+.ele-input__prepend, .ele-input__append { -fx-min-height: 32px; -fx-padding: 0 20px; -fx-alignment: center; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-text-fill: -elefx-ct-regular; }
+.ele-input__prepend { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; -fx-border-width: 1px 0 1px 1px; }
+.ele-input__append { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; -fx-border-width: 1px 1px 1px 0; }
+.ele-input--group-prepend .ele-input__group-wrapper { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; }
+.ele-input--group-append .ele-input__group-wrapper { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; }
+.ele-input--group-prepend.ele-input--group-append .ele-input__group-wrapper { -fx-background-radius: 0; -fx-border-radius: 0; }
