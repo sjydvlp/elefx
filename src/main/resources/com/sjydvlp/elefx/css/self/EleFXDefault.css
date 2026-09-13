@@ -744,3 +744,11 @@
 .ele-form-item--error .text-input, .ele-form-item--error .combo-box-base { -fx-border-color: -elefx-cd-1; }
 .ele-form-item--error .text-input:focused, .ele-form-item--error .combo-box-base:focused { -fx-border-color: -elefx-cd-1; }
 .ele-form-item--error .ele-date-picker { -fx-border-color: -elefx-cd-1; }
+
+/* ------------------------------ rate ------------------------------ */
+.ele-rate { -fx-spacing: 8px; -fx-alignment: center-left; }
+.ele-rate:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; }
+.ele-rate__icons { -fx-spacing: 6px; -fx-alignment: center-left; }
+.ele-rate__item { -fx-alignment: center; -fx-cursor: hand; }
+.ele-rate:disabled .ele-rate__item { -fx-cursor: default; }
+.ele-rate__text { -fx-font-size: 14px; -fx-text-fill: -elefx-ct-primary; }
