@@ -23,6 +23,7 @@ public enum EleFXThemes implements Theme {
     INPUT_NUMBER("css/component/inputnumber/EleFXInputNumber.css"),
     CASCADER("css/component/cascader/EleFXCascader.css"),
     CHECKBOX("css/component/checkbox/EleFXCheckbox.css"),
+    RADIO("css/component/radio/EleFXRadio.css"),
     COLOR_PICKER("css/component/colorpicker/EleFXColorPicker.css"),
     COLOR_PICKER_PANEL("css/component/colorpickerpanel/EleFXColorPickerPanel.css"),
     DATE_PICKER("css/component/datepicker/EleFXDatePicker.css"),
