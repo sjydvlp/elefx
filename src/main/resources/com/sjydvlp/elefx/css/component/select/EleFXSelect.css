@@ -52,3 +52,4 @@
 .ele-select__option:disabled .ele-select__option-label { -fx-text-fill: -elefx-ct-disabled; }
 .ele-select__empty { -fx-padding: 12px 20px; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 14px; }
 .ele-select__loading { -fx-padding: 12px 20px; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 14px; }
+.ele-select__loading-container { -fx-min-height: 42px; -fx-alignment: center; }

@@ -451,6 +451,7 @@
 .ele-select__option:disabled .ele-select__option-label { -fx-text-fill: -elefx-ct-disabled; }
 .ele-select__empty { -fx-padding: 12px 20px; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 14px; }
 .ele-select__loading { -fx-padding: 12px 20px; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 14px; }
+.ele-select__loading-container { -fx-min-height: 42px; -fx-alignment: center; }
 
 /* ------------------------------ checkbox ------------------------------ */
 .ele-checkbox { -fx-min-height: 32px; -fx-padding: 0; -fx-spacing: 8px; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-cursor: hand; }

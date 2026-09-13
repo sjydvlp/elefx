@@ -111,6 +111,8 @@ public class EleFXSelect<T> extends HBox implements Themable {
 
     private final BooleanProperty loading = new SimpleBooleanProperty(this, "loading", false);
 
+    private final ObjectProperty<Node> loadingNode = new SimpleObjectProperty<>(this, "loadingNode");
+
     private final ObjectProperty<Consumer<String>> remoteMethod = new SimpleObjectProperty<>(this, "remoteMethod");
 
     private final BooleanProperty clearable = new SimpleBooleanProperty(this, "clearable", false);
@@ -228,6 +230,19 @@ public class EleFXSelect<T> extends HBox implements Themable {
 
     public void setLoading(boolean value) {
         loading.set(value);
+    }
+
+    /** Node rendered in the dropdown while loading. */
+    public Node getLoadingNode() {
+        return loadingNode.get();
+    }
+
+    public ObjectProperty<Node> loadingNodeProperty() {
+        return loadingNode;
+    }
+
+    public void setLoadingNode(Node value) {
+        loadingNode.set(value);
     }
 
     public Consumer<String> getRemoteMethod() {
@@ -507,6 +522,7 @@ public class EleFXSelect<T> extends HBox implements Themable {
             updateDisplay();
         });
         loading.addListener((observable, oldValue, value) -> rebuildOptions());
+        loadingNode.addListener((observable, oldValue, value) -> rebuildOptions());
         clearable.addListener((observable, oldValue, value) -> updateClearButton());
         collapseTags.addListener((observable, oldValue, value) -> updateDisplay());
         collapseTagsTooltip.addListener((observable, oldValue, value) -> updateDisplay());
@@ -545,9 +561,17 @@ public class EleFXSelect<T> extends HBox implements Themable {
     private void rebuildOptions() {
         optionList.getChildren().clear();
         if (isLoading()) {
-            Label loadingLabel = new Label("Loading");
-            loadingLabel.getStyleClass().add("ele-select__loading");
-            optionList.getChildren().add(loadingLabel);
+            Node content = getLoadingNode();
+            if (content == null) {
+                Label loadingLabel = new Label("Loading");
+                loadingLabel.getStyleClass().add("ele-select__loading");
+                content = loadingLabel;
+            }
+            StackPane loadingContainer = new StackPane(content);
+            loadingContainer.getStyleClass().add("ele-select__loading-container");
+            loadingContainer.setMaxWidth(Double.MAX_VALUE);
+            StackPane.setAlignment(content, Pos.CENTER);
+            optionList.getChildren().add(loadingContainer);
             return;
         }
         String query = filterInput.getText() == null ? "" : filterInput.getText().trim().toLowerCase();
