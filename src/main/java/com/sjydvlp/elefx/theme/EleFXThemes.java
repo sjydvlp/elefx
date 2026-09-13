@@ -20,6 +20,7 @@ public enum EleFXThemes implements Theme {
     AUTOCOMPLETE("css/component/autocomplete/EleFXAutocomplete.css"),
     SELECT("css/component/select/EleFXSelect.css"),
     INPUT("css/component/input/EleFXInput.css"),
+    INPUT_NUMBER("css/component/inputnumber/EleFXInputNumber.css"),
     CASCADER("css/component/cascader/EleFXCascader.css"),
     CHECKBOX("css/component/checkbox/EleFXCheckbox.css"),
     COLOR_PICKER("css/component/colorpicker/EleFXColorPicker.css"),

@@ -1,0 +1,32 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-input-number { -fx-min-width: 180px; -fx-pref-width: 180px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input-number:hover { -fx-border-color: -elefx-ct-placeholder; }
+.ele-input-number:focused, .ele-input-number:focused:hover { -fx-border-color: -elefx-cp-1; }
+.ele-input-number:disabled { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
+.ele-input-number__input-wrapper { -fx-alignment: center; }
+.ele-input-number__input, .ele-input-number__input:focused { -fx-padding: 0 8px; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }
+.ele-input-number__prefix, .ele-input-number__suffix { -fx-text-fill: -elefx-ct-secondary; }
+.ele-input-number__right-adornment { -fx-alignment: center-right; }
+.ele-input-number__prefix-adornment { -fx-padding: 0 0 0 6px; -fx-alignment: center-left; }
+.ele-input-number__suffix-adornment { -fx-padding: 0 6px 0 0; -fx-alignment: center-right; }
+.ele-input-number__decrease, .ele-input-number__increase { -fx-min-width: 32px; -fx-pref-width: 32px; -fx-max-width: 32px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-max-height: 30px; -fx-padding: 0; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; }
+.ele-input-number__decrease:hover, .ele-input-number__increase:hover { -fx-background-color: -elefx-cf-light; }
+.ele-input-number__decrease:hover .ele-icon__svg, .ele-input-number__increase:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }
+.ele-input-number__decrease:disabled, .ele-input-number__increase:disabled { -fx-opacity: 1; -fx-cursor: default; }
+.ele-input-number__decrease:disabled .ele-icon__svg, .ele-input-number__increase:disabled .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
+.ele-input-number__decrease { -fx-background-radius: 3px 0 0 3px; -fx-border-color: transparent -elefx-cb-darker transparent transparent; -fx-border-width: 0 1px 0 0; }
+.ele-input-number__increase { -fx-background-radius: 0 3px 3px 0; -fx-border-color: transparent transparent transparent -elefx-cb-darker; -fx-border-width: 0 0 0 1px; }
+.ele-input-number__decrease .ele-icon__svg, .ele-input-number__increase .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
+.ele-input-number--controls-right .ele-input-number__right-controls { -fx-min-width: 32px; -fx-pref-width: 32px; -fx-max-width: 32px; -fx-border-color: transparent -elefx-cb-darker transparent -elefx-cb-darker; -fx-border-width: 0 1px 0 1px; }
+.ele-input-number:focused.ele-input-number--controls-right .ele-input-number__right-controls { -fx-border-color: transparent -elefx-cp-1 transparent -elefx-cb-darker; -fx-border-width: 0 1px 0 1px; }
+.ele-input-number--controls-right .ele-input-number__decrease, .ele-input-number--controls-right .ele-input-number__increase { -fx-min-height: 15px; -fx-pref-height: 15px; -fx-max-height: 15px; -fx-background-insets: 0; -fx-background-radius: 0 3px 0 0; }
+.ele-input-number--controls-right .ele-input-number__increase { -fx-border-color: transparent transparent transparent -elefx-cb-darker; -fx-border-width: 0 0 0 1px; }
+.ele-input-number--controls-right .ele-input-number__decrease { -fx-background-radius: 0 0 3px 0; -fx-border-color: -elefx-cb-darker transparent transparent -elefx-cb-darker; -fx-border-width: 1px 0 0 1px; }
+.ele-input-number--size-large { -fx-min-height: 40px; -fx-pref-height: 40px; -fx-max-height: 40px; }
+.ele-input-number--size-large .ele-input-number__decrease, .ele-input-number--size-large .ele-input-number__increase { -fx-min-height: 38px; -fx-pref-height: 38px; -fx-max-height: 38px; }
+.ele-input-number--size-large.ele-input-number--controls-right .ele-input-number__decrease, .ele-input-number--size-large.ele-input-number--controls-right .ele-input-number__increase { -fx-min-height: 19px; -fx-pref-height: 19px; -fx-max-height: 19px; }
+.ele-input-number--size-small { -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; }
+.ele-input-number--size-small .ele-input-number__decrease, .ele-input-number--size-small .ele-input-number__increase { -fx-min-height: 22px; -fx-pref-height: 22px; -fx-max-height: 22px; }
+.ele-input-number--size-small.ele-input-number--controls-right .ele-input-number__decrease, .ele-input-number--size-small.ele-input-number--controls-right .ele-input-number__increase { -fx-min-height: 11px; -fx-pref-height: 11px; -fx-max-height: 11px; }
