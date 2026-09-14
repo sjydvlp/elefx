@@ -23,6 +23,7 @@ public enum EleFXThemes implements Theme {
     INPUT_NUMBER("css/component/inputnumber/EleFXInputNumber.css"),
     SLIDER("css/component/slider/EleFXSlider.css"),
     RATE("css/component/rate/EleFXRate.css"),
+    SWITCH("css/component/switcher/EleFXSwitch.css"),
     CASCADER("css/component/cascader/EleFXCascader.css"),
     CHECKBOX("css/component/checkbox/EleFXCheckbox.css"),
     RADIO("css/component/radio/EleFXRadio.css"),
