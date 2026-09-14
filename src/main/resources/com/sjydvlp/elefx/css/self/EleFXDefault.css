@@ -795,3 +795,22 @@
 .ele-slider--size-large .ele-slider__track, .ele-slider--size-large .ele-slider__input-box { -fx-min-height: 40px; -fx-pref-height: 40px; -fx-max-height: 40px; }.ele-slider--size-large .ele-slider__input, .ele-slider--size-large .ele-slider__input-control { -fx-min-height: 36px; -fx-pref-height: 36px; -fx-max-height: 36px; }
 .ele-slider--size-small .ele-slider__track, .ele-slider--size-small .ele-slider__input-box { -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; }.ele-slider--size-small .ele-slider__input, .ele-slider--size-small .ele-slider__input-control { -fx-min-height: 20px; -fx-pref-height: 20px; -fx-max-height: 20px; }
 .ele-slider--vertical { -fx-alignment: top-center; }
+
+/* ----------------------------- transfer ----------------------------- */
+.ele-transfer { -fx-background-color: transparent; }
+.ele-transfer-panel { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-background-radius: 4px; }
+.ele-transfer-panel__header { -fx-min-height: 40px; -fx-padding: 0 15px; -fx-background-color: -elefx-cf-light; -fx-background-radius: 4px 4px 0 0; -fx-border-color: transparent transparent -elefx-cb-base transparent; -fx-border-width: 0 0 1px 0; -fx-text-fill: -elefx-ct-primary; -fx-font-size: 14px; }
+.ele-transfer-panel__count { -fx-text-fill: -elefx-ct-secondary; }
+.ele-transfer-panel__header .check-box { -fx-padding: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-transfer-panel__filter-wrapper { -fx-min-height: 32px; -fx-pref-height: 32px; }
+.ele-transfer-panel__filter { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 0 11px 0 32px; -fx-font-size: 14px; -fx-prompt-text-fill: -elefx-ct-placeholder; }
+.ele-transfer-panel__filter-icon .ele-icon__svg { -fx-fill: -elefx-ct-placeholder; }
+.ele-transfer-panel__filter:focused { -fx-background-insets: 0; -fx-border-insets: 0; -fx-border-color: -elefx-cp-1; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-transfer-panel__list, .ele-transfer-panel__list .viewport { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.ele-transfer-panel__list { -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-transfer-panel__list .list-cell { -fx-padding: 0 15px; -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-transfer-panel__list .list-cell:filled:hover { -fx-background-color: -elefx-cf-light; }
+.ele-transfer-panel__item { -fx-min-height: 30px; -fx-padding: 0; -fx-spacing: 8px; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-cursor: hand; }
+.ele-transfer-panel__item:disabled { -fx-opacity: 1; -fx-text-fill: -elefx-ct-disabled; -fx-cursor: default; }
+.ele-transfer__buttons .ele-button { -fx-min-width: 110px; }
+.ele-transfer__buttons .ele-button:focused { -fx-background-insets: 0; -fx-border-insets: 0; }

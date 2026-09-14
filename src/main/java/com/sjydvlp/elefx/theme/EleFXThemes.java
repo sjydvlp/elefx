@@ -32,6 +32,7 @@ public enum EleFXThemes implements Theme {
     DATE_PICKER("css/component/datepicker/EleFXDatePicker.css"),
     DATE_PICKER_PANEL("css/component/datepickerpanel/EleFXDatePickerPanel.css"),
     FORM("css/component/form/EleFXForm.css"),
+    TRANSFER("css/component/transfer/EleFXTransfer.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
