@@ -1,0 +1,22 @@
+@import "../../common/EleFXColor.css";
+
+.ele-slider { -fx-alignment: center-left; -fx-spacing: 12px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; }
+.ele-slider:focused { -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; }
+.ele-slider__track { -fx-min-height: 32px; -fx-pref-height: 32px; }
+.ele-slider__runway { -fx-background-color: -elefx-cb-base; -fx-background-insets: 0; -fx-background-radius: 3px; }
+.ele-slider__bar { -fx-background-color: -elefx-cp-1; -fx-background-insets: 0; -fx-background-radius: 3px; }
+.ele-slider__button { -fx-background-color: -elefx-co-basic-white; -fx-background-radius: 50%; -fx-border-color: -elefx-cp-1; -fx-border-radius: 50%; -fx-border-width: 2px; -fx-cursor: hand; }
+.ele-slider__button:hover { -fx-scale-x: 1.15; -fx-scale-y: 1.15; }
+.ele-slider:focused .ele-slider__button { -fx-border-color: -elefx-cp-d2; }
+.ele-slider:disabled { -fx-opacity: 1; }.ele-slider:disabled .ele-slider__bar { -fx-background-color: -elefx-cp-l5; }.ele-slider:disabled .ele-slider__button { -fx-border-color: -elefx-cp-l5; -fx-background-color: -elefx-co-basic-white; -fx-cursor: default; }
+.ele-slider__stop, .ele-slider__mark-stop { -fx-background-color: -elefx-co-basic-white; -fx-background-radius: 50%; }.ele-slider__mark-text { -fx-font-size: 12px; -fx-text-fill: -elefx-ct-regular; }
+.ele-slider__tooltip { -fx-alignment: center; -fx-padding: 6px 3px; -fx-background-color: -elefx-ct-primary; -fx-background-radius: 4px; -fx-text-fill: -elefx-co-basic-white; -fx-font-size: 12px; }
+.ele-slider__tooltip-arrow { -fx-background-color: -elefx-ct-primary; -fx-rotate: 45; }
+.ele-slider__input-box { -fx-alignment: center; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 1px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-border-width: 1px; }
+.ele-slider__input-box:focused { -fx-border-color: -elefx-cp-1; }
+.ele-slider__input { -fx-pref-width: 74px; -fx-min-width: 64px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-max-height: 30px; -fx-alignment: center; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-padding: 0 8px; -fx-text-fill: -elefx-ct-regular; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-slider__input-control { -fx-min-width: 30px; -fx-pref-width: 30px; -fx-max-width: 30px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-max-height: 28px; -fx-padding: 0; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; }.ele-slider__input-control:hover { -fx-text-fill: -elefx-cp-1; -fx-background-color: -elefx-cp-l8; }
+.ele-slider__input-decrease { -fx-border-color: transparent -elefx-cb-darker transparent transparent; -fx-border-width: 0 1px 0 0; -fx-background-radius: 3px 0 0 3px; }.ele-slider__input-increase { -fx-border-color: transparent transparent transparent -elefx-cb-darker; -fx-border-width: 0 0 0 1px; -fx-background-radius: 0 3px 3px 0; }
+.ele-slider--size-large .ele-slider__track, .ele-slider--size-large .ele-slider__input-box { -fx-min-height: 40px; -fx-pref-height: 40px; -fx-max-height: 40px; }.ele-slider--size-large .ele-slider__input, .ele-slider--size-large .ele-slider__input-control { -fx-min-height: 36px; -fx-pref-height: 36px; -fx-max-height: 36px; }
+.ele-slider--size-small .ele-slider__track, .ele-slider--size-small .ele-slider__input-box { -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; }.ele-slider--size-small .ele-slider__input, .ele-slider--size-small .ele-slider__input-control { -fx-min-height: 20px; -fx-pref-height: 20px; -fx-max-height: 20px; }
+.ele-slider--vertical { -fx-alignment: top-center; }
