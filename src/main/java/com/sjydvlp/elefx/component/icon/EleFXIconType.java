@@ -126,6 +126,7 @@ public enum EleFXIconType {
     FOLDER_OPENED("folder-opened", "svg/folder-opened.svg"),
     FOLDER_REMOVE("folder-remove", "svg/folder-remove.svg"),
     FOLDER("folder", "svg/folder.svg"),
+    FORBIDDEN("forbidden", "svg/forbidden.svg"),
     FOOD("food", "svg/food.svg"),
     FOOTBALL("football", "svg/football.svg"),
     FORK_SPOON("fork-spoon", "svg/fork-spoon.svg"),

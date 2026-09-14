@@ -10,21 +10,21 @@ public class EleFXSwitchEvent extends Event {
     public static final EventType<EleFXSwitchEvent> VALUE_CHANGED = new EventType<>(Event.ANY,
             "ELEFX_SWITCH_VALUE_CHANGED");
 
-    private final boolean oldValue;
+    private final Object oldValue;
 
-    private final boolean value;
+    private final Object value;
 
-    public EleFXSwitchEvent(Object source, EventTarget target, boolean oldValue, boolean value) {
+    public EleFXSwitchEvent(Object source, EventTarget target, Object oldValue, Object value) {
         super(source, target, VALUE_CHANGED);
         this.oldValue = oldValue;
         this.value = value;
     }
 
-    public boolean getOldValue() {
+    public Object getOldValue() {
         return oldValue;
     }
 
-    public boolean getValue() {
+    public Object getValue() {
         return value;
     }
 }

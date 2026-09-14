@@ -735,11 +735,13 @@
 /* ----------------------------- switch ----------------------------- */
 .ele-switch { -fx-alignment: center-left; -fx-spacing: 8px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-radius: 0; -fx-border-width: 0; -fx-effect: null; -fx-cursor: hand; }
 .ele-switch:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-radius: 0; -fx-border-width: 0; -fx-effect: null; }
-.ele-switch:disabled { -fx-opacity: 1; -fx-cursor: default; }
+.ele-switch:disabled { -fx-opacity: 1; -fx-cursor: not-allowed; }
+.ele-switch--loading { -fx-cursor: not-allowed; }
 .ele-switch__core { -fx-padding: 2px; -fx-background-insets: 0; -fx-background-radius: 999px; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-radius: 999px; -fx-border-width: 0; }
 .ele-switch:disabled .ele-switch__core { -fx-opacity: .55; }
 .ele-switch:focused .ele-switch__core { -fx-border-color: transparent; -fx-border-width: 0; }
 .ele-switch__action { -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 50%; -fx-effect: null; }
+.ele-switch__loading-icon { -fx-alignment: center; }
 .ele-switch__prompt { -fx-padding: 0 6px; -fx-font-size: 12px; -fx-text-fill: -elefx-co-white-bg; -fx-alignment: center; -fx-text-overrun: ellipsis; }
 .ele-switch__prompt .ele-icon__svg { -fx-fill: -elefx-co-white-bg; }
 .ele-switch__label { -fx-font-size: 14px; -fx-text-fill: -elefx-ct-primary; }

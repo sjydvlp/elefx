@@ -3,6 +3,8 @@ package com.sjydvlp.elefx.component.switcher;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import com.sjydvlp.elefx.component.icon.EleFXIcon;
+import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.BooleanProperty;
@@ -17,8 +19,11 @@ import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.AccessibleRole;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -28,14 +33,20 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * A JavaFX switch styled after Element Plus.
  *
  * <p>
- * The {@link #selectedProperty()} is the Boolean equivalent of Element
- * Plus's {@code v-model}. Active/inactive text can be placed alongside the
+ * The {@link #valueProperty()} is the equivalent of Element Plus's
+ * {@code v-model}; it resolves to {@link #getActiveValue()} or
+ * {@link #getInactiveValue()}. {@link #selectedProperty()} remains available
+ * as the Boolean state alias. Active/inactive text can be placed alongside the
  * control or inside its track with {@link #setInlinePrompt(boolean)}.
  * </p>
  */
@@ -45,6 +56,8 @@ public class EleFXSwitch extends HBox implements Themable {
 
     private static final PseudoClass INLINE_PROMPT = PseudoClass.getPseudoClass("inline-prompt");
 
+    private static final String LOADING_STYLE_CLASS = "ele-switch--loading";
+
     private final Label activeLabel = new Label();
 
     private final StackPane track = new StackPane();
@@ -53,11 +66,25 @@ public class EleFXSwitch extends HBox implements Themable {
 
     private final StackPane thumb = new StackPane();
 
+    private final EleFXIcon loadingIcon = new EleFXIcon(EleFXIconType.LOADING, 10);
+
+    private final Cursor blockedCursor = createBlockedCursor();
+
+    private final EventHandler<MouseEvent> sceneMouseMovedHandler = this::handleSceneMouseMoved;
+
     private final Label inactiveLabel = new Label();
 
     private final TranslateTransition thumbTransition = new TranslateTransition(Duration.millis(200), thumb);
 
     private final BooleanProperty selected = new SimpleBooleanProperty(this, "selected", false);
+
+    private final ObjectProperty<Object> activeValue = new SimpleObjectProperty<>(this, "activeValue", true);
+
+    private final ObjectProperty<Object> inactiveValue = new SimpleObjectProperty<>(this, "inactiveValue", false);
+
+    private final ObjectProperty<Object> value = new SimpleObjectProperty<>(this, "value", false);
+
+    private final BooleanProperty loading = new SimpleBooleanProperty(this, "loading", false);
 
     private final BooleanProperty inlinePrompt = new SimpleBooleanProperty(this, "inlinePrompt", false);
 
@@ -89,6 +116,10 @@ public class EleFXSwitch extends HBox implements Themable {
     private final ObjectProperty<EventHandler<EleFXSwitchEvent>> onChange = new SimpleObjectProperty<>(this,
             "onChange");
 
+    private final ObjectProperty<BooleanSupplier> beforeChange = new SimpleObjectProperty<>(this, "beforeChange");
+
+    private boolean synchronizingValue;
+
     public EleFXSwitch() {
         getStyleClass().add("ele-switch");
         activeLabel.getStyleClass().add("ele-switch__label");
@@ -98,6 +129,9 @@ public class EleFXSwitch extends HBox implements Themable {
         track.getStyleClass().add("ele-switch__core");
         prompt.getStyleClass().add("ele-switch__prompt");
         thumb.getStyleClass().add("ele-switch__action");
+        loadingIcon.getStyleClass().add("ele-switch__loading-icon");
+        loadingIcon.setMouseTransparent(true);
+        loadingIcon.setLoading(true);
         track.getChildren().addAll(prompt, thumb);
         // Keep Element Plus's fixed text order: inactive-text [switch]
         // active-text. State changes only the highlighted label.
@@ -107,7 +141,23 @@ public class EleFXSwitch extends HBox implements Themable {
         setAccessibleRole(AccessibleRole.CHECK_BOX);
         thumbTransition.setInterpolator(Interpolator.EASE_BOTH);
 
-        selected.addListener((o, oldValue, newValue) -> valueChanged(oldValue, newValue));
+        selected.addListener((o, oldValue, newValue) -> {
+            if (!synchronizingValue) setValue(newValue ? getActiveValue() : getInactiveValue());
+        });
+        value.addListener((o, oldValue, newValue) -> {
+            synchronizingValue = true;
+            selected.set(Objects.equals(newValue, getActiveValue()));
+            synchronizingValue = false;
+            valueChanged(oldValue, newValue);
+        });
+        activeValue.addListener((o, oldValue, newValue) -> {
+            if (isSelected()) setValue(newValue);
+        });
+        inactiveValue.addListener((o, oldValue, newValue) -> {
+            if (!isSelected()) setValue(newValue);
+        });
+        loading.addListener((o, oldValue, newValue) -> updateLoading(newValue));
+        disableProperty().addListener((o, oldValue, newValue) -> updateInteractionCursor());
         inlinePrompt.addListener((o, oldValue, newValue) -> updateContent());
         size.addListener((o, oldValue, newValue) -> updateSize());
         switchWidth.addListener((o, oldValue, newValue) -> updateSize());
@@ -124,11 +174,20 @@ public class EleFXSwitch extends HBox implements Themable {
         track.heightProperty().addListener((o, oldValue, newValue) -> updateThumbPosition(false));
         setOnMouseClicked(this::handleMouseClick);
         setOnKeyPressed(this::handleKeyPressed);
+        sceneProperty().addListener((o, oldScene, newScene) -> {
+            if (oldScene != null) {
+                oldScene.removeEventFilter(MouseEvent.MOUSE_MOVED, sceneMouseMovedHandler);
+                if (oldScene.getCursor() == blockedCursor) oldScene.setCursor(null);
+            }
+            if (newScene != null) newScene.addEventFilter(MouseEvent.MOUSE_MOVED, sceneMouseMovedHandler);
+        });
 
         updateSize();
         updateContent();
         updateColors();
         updateSelectedStyle();
+        updateLoading(isLoading());
+        updateInteractionCursor();
         updateThumbPosition(false);
         updateAccessibleText();
         sceneBuilderIntegration();
@@ -144,14 +203,14 @@ public class EleFXSwitch extends HBox implements Themable {
     }
 
     public void setSelected(boolean value) {
-        selected.set(value);
+        setValue(value ? getActiveValue() : getInactiveValue());
     }
 
     public BooleanProperty selectedProperty() {
         return selected;
     }
 
-    /** Alias for users who prefer a model-value naming convention. */
+    /** Legacy Boolean state alias. Use {@link #getValue()} for the model value. */
     public boolean isValue() {
         return isSelected();
     }
@@ -160,8 +219,60 @@ public class EleFXSwitch extends HBox implements Themable {
         setSelected(value);
     }
 
-    public BooleanProperty valueProperty() {
-        return selectedProperty();
+    /** Current model value, equivalent to Element Plus's {@code v-model}. */
+    public Object getValue() {
+        return value.get();
+    }
+
+    /**
+     * Sets the model value. A value equal to {@link #getActiveValue()} renders
+     * the switch as selected; any other value renders it as inactive.
+     */
+    public void setValue(Object value) {
+        this.value.set(value);
+    }
+
+    public ObjectProperty<Object> valueProperty() {
+        return value;
+    }
+
+    public Object getActiveValue() {
+        return activeValue.get();
+    }
+
+    public void setActiveValue(Object value) {
+        requireDistinctValues(value, getInactiveValue());
+        activeValue.set(value);
+    }
+
+    public ObjectProperty<Object> activeValueProperty() {
+        return activeValue;
+    }
+
+    public Object getInactiveValue() {
+        return inactiveValue.get();
+    }
+
+    public void setInactiveValue(Object value) {
+        requireDistinctValues(getActiveValue(), value);
+        inactiveValue.set(value);
+    }
+
+    public ObjectProperty<Object> inactiveValueProperty() {
+        return inactiveValue;
+    }
+
+    /** Whether this switch displays an in-progress indicator and rejects user toggles. */
+    public boolean isLoading() {
+        return loading.get();
+    }
+
+    public void setLoading(boolean value) {
+        loading.set(value);
+    }
+
+    public BooleanProperty loadingProperty() {
+        return loading;
     }
 
     public boolean isInlinePrompt() {
@@ -333,9 +444,29 @@ public class EleFXSwitch extends HBox implements Themable {
         return onChange;
     }
 
-    /** Toggles the value unless this switch is disabled. */
+    /**
+     * Optional Element Plus-compatible guard invoked before a user toggle.
+     * Return {@code false} to prevent the change. Programmatic value updates
+     * are intentionally not intercepted.
+     */
+    public BooleanSupplier getBeforeChange() {
+        return beforeChange.get();
+    }
+
+    public void setBeforeChange(BooleanSupplier value) {
+        beforeChange.set(value);
+    }
+
+    public ObjectProperty<BooleanSupplier> beforeChangeProperty() {
+        return beforeChange;
+    }
+
+    /** Toggles the value unless it is disabled, loading, or prevented by {@link #getBeforeChange()}. */
     public void toggle() {
-        if (!isDisabled()) setSelected(!isSelected());
+        if (isDisabled() || isLoading()) return;
+        BooleanSupplier guard = getBeforeChange();
+        if (guard != null && !guard.getAsBoolean()) return;
+        setValue(isSelected() ? getInactiveValue() : getActiveValue());
     }
 
     @Override
@@ -354,7 +485,7 @@ public class EleFXSwitch extends HBox implements Themable {
     }
 
     private void handleMouseClick(MouseEvent event) {
-        if (!isDisabled()) {
+        if (!isDisabled() && !isLoading()) {
             requestFocus();
             toggle();
         }
@@ -368,18 +499,27 @@ public class EleFXSwitch extends HBox implements Themable {
         }
     }
 
-    private void valueChanged(boolean oldValue, boolean newValue) {
-        updateSelectedStyle();
-        updateContent();
-        updateThumbPosition(true);
-        updateColors();
-        updateAccessibleText();
-        if (oldValue != newValue) {
+    private void valueChanged(Object oldValue, Object newValue) {
+        updateSelectedState();
+        if (!Objects.equals(oldValue, newValue)) {
             EleFXSwitchEvent event = new EleFXSwitchEvent(this, this, oldValue, newValue);
             EventHandler<EleFXSwitchEvent> handler = getOnChange();
             if (handler != null) handler.handle(event);
             fireEvent(event);
         }
+    }
+
+    private void updateSelectedState() {
+        updateSelectedStyle();
+        updateContent();
+        updateThumbPosition(true);
+        updateColors();
+        updateAccessibleText();
+    }
+
+    private void requireDistinctValues(Object active, Object inactive) {
+        if (Objects.equals(active, inactive))
+            throw new IllegalArgumentException("activeValue and inactiveValue must be different");
     }
 
     private void updateSize() {
@@ -393,6 +533,7 @@ public class EleFXSwitch extends HBox implements Themable {
         thumb.setMinSize(resolved.thumbSize(), resolved.thumbSize());
         thumb.setPrefSize(resolved.thumbSize(), resolved.thumbSize());
         thumb.setMaxSize(resolved.thumbSize(), resolved.thumbSize());
+        loadingIcon.setSize(resolved.thumbSize() - 3);
         updateThumbPosition(false);
     }
 
@@ -419,7 +560,7 @@ public class EleFXSwitch extends HBox implements Themable {
         prompt.setManaged(prompt.isVisible());
         StackPane.setAlignment(prompt, isSelected() ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
         thumb.getChildren().setAll();
-        Node action = isSelected() ? getActiveAction() : getInactiveAction();
+        Node action = isLoading() ? loadingIcon : isSelected() ? getActiveAction() : getInactiveAction();
         if (action != null) thumb.getChildren().add(action);
         StackPane.setAlignment(thumb, Pos.CENTER_LEFT);
     }
@@ -448,6 +589,42 @@ public class EleFXSwitch extends HBox implements Themable {
     private void updateColors() {
         Paint paint = isSelected() ? getActiveColor() : getInactiveColor();
         track.setStyle("-fx-background-color: " + cssPaint(paint) + ";");
+        loadingIcon.setFill(paint);
+    }
+
+    private void updateLoading(boolean loading) {
+        if (loading) {
+            if (!getStyleClass().contains(LOADING_STYLE_CLASS)) getStyleClass().add(LOADING_STYLE_CLASS);
+        } else {
+            getStyleClass().remove(LOADING_STYLE_CLASS);
+        }
+        updateInteractionCursor();
+        updateContent();
+    }
+
+    private void updateInteractionCursor() {
+        setCursor(isDisabled() || isLoading() ? blockedCursor : Cursor.HAND);
+        if (!isDisabled() && !isLoading() && getScene() != null && getScene().getCursor() == blockedCursor)
+            getScene().setCursor(null);
+    }
+
+    private void handleSceneMouseMoved(MouseEvent event) {
+        if (getScene() == null) return;
+        boolean pointerInside = getBoundsInLocal().contains(sceneToLocal(event.getSceneX(), event.getSceneY()));
+        if ((isDisabled() || isLoading()) && pointerInside) {
+            getScene().setCursor(blockedCursor);
+        } else if (getScene().getCursor() == blockedCursor) {
+            getScene().setCursor(null);
+        }
+    }
+
+    private static Cursor createBlockedCursor() {
+        EleFXIcon icon = new EleFXIcon(EleFXIconType.FORBIDDEN, 20);
+        icon.setFill(Color.web("#606266"));
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(Color.TRANSPARENT);
+        WritableImage image = icon.snapshot(parameters, null);
+        return new ImageCursor(image, 10, 10);
     }
 
     private String cssPaint(Paint paint) {
