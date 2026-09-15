@@ -1,0 +1,20 @@
+@import "../../common/EleFXColor.css";
+
+.ele-avatar {
+    -fx-alignment: center;
+    -fx-background-color: -elefx-ct-disabled;
+    -fx-background-insets: 0;
+    -fx-background-radius: 50%;
+    -fx-text-fill: -elefx-co-basic-white;
+    -fx-font-size: 14px;
+}
+
+.ele-avatar--square { -fx-background-radius: 4px; }
+.ele-avatar--small .ele-avatar__text { -fx-font-size: 12px; }
+.ele-avatar__text { -fx-text-fill: -elefx-co-basic-white; -fx-font-size: 14px; }
+.ele-avatar .ele-icon .ele-icon__svg { -fx-fill: -elefx-co-basic-white; }
+.ele-avatar--error .ele-avatar__error-icon .ele-icon__svg { -fx-fill: -elefx-co-basic-white; }
+
+.ele-avatar-group { -fx-alignment: center-left; -fx-spacing: -8px; }
+.ele-avatar-group .ele-avatar { -fx-border-color: -elefx-co-basic-white; -fx-border-insets: 0; -fx-border-radius: 50%; -fx-border-width: 2px; }
+.ele-avatar-group .ele-avatar--square { -fx-border-radius: 4px; }

@@ -9,6 +9,7 @@ public enum EleFXThemes implements Theme {
     DEFAULT("css/self/EleFXDefault.css"),
     BUTTON("css/component/button/EleFXButton.css"),
     ICON("css/component/icon/EleFXIcon.css"),
+    AVATAR("css/component/avatar/EleFXAvatar.css"),
     LAYOUT("css/component/layout/EleFXLayout.css"),
     CONTAINER("css/component/container/EleFXContainer.css"),
     LINK("css/component/link/EleFXLink.css"),
