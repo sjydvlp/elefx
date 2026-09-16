@@ -1,0 +1,15 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-empty { -fx-alignment: top-center; -fx-spacing: 8px; -fx-padding: 40px 0; }
+.ele-empty__image { -fx-alignment: center; }
+.ele-empty__description { -fx-alignment: center; }
+.ele-empty__description-text { -fx-text-fill: -elefx-ct-secondary; -fx-font-family: "Roboto"; -fx-font-size: 14px; -fx-alignment: center; }
+.ele-empty__bottom { -fx-alignment: top-center; -fx-padding: 12px 0 0 0; }
+.ele-empty__fill-0 { -fx-fill: -elefx-co-basic-white; }
+.ele-empty__fill-1 { -fx-fill: #fcfcfd; }
+.ele-empty__fill-3 { -fx-fill: #f7f8fc; }
+.ele-empty__fill-5 { -fx-fill: #edeef2; }
+.ele-empty__fill-6 { -fx-fill: #e9ebef; }
+.ele-empty__fill-7 { -fx-fill: #e5e7e9; }
+.ele-empty__fill-8 { -fx-fill: #e0e3e9; }

@@ -84,6 +84,20 @@
 .ele-avatar-group .ele-avatar { -fx-border-color: -elefx-co-basic-white; -fx-border-insets: 0; -fx-border-radius: 50%; -fx-border-width: 2px; }
 .ele-avatar-group .ele-avatar--square { -fx-border-radius: 4px; }
 
+/* ------------------------------ empty ------------------------------ */
+.ele-empty { -fx-alignment: top-center; -fx-spacing: 8px; -fx-padding: 40px 0; }
+.ele-empty__image { -fx-alignment: center; }
+.ele-empty__description { -fx-alignment: center; }
+.ele-empty__description-text { -fx-text-fill: -elefx-ct-secondary; -fx-font-family: "Roboto"; -fx-font-size: 14px; -fx-alignment: center; }
+.ele-empty__bottom { -fx-alignment: top-center; -fx-padding: 12px 0 0 0; }
+.ele-empty__fill-0 { -fx-fill: -elefx-co-basic-white; }
+.ele-empty__fill-1 { -fx-fill: #fcfcfd; }
+.ele-empty__fill-3 { -fx-fill: #f7f8fc; }
+.ele-empty__fill-5 { -fx-fill: #edeef2; }
+.ele-empty__fill-6 { -fx-fill: #e9ebef; }
+.ele-empty__fill-7 { -fx-fill: #e5e7e9; }
+.ele-empty__fill-8 { -fx-fill: #e0e3e9; }
+
 /* ------------------------------ card ------------------------------ */
 .ele-card { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-border-width: 1px; }
 .ele-card__header { -fx-padding: 16px 20px; -fx-border-color: transparent transparent -elefx-cb-light transparent; -fx-border-width: 0 0 1px 0; }
