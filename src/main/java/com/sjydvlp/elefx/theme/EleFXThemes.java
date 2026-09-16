@@ -36,6 +36,7 @@ public enum EleFXThemes implements Theme {
     FORM("css/component/form/EleFXForm.css"),
     TRANSFER("css/component/transfer/EleFXTransfer.css"),
     CAROUSEL("css/component/carousel/EleFXCarousel.css"),
+    COLLAPSE("css/component/collapse/EleFXCollapse.css"),
     UPLOAD("css/component/upload/EleFXUpload.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),

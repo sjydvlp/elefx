@@ -1,0 +1,14 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-collapse { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: -elefx-cb-light transparent -elefx-cb-light transparent; -fx-border-insets: 0; -fx-border-width: 1px 0; }
+.ele-collapse-item { -fx-background-color: transparent; }
+.ele-collapse-item__header { -fx-min-height: 48px; -fx-pref-height: 48px; -fx-padding: 0; -fx-spacing: 8px; -fx-cursor: hand; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent transparent -elefx-cb-light transparent; -fx-border-insets: 0; -fx-border-width: 0 0 1px 0; }
+.ele-collapse-item__title { -fx-alignment: center-left; }
+.ele-collapse-item__title-text { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 13px; }
+.ele-collapse-item__arrow { -fx-min-width: 16px; -fx-pref-width: 16px; -fx-alignment: center; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 18px; }.ele-collapse-item__arrow .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
+.ele-collapse-item--active .ele-collapse-item__header { -fx-border-color: transparent; }
+.ele-collapse-item__wrap { -fx-padding: 16px 0; -fx-spacing: 8px; -fx-background-color: transparent; -fx-border-color: transparent transparent -elefx-cb-light transparent; -fx-border-insets: 0; -fx-border-width: 0 0 1px 0; }
+.ele-collapse-item--collapsing .ele-collapse-item__wrap { -fx-border-color: transparent; }
+.ele-collapse-item--last .ele-collapse-item__header, .ele-collapse-item--last .ele-collapse-item__wrap { -fx-border-color: transparent; }
+.ele-collapse-item--disabled .ele-collapse-item__header { -fx-cursor: default; }.ele-collapse-item--disabled .ele-collapse-item__title-text, .ele-collapse-item--disabled .ele-collapse-item__arrow { -fx-text-fill: -elefx-ct-disabled; }.ele-collapse-item--disabled .ele-collapse-item__arrow .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
