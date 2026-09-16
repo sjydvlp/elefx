@@ -1,0 +1,14 @@
+@import "../../common/EleFXColor.css";
+
+.ele-image { -fx-alignment: center; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; }
+.ele-image:focused { -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; }
+.ele-image__inner { -fx-smooth: true; }
+.ele-image__fallback { -fx-alignment: center; }
+.ele-image__placeholder { -fx-progress-color: -elefx-cp-1; }
+.ele-image__error { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 14px; }
+.ele-image-viewer__root { -fx-background-color: rgba(0, 0, 0, .82); -fx-padding: 24px; }
+.ele-image-viewer { -fx-alignment: center; }
+.ele-image-viewer__toolbar { -fx-alignment: center; }
+.ele-image-viewer__toolbar .button { -fx-background-color: rgba(255, 255, 255, .18); -fx-background-insets: 0; -fx-background-radius: 18px; -fx-text-fill: white; -fx-font-size: 20px; -fx-min-width: 36px; -fx-min-height: 36px; }
+.ele-image-viewer__toolbar .button:focused { -fx-background-color: rgba(64, 158, 255, .8); -fx-background-insets: 0; -fx-border-color: white; -fx-border-insets: 0; -fx-border-radius: 18px; }
+.ele-image-viewer__progress { -fx-text-fill: white; -fx-font-size: 14px; }
