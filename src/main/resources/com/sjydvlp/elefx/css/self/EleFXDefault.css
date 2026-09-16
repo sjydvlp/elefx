@@ -95,6 +95,38 @@
 .ele-card--shadow-hover:hover { -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.12), 12, 0, 0, 2); }
 .ele-card--shadow-never { -fx-effect: null; }
 
+/* --------------------------- descriptions -------------------------- */
+.ele-descriptions { -fx-spacing: 12px; -fx-font-size: 14px; }
+.ele-descriptions__header { -fx-spacing: 12px; }
+.ele-descriptions__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 16px; -fx-font-weight: 700; }
+.ele-descriptions__extra { -fx-text-fill: -elefx-ct-primary; }
+.ele-descriptions__body { -fx-hgap: 0; -fx-vgap: 0; }
+.ele-descriptions__cell { -fx-min-height: 32px; }
+.ele-descriptions__cell--horizontal, .ele-descriptions__cell--vertical { -fx-padding: 0 16px 16px 0; }
+.ele-descriptions__cell--horizontal { -fx-spacing: 8px; }
+.ele-descriptions__cell--vertical { -fx-spacing: 8px; }
+.ele-descriptions__label, .ele-descriptions__label .label { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 14px; }
+.ele-descriptions__content { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }
+.ele-descriptions--large.ele-descriptions { -fx-spacing: 16px; }
+.ele-descriptions--large .ele-descriptions__cell { -fx-min-height: 40px; }
+.ele-descriptions--large .ele-descriptions__title { -fx-font-size: 18px; }
+.ele-descriptions--large .ele-descriptions__label, .ele-descriptions--large .ele-descriptions__label .label, .ele-descriptions--large .ele-descriptions__content { -fx-font-size: 16px; }
+.ele-descriptions--large .ele-descriptions__cell--horizontal, .ele-descriptions--large .ele-descriptions__cell--vertical { -fx-padding: 0 16px 20px 0; }
+.ele-descriptions--small.ele-descriptions { -fx-spacing: 8px; }
+.ele-descriptions--small .ele-descriptions__cell { -fx-min-height: 24px; }
+.ele-descriptions--small .ele-descriptions__title { -fx-font-size: 14px; }
+.ele-descriptions--small .ele-descriptions__label, .ele-descriptions--small .ele-descriptions__label .label, .ele-descriptions--small .ele-descriptions__content { -fx-font-size: 12px; }
+.ele-descriptions--small .ele-descriptions__cell--horizontal, .ele-descriptions--small .ele-descriptions__cell--vertical { -fx-padding: 0 12px 12px 0; }
+.ele-descriptions--bordered .ele-descriptions__body { -fx-border-color: -elefx-cb-base; -fx-border-width: 1px 0 0 1px; }
+.ele-descriptions--bordered .ele-descriptions__cell { -fx-padding: 0; -fx-border-color: transparent -elefx-cb-base -elefx-cb-base transparent; -fx-border-width: 0 1px 1px 0; }
+.ele-descriptions--bordered .ele-descriptions__cell--horizontal, .ele-descriptions--bordered .ele-descriptions__cell--vertical { -fx-spacing: 0; }
+.ele-descriptions--bordered .ele-descriptions__label { -fx-background-color: -elefx-cf-light; -fx-padding: 8px 12px; }
+.ele-descriptions--bordered .ele-descriptions__content { -fx-padding: 8px 12px; }
+.ele-descriptions--bordered.ele-descriptions--horizontal .ele-descriptions__label { -fx-border-color: transparent -elefx-cb-base transparent transparent; -fx-border-width: 0 1px 0 0; }
+.ele-descriptions--bordered.ele-descriptions--vertical .ele-descriptions__label { -fx-border-color: transparent transparent -elefx-cb-base transparent; -fx-border-width: 0 0 1px 0; }
+.ele-descriptions--large.ele-descriptions--bordered .ele-descriptions__label, .ele-descriptions--large.ele-descriptions--bordered .ele-descriptions__content { -fx-padding: 12px; }
+.ele-descriptions--small.ele-descriptions--bordered .ele-descriptions__label, .ele-descriptions--small.ele-descriptions--bordered .ele-descriptions__content { -fx-padding: 4px 8px; }
+
 /* ------------------------------ icon ------------------------------ */
 .ele-icon {
     -fx-alignment: center;
