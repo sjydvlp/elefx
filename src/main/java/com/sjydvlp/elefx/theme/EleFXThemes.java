@@ -43,6 +43,7 @@ public enum EleFXThemes implements Theme {
     COLLAPSE("css/component/collapse/EleFXCollapse.css"),
     UPLOAD("css/component/upload/EleFXUpload.css"),
     PAGINATION("css/component/pagination/EleFXPagination.css"),
+    PROGRESS("css/component/progress/EleFXProgress.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
