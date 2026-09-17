@@ -11,20 +11,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.util.Duration;
 
-/**
- * A scroll container that calls a loading action as its content approaches the bottom.
- *
- * <p>
- * This is the JavaFX counterpart of Element Plus Infinite Scroll. The action is throttled
- * by {@link #delayProperty()}, can be disabled, and is also checked once after layout by default
- * so an initially short list can load its first page.
- * </p>
- */
+/** A scroll pane that calls a loading action as its content approaches the bottom. */
 public class EleFXInfiniteScroll extends ScrollPane implements Themable {
 
     private static final String STYLE_CLASS = "ele-infinite-scroll";
@@ -38,6 +32,8 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
     private final BooleanProperty immediate = new SimpleBooleanProperty(this, "immediate", true);
 
     private final PauseTransition throttle = new PauseTransition();
+
+    private final ChangeListener<Bounds> contentBoundsListener = (observable, oldBounds, newBounds) -> evaluate(true);
 
     private double lastLoadedContentHeight = Double.NaN;
 
@@ -60,11 +56,11 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
         return onLoad;
     }
 
-    public void setOnLoad(Runnable onLoad) {
-        this.onLoad.set(onLoad);
+    public void setOnLoad(Runnable value) {
+        onLoad.set(value);
     }
 
-    /** Throttle interval in milliseconds. The default matches Element Plus: 200 ms. */
+    /** Throttle interval in milliseconds. */
     public int getDelay() {
         return delay.get();
     }
@@ -73,11 +69,9 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
         return delay;
     }
 
-    public void setDelay(int delay) {
-        if (delay < 0) {
-            throw new IllegalArgumentException("delay must not be negative");
-        }
-        this.delay.set(delay);
+    public void setDelay(int value) {
+        if (value < 0) throw new IllegalArgumentException("delay must not be negative");
+        delay.set(value);
     }
 
     /** Distance in pixels from the bottom at which loading is triggered. */
@@ -89,11 +83,9 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
         return distance;
     }
 
-    public void setDistance(int distance) {
-        if (distance < 0) {
-            throw new IllegalArgumentException("distance must not be negative");
-        }
-        this.distance.set(distance);
+    public void setDistance(int value) {
+        if (value < 0) throw new IllegalArgumentException("distance must not be negative");
+        distance.set(value);
     }
 
     public boolean isImmediate() {
@@ -104,11 +96,11 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
         return immediate;
     }
 
-    public void setImmediate(boolean immediate) {
-        this.immediate.set(immediate);
+    public void setImmediate(boolean value) {
+        immediate.set(value);
     }
 
-    /** Re-evaluates the current scroll position, useful after asynchronous content changes. */
+    /** Re-evaluates the current scroll position after asynchronous content changes. */
     public void check() {
         evaluate(false);
     }
@@ -131,45 +123,36 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
     private void initialize() {
         getStyleClass().add(STYLE_CLASS);
         throttle.setOnFinished(event -> runLoad());
-        contentProperty().addListener((observable, oldContent, newContent) -> observeContent(newContent));
-        observeContent(getContent());
+        contentProperty().addListener((observable, oldContent, newContent) -> observeContent(oldContent, newContent));
+        observeContent(null, getContent());
         vvalueProperty().addListener((observable, oldValue, newValue) -> evaluate(false));
         viewportBoundsProperty().addListener((observable, oldBounds, newBounds) -> evaluate(true));
         disabledProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
+            if (newValue)
                 throttle.stop();
-            } else {
+            else
                 evaluate(true);
-            }
         });
         immediate.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                evaluate(true);
-            }
+            if (newValue) evaluate(true);
         });
         sceneProperty().addListener((observable, oldScene, newScene) -> {
-            if (newScene != null) {
-                Platform.runLater(() -> evaluate(true));
-            }
+            if (newScene != null) Platform.runLater(() -> evaluate(true));
         });
         Platform.runLater(() -> evaluate(true));
         sceneBuilderIntegration();
     }
 
-    private void observeContent(Node content) {
+    private void observeContent(Node oldContent, Node newContent) {
+        if (oldContent != null) oldContent.layoutBoundsProperty().removeListener(contentBoundsListener);
         lastLoadedContentHeight = Double.NaN;
         wasWithinDistance = false;
-        if (content != null) {
-            content.layoutBoundsProperty().addListener((observable, oldBounds, newBounds) -> evaluate(true));
-        }
+        if (newContent != null) newContent.layoutBoundsProperty().addListener(contentBoundsListener);
         evaluate(true);
     }
 
     private void evaluate(boolean layoutChanged) {
-        if (isDisabled() || getOnLoad() == null || getContent() == null || getViewportBounds().getHeight() <= 0) {
-            return;
-        }
-
+        if (isDisabled() || getOnLoad() == null || getContent() == null || getViewportBounds().getHeight() <= 0) return;
         double contentHeight = getContent().getLayoutBounds().getHeight();
         double scrollTop = getVvalue() * Math.max(0, contentHeight - getViewportBounds().getHeight());
         double remaining = Math.max(0, contentHeight - getViewportBounds().getHeight() - scrollTop);
@@ -178,7 +161,6 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
             wasWithinDistance = false;
             return;
         }
-
         boolean contentChanged = Double.compare(contentHeight, lastLoadedContentHeight) != 0;
         boolean shouldLoad = !wasWithinDistance || (isImmediate() && layoutChanged && contentChanged);
         wasWithinDistance = true;
@@ -189,9 +171,7 @@ public class EleFXInfiniteScroll extends ScrollPane implements Themable {
     }
 
     private void runLoad() {
-        if (isDisabled() || getOnLoad() == null) {
-            return;
-        }
+        if (isDisabled() || getOnLoad() == null) return;
         lastLoadedContentHeight = getContent() == null ? Double.NaN : getContent().getLayoutBounds().getHeight();
         getOnLoad().run();
     }
