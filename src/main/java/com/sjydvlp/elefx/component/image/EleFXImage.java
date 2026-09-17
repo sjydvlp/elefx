@@ -1,22 +1,14 @@
 package com.sjydvlp.elefx.component.image;
 
-import java.util.Collection;
-
-import com.sjydvlp.elefx.component.icon.EleFXIcon;
-import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -24,24 +16,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
 
 /**
  * An Element Plus-inspired image view with loading/error fallbacks and an optional preview.
@@ -53,17 +33,11 @@ public class EleFXImage extends StackPane implements Themable {
 
     public static final EventType<Event> IMAGE_ERROR = new EventType<>(Event.ANY, "ELEFX_IMAGE_ERROR");
 
-    public static final EventType<Event> PREVIEW_SHOW = new EventType<>(Event.ANY, "ELEFX_IMAGE_PREVIEW_SHOW");
-
-    public static final EventType<Event> PREVIEW_CLOSE = new EventType<>(Event.ANY, "ELEFX_IMAGE_PREVIEW_CLOSE");
-
-    public static final EventType<Event> PREVIEW_SWITCH = new EventType<>(Event.ANY, "ELEFX_IMAGE_PREVIEW_SWITCH");
-
     private final StringProperty src = new SimpleStringProperty(this, "src", "");
 
     private final StringProperty alt = new SimpleStringProperty(this, "alt", "");
 
-    private final ObjectProperty<EleFXImageFit> fit = new SimpleObjectProperty<>(this, "fit", EleFXImageFit.FILL);
+    private final ObjectProperty<EleFXImageFit> fit = new SimpleObjectProperty<>(this, "fit", EleFXImageFit.SCALE_DOWN);
 
     private final BooleanProperty lazy = new SimpleBooleanProperty(this, "lazy", false);
 
@@ -71,29 +45,15 @@ public class EleFXImage extends StackPane implements Themable {
 
     private final BooleanProperty imageError = new SimpleBooleanProperty(this, "imageError", false);
 
+    private final BooleanProperty previewEnabled = new SimpleBooleanProperty(this, "previewEnabled", false);
+
     private final ObjectProperty<Node> placeholderNode = new SimpleObjectProperty<>(this, "placeholderNode");
 
     private final ObjectProperty<Node> errorNode = new SimpleObjectProperty<>(this, "errorNode");
 
-    private final ObservableList<String> previewSrcList = FXCollections.observableArrayList();
-
-    private final IntegerProperty initialIndex = new SimpleIntegerProperty(this, "initialIndex", 0);
-
-    private final BooleanProperty showProgress = new SimpleBooleanProperty(this, "showProgress", false);
-
-    private final BooleanProperty infinite = new SimpleBooleanProperty(this, "infinite", true);
-
-    private final BooleanProperty closeOnPressEscape = new SimpleBooleanProperty(this, "closeOnPressEscape", true);
-
     private final ObjectProperty<EventHandler<Event>> onLoad = new SimpleObjectProperty<>(this, "onLoad");
 
     private final ObjectProperty<EventHandler<Event>> onError = new SimpleObjectProperty<>(this, "onError");
-
-    private final ObjectProperty<EventHandler<Event>> onShow = new SimpleObjectProperty<>(this, "onShow");
-
-    private final ObjectProperty<EventHandler<Event>> onClose = new SimpleObjectProperty<>(this, "onClose");
-
-    private final ObjectProperty<EventHandler<Event>> onSwitch = new SimpleObjectProperty<>(this, "onSwitch");
 
     private final ImageView imageView = new ImageView();
 
@@ -107,21 +67,7 @@ public class EleFXImage extends StackPane implements Themable {
 
     private Image currentImage;
 
-    private Stage previewStage;
-
-    private ImageView previewImage;
-
-    private StackPane previewImageContent;
-
-    private Label previewProgress;
-
-    private int previewIndex;
-
-    private boolean previewImageError;
-
-    private boolean previewOriginalSize;
-
-    private EleFXIcon previewSizeModeIcon;
+    private final EleFXImageViewer imageViewer = new EleFXImageViewer();
 
     public EleFXImage() {
         initialize();
@@ -165,7 +111,7 @@ public class EleFXImage extends StackPane implements Themable {
     }
 
     public void setFit(EleFXImageFit value) {
-        fit.set(value == null ? EleFXImageFit.FILL : value);
+        fit.set(value == null ? EleFXImageFit.SCALE_DOWN : value);
     }
 
     public boolean isLazy() {
@@ -197,6 +143,19 @@ public class EleFXImage extends StackPane implements Themable {
         return imageError;
     }
 
+    /** Whether this image can open its viewer when clicked or through {@link #showPreview()}. */
+    public boolean isPreviewEnabled() {
+        return previewEnabled.get();
+    }
+
+    public BooleanProperty previewEnabledProperty() {
+        return previewEnabled;
+    }
+
+    public void setPreviewEnabled(boolean value) {
+        previewEnabled.set(value);
+    }
+
     public Node getPlaceholderNode() {
         return placeholderNode.get();
     }
@@ -219,72 +178,6 @@ public class EleFXImage extends StackPane implements Themable {
 
     public void setErrorNode(Node value) {
         errorNode.set(value);
-    }
-
-    public ObservableList<String> getPreviewSrcList() {
-        return previewSrcList;
-    }
-
-    /** Replaces the image sources available to the preview viewer. */
-    public void setPreviewSrcList(Collection<String> values) {
-        previewSrcList.setAll(values == null ? FXCollections.emptyObservableList() : values);
-        if (!isPreviewShowing()) return;
-        ObservableList<String> sources = previewSources();
-        if (sources.isEmpty()) {
-            closePreview();
-            return;
-        }
-        previewIndex = Math.min(previewIndex, sources.size() - 1);
-        updatePreview();
-    }
-
-    public int getInitialIndex() {
-        return initialIndex.get();
-    }
-
-    public IntegerProperty initialIndexProperty() {
-        return initialIndex;
-    }
-
-    public void setInitialIndex(int value) {
-        initialIndex.set(Math.max(0, value));
-    }
-
-    /** Whether the preview viewer displays the current image index and total count. */
-    public boolean isShowProgress() {
-        return showProgress.get();
-    }
-
-    public BooleanProperty showProgressProperty() {
-        return showProgress;
-    }
-
-    public void setShowProgress(boolean value) {
-        showProgress.set(value);
-    }
-
-    public boolean isInfinite() {
-        return infinite.get();
-    }
-
-    public BooleanProperty infiniteProperty() {
-        return infinite;
-    }
-
-    public void setInfinite(boolean value) {
-        infinite.set(value);
-    }
-
-    public boolean isCloseOnPressEscape() {
-        return closeOnPressEscape.get();
-    }
-
-    public BooleanProperty closeOnPressEscapeProperty() {
-        return closeOnPressEscape;
-    }
-
-    public void setCloseOnPressEscape(boolean value) {
-        closeOnPressEscape.set(value);
     }
 
     public EventHandler<Event> getOnLoad() {
@@ -311,44 +204,13 @@ public class EleFXImage extends StackPane implements Themable {
         onError.set(value);
     }
 
-    public EventHandler<Event> getOnShow() {
-        return onShow.get();
-    }
-
-    public ObjectProperty<EventHandler<Event>> onShowProperty() {
-        return onShow;
-    }
-
-    public void setOnShow(EventHandler<Event> value) {
-        onShow.set(value);
-    }
-
-    public EventHandler<Event> getOnClose() {
-        return onClose.get();
-    }
-
-    public ObjectProperty<EventHandler<Event>> onCloseProperty() {
-        return onClose;
-    }
-
-    public void setOnClose(EventHandler<Event> value) {
-        onClose.set(value);
-    }
-
-    public EventHandler<Event> getOnSwitch() {
-        return onSwitch.get();
-    }
-
-    public ObjectProperty<EventHandler<Event>> onSwitchProperty() {
-        return onSwitch;
-    }
-
-    public void setOnSwitch(EventHandler<Event> value) {
-        onSwitch.set(value);
-    }
-
     public ImageView getImageView() {
         return imageView;
+    }
+
+    /** Returns the viewer used when this image is clicked for preview. */
+    public EleFXImageViewer getImageViewer() {
+        return imageViewer;
     }
 
     /** Starts deferred loading. It is safe to call even when lazy loading is disabled. */
@@ -358,23 +220,16 @@ public class EleFXImage extends StackPane implements Themable {
 
     /** Opens the preview window when a preview source list or source is available. */
     public void showPreview() {
-        ObservableList<String> sources = previewSources();
-        if (sources.isEmpty()) return;
-        previewIndex = Math.min(getInitialIndex(), sources.size() - 1);
-        if (previewStage == null) createPreview();
-        updatePreview();
-        fitPreviewToOwner();
-        previewStage.show();
-        previewStage.toFront();
-        fireEvent(new Event(this, this, PREVIEW_SHOW));
+        if (!isPreviewEnabled()) return;
+        imageViewer.show(getScene() == null ? null : getScene().getWindow(), getSrc());
     }
 
     public void closePreview() {
-        if (previewStage != null) previewStage.hide();
+        imageViewer.close();
     }
 
     public boolean isPreviewShowing() {
-        return previewStage != null && previewStage.isShowing();
+        return imageViewer.isShowing();
     }
 
     @Override
@@ -416,16 +271,17 @@ public class EleFXImage extends StackPane implements Themable {
         });
         alt.addListener(o -> setAccessibleText(getAlt()));
         fit.addListener(o -> updateGeometry());
-        showProgress.addListener(o -> updatePreviewProgress());
         placeholderNode.addListener(o -> showFallback());
         errorNode.addListener(o -> showFallback());
+        previewEnabled.addListener((o, oldValue, enabled) -> {
+            if (!enabled) closePreview();
+        });
         onLoad.addListener((o, a, b) -> setEventHandler(IMAGE_LOAD, b));
         onError.addListener((o, a, b) -> setEventHandler(IMAGE_ERROR, b));
-        onShow.addListener((o, a, b) -> setEventHandler(PREVIEW_SHOW, b));
-        onClose.addListener((o, a, b) -> setEventHandler(PREVIEW_CLOSE, b));
-        onSwitch.addListener((o, a, b) -> setEventHandler(PREVIEW_SWITCH, b));
         setOnMouseClicked(e -> {
-            if (!e.isConsumed() && !previewSources().isEmpty()) showPreview();
+            if (!e.isConsumed() && isPreviewEnabled()
+                    && (!imageViewer.getUrlList().isEmpty() || !getSrc().isBlank()))
+                showPreview();
         });
         setAccessibleText(getAlt());
         if (!isLazy())
@@ -568,202 +424,4 @@ public class EleFXImage extends StackPane implements Themable {
         updateGeometry();
     }
 
-    private ObservableList<String> previewSources() {
-        if (!previewSrcList.isEmpty()) return previewSrcList;
-        return getSrc().isBlank() ? FXCollections.observableArrayList() : FXCollections.observableArrayList(getSrc());
-    }
-
-    private void createPreview() {
-        previewStage = new Stage();
-        Window owner = getScene() == null ? null : getScene().getWindow();
-        if (owner != null) previewStage.initOwner(owner);
-        previewStage.initModality(Modality.NONE);
-        previewStage.initStyle(StageStyle.TRANSPARENT);
-        previewImage = new ImageView();
-        previewImage.setPreserveRatio(true);
-        previewImage.setSmooth(true);
-        previewImage.setFitWidth(900);
-        previewImage.setFitHeight(650);
-        Button previous = previewButton(EleFXIconType.ARROW_LEFT, "Previous image", "ele-image-viewer__nav");
-        Button next = previewButton(EleFXIconType.ARROW_RIGHT, "Next image", "ele-image-viewer__nav");
-        Button zoomOut = previewButton(EleFXIconType.ZOOM_OUT, "Zoom out", "ele-image-viewer__action");
-        Button zoomIn = previewButton(EleFXIconType.ZOOM_IN, "Zoom in", "ele-image-viewer__action");
-        Button sizeMode = previewButton(EleFXIconType.FULL_SCREEN, "Show original size", "ele-image-viewer__action");
-        previewSizeModeIcon = (EleFXIcon) sizeMode.getGraphic();
-        Button rotateLeft = previewButton(EleFXIconType.REFRESH_LEFT, "Rotate left", "ele-image-viewer__action");
-        Button rotateRight = previewButton(EleFXIconType.REFRESH_RIGHT, "Rotate right", "ele-image-viewer__action");
-        Button close = previewButton(EleFXIconType.CLOSE, "Close preview", "ele-image-viewer__close");
-        previous.setOnAction(e -> movePreview(-1));
-        next.setOnAction(e -> movePreview(1));
-        zoomOut.setOnAction(e -> zoomPreview(1 / 1.2));
-        zoomIn.setOnAction(e -> zoomPreview(1.2));
-        sizeMode.setOnAction(e -> togglePreviewSizeMode(sizeMode));
-        rotateLeft.setOnAction(e -> previewImage.setRotate(previewImage.getRotate() - 90));
-        rotateRight.setOnAction(e -> previewImage.setRotate(previewImage.getRotate() + 90));
-        close.setOnAction(e -> closePreview());
-        HBox controls = new HBox(4, zoomOut, zoomIn, sizeMode, rotateLeft, rotateRight);
-        controls.getStyleClass().add("ele-image-viewer__toolbar");
-        controls.setAlignment(Pos.CENTER);
-        controls.setMaxWidth(Region.USE_PREF_SIZE);
-        previewProgress = new Label();
-        previewProgress.getStyleClass().add("ele-image-viewer__progress");
-        previewProgress.setMinHeight(20);
-        previewProgress.setPrefHeight(20);
-        updatePreviewProgress();
-        previewImageContent = new StackPane(previewImage);
-        previewImageContent.getStyleClass().add("ele-image-viewer");
-        previewImageContent.setMinSize(0, 0);
-        previewImageContent.widthProperty().addListener(o -> updatePreviewImageSize());
-        previewImageContent.heightProperty().addListener(o -> updatePreviewImageSize());
-        StackPane.setAlignment(previous, Pos.CENTER_LEFT);
-        StackPane.setAlignment(next, Pos.CENTER_RIGHT);
-        VBox footer = new VBox(8, previewProgress, controls);
-        footer.setAlignment(Pos.CENTER);
-        footer.setFillWidth(false);
-        footer.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        StackPane root = new StackPane(previewImageContent, footer, previous, next);
-        StackPane.setAlignment(previous, Pos.CENTER_LEFT);
-        StackPane.setAlignment(next, Pos.CENTER_RIGHT);
-        StackPane.setAlignment(footer, Pos.BOTTOM_CENTER);
-        root.getStyleClass().add("ele-image-viewer__root");
-        StackPane overlay = new StackPane(root, close);
-        StackPane.setAlignment(close, Pos.TOP_RIGHT);
-        Scene scene = new Scene(overlay, Color.TRANSPARENT);
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE && isCloseOnPressEscape())
-                closePreview();
-            else if (e.getCode() == KeyCode.LEFT)
-                movePreview(-1);
-            else if (e.getCode() == KeyCode.RIGHT) movePreview(1);
-        });
-        scene.addEventFilter(ScrollEvent.SCROLL, e -> {
-            if (e.getDeltaY() == 0) return;
-            zoomPreview(e.getDeltaY() > 0 ? 1.1 : 1 / 1.1);
-            e.consume();
-        });
-        previewStage.setScene(scene);
-        previewStage.setOnHidden(e -> fireEvent(new Event(this, this, PREVIEW_CLOSE)));
-    }
-
-    private Button previewButton(EleFXIconType iconType, String accessibleText, String styleClass) {
-        EleFXIcon icon = new EleFXIcon(iconType, 22);
-        icon.setMouseTransparent(true);
-        Button button = new Button();
-        button.setGraphic(icon);
-        button.setAccessibleText(accessibleText);
-        button.getStyleClass().add(styleClass);
-        return button;
-    }
-
-    private void fitPreviewToOwner() {
-        if (previewStage.isFullScreen() || getScene() == null) return;
-        Window owner = getScene().getWindow();
-        if (owner == null) return;
-        previewStage.setX(owner.getX());
-        previewStage.setY(owner.getY());
-        previewStage.setWidth(owner.getWidth());
-        previewStage.setHeight(owner.getHeight());
-    }
-
-    private void zoomPreview(double factor) {
-        double scale = Math.max(previewImage.getScaleX(), previewImage.getScaleY()) * factor;
-        scale = Math.max(.2, Math.min(7, scale));
-        previewImage.setScaleX(scale);
-        previewImage.setScaleY(scale);
-    }
-
-    private void togglePreviewSizeMode(Button sizeMode) {
-        previewOriginalSize = !previewOriginalSize;
-        updatePreviewImageSize();
-        previewImage.setScaleX(1);
-        previewImage.setScaleY(1);
-        previewSizeModeIcon.setType(previewOriginalSize ? EleFXIconType.SCALE_TO_ORIGINAL : EleFXIconType.FULL_SCREEN);
-        sizeMode.setAccessibleText(previewOriginalSize ? "Fit image to preview" : "Show original size");
-    }
-
-    private void movePreview(int change) {
-        ObservableList<String> sources = previewSources();
-        if (sources.isEmpty()) return;
-        int target = previewIndex + change;
-        if (isInfinite())
-            target = Math.floorMod(target, sources.size());
-        else
-            target = Math.max(0, Math.min(target, sources.size() - 1));
-        if (target != previewIndex) {
-            previewIndex = target;
-            updatePreview();
-            fireEvent(new Event(this, this, PREVIEW_SWITCH));
-        }
-    }
-
-    private void updatePreview() {
-        ObservableList<String> sources = previewSources();
-        if (sources.isEmpty()) return;
-        String source = sources.get(previewIndex);
-        previewImageError = false;
-        previewOriginalSize = false;
-        if (previewSizeModeIcon != null) previewSizeModeIcon.setType(EleFXIconType.FULL_SCREEN);
-        updatePreviewImageSize();
-        previewImage.setScaleX(1);
-        previewImage.setScaleY(1);
-        previewImage.setRotate(0);
-        try {
-            Image candidate = new Image(source, true);
-            candidate.errorProperty().addListener((o, old, failed) -> {
-                if (failed && previewImage.getImage() == candidate) {
-                    previewImageError = true;
-                    updatePreviewProgress();
-                }
-            });
-            candidate.progressProperty().addListener((o, old, progress) -> {
-                if (progress.doubleValue() >= 1 && previewImage.getImage() == candidate) updatePreviewImageSize();
-            });
-            previewImage.setImage(candidate);
-            previewImageError = candidate.isError();
-            updatePreviewImageSize();
-            updatePreviewProgress();
-        } catch (IllegalArgumentException exception) {
-            previewImage.setImage(null);
-            previewImageError = true;
-            updatePreviewProgress();
-        }
-    }
-
-    private void updatePreviewProgress() {
-        if (previewProgress == null) return;
-        boolean visible = isShowProgress() || previewImageError;
-        previewProgress.setVisible(visible);
-        previewProgress.setManaged(true);
-        if (!visible) return;
-        if (previewImageError) {
-            previewProgress.setText("Failed to load image");
-            return;
-        }
-        ObservableList<String> sources = previewSources();
-        previewProgress.setText((previewIndex + 1) + " / " + sources.size());
-    }
-
-    private void updatePreviewImageSize() {
-        if (previewImage == null || previewImageContent == null) return;
-        Image image = previewImage.getImage();
-        if (previewOriginalSize || image == null || image.getWidth() <= 0 || image.getHeight() <= 0) {
-            previewImage.setPreserveRatio(true);
-            previewImage.setFitWidth(0);
-            previewImage.setFitHeight(0);
-            return;
-        }
-        double availableWidth = previewImageContent.getWidth();
-        double availableHeight = previewImageContent.getHeight();
-        if (availableWidth <= 0 || availableHeight <= 0) return;
-        if (image.getWidth() <= availableWidth && image.getHeight() <= availableHeight) {
-            previewImage.setPreserveRatio(true);
-            previewImage.setFitWidth(0);
-            previewImage.setFitHeight(0);
-        } else {
-            double scale = Math.max(availableWidth / image.getWidth(), availableHeight / image.getHeight());
-            previewImage.setPreserveRatio(false);
-            previewImage.setFitWidth(image.getWidth() * scale);
-            previewImage.setFitHeight(image.getHeight() * scale);
-        }
-    }
 }
