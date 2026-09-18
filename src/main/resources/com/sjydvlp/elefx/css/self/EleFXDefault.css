@@ -73,6 +73,25 @@
     -elefx-co-overlay-bg: #FFFFFF;
 }
 
+/* ----------------------------- skeleton ----------------------------- */
+.ele-skeleton { -fx-alignment: top-left; }
+.ele-skeleton__rendered, .ele-skeleton__content { -fx-alignment: top-left; }
+.ele-skeleton__template { -fx-spacing: 16px; }
+.ele-skeleton__default { -fx-spacing: 16px; }
+.ele-skeleton__rendered { -fx-spacing: 16px; }
+.ele-skeleton-item { -fx-min-height: 16px; -fx-pref-height: 16px; -fx-background-color: -elefx-cf-base; -fx-background-insets: 0; -fx-background-radius: 2px; }
+.ele-skeleton__row { -fx-background-radius: 2px; }
+.ele-skeleton__row--last { -fx-background-radius: 2px; }
+.ele-skeleton-item--p { -fx-min-height: 16px; -fx-pref-height: 16px; }
+.ele-skeleton-item--h1 { -fx-min-height: 20px; -fx-pref-height: 20px; }
+.ele-skeleton-item--h3 { -fx-min-height: 18px; -fx-pref-height: 18px; }
+.ele-skeleton-item--caption { -fx-min-height: 12px; -fx-pref-height: 12px; }
+.ele-skeleton-item--button { -fx-min-width: 64px; -fx-pref-width: 64px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-radius: 4px; }
+.ele-skeleton-item--image { -fx-min-height: 100px; -fx-pref-height: 100px; }
+.ele-skeleton-item .ele-skeleton-item--image-icon .ele-icon__svg { -fx-fill: -elefx-cb-base; }
+.ele-skeleton-item--circle { -fx-min-width: 40px; -fx-pref-width: 40px; -fx-min-height: 40px; -fx-pref-height: 40px; -fx-background-radius: 50%; }
+.ele-skeleton-item--rect { -fx-background-radius: 0; }
+
 /* ----------------------------- progress ----------------------------- */
 .ele-progress { -fx-background-color: transparent; -fx-background-insets: 0; }.ele-progress--line { -fx-alignment: center-left; -fx-spacing: 5px; }.ele-progress-bar__outer { -fx-alignment: center-left; }.ele-progress-bar__background { -fx-fill: -elefx-cf-base; }.ele-progress-bar__inner { -fx-fill: -elefx-cp-1; }.ele-progress-bar__stripe { -fx-opacity: 1; }.ele-progress--circle { -fx-alignment: center; }.ele-progress-circle__track { -fx-stroke: -elefx-cb-lighter; }.ele-progress-circle__path { -fx-stroke: -elefx-cp-1; }.ele-progress__text { -fx-alignment: center; -fx-text-alignment: center; -fx-text-fill: -elefx-ct-primary; -fx-font-size: 14px; }.ele-progress--circle .ele-progress__text { -fx-font-size: 16px; }.ele-progress__text-slot { -fx-alignment: center-left; }.ele-progress__status-icon { -fx-min-width: 16px; -fx-min-height: 16px; -fx-pref-width: 16px; -fx-pref-height: 16px; }.ele-progress-bar__outer .ele-progress__text { -fx-text-fill: white; -fx-font-size: 12px; }
 

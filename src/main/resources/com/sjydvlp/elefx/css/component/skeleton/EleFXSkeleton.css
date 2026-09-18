@@ -1,0 +1,26 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-skeleton { -fx-alignment: top-left; }
+.ele-skeleton__rendered, .ele-skeleton__content { -fx-alignment: top-left; }
+.ele-skeleton__template { -fx-spacing: 16px; }
+.ele-skeleton__default { -fx-spacing: 16px; }
+.ele-skeleton__rendered { -fx-spacing: 16px; }
+.ele-skeleton-item {
+    -fx-min-height: 16px;
+    -fx-pref-height: 16px;
+    -fx-background-color: -elefx-cf-base;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+}
+.ele-skeleton__row { -fx-background-radius: 2px; }
+.ele-skeleton__row--last { -fx-background-radius: 2px; }
+.ele-skeleton-item--p { -fx-min-height: 16px; -fx-pref-height: 16px; }
+.ele-skeleton-item--h1 { -fx-min-height: 20px; -fx-pref-height: 20px; }
+.ele-skeleton-item--h3 { -fx-min-height: 18px; -fx-pref-height: 18px; }
+.ele-skeleton-item--caption { -fx-min-height: 12px; -fx-pref-height: 12px; }
+.ele-skeleton-item--button { -fx-min-width: 64px; -fx-pref-width: 64px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-radius: 4px; }
+.ele-skeleton-item--image { -fx-min-height: 100px; -fx-pref-height: 100px; }
+.ele-skeleton-item .ele-skeleton-item--image-icon .ele-icon__svg { -fx-fill: -elefx-cb-base; }
+.ele-skeleton-item--circle { -fx-min-width: 40px; -fx-pref-width: 40px; -fx-min-height: 40px; -fx-pref-height: 40px; -fx-background-radius: 50%; }
+.ele-skeleton-item--rect { -fx-background-radius: 0; }
