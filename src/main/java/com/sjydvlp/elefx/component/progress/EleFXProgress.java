@@ -14,6 +14,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -23,7 +25,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Rectangle;
@@ -54,6 +59,12 @@ public class EleFXProgress extends Pane implements Themable {
 
     private final Rectangle lineBar = new Rectangle();
 
+    /** Semi-transparent diagonal bands rendered above the filled line bar. */
+    private final Rectangle stripeOverlay = new Rectangle();
+
+    /** JavaFX equivalent of Element Plus's overflow: hidden bar container. */
+    private final Rectangle lineClip = new Rectangle();
+
     private final StackPane circleBox = new StackPane();
 
     private final Arc circleBackground = new Arc();
@@ -64,7 +75,7 @@ public class EleFXProgress extends Pane implements Themable {
 
     private final EleFXIcon statusIcon = new EleFXIcon(EleFXIconType.CIRCLE_CHECK, 16);
 
-    /** Element Plus reserves a constant trailing area, keeping all tracks aligned. */
+    /** Reserves a common trailing area so every line track has the same end. */
     private final StackPane textSlot = new StackPane();
 
     private final DoubleProperty percentage = new SimpleDoubleProperty(this, "percentage", 0);
@@ -80,9 +91,18 @@ public class EleFXProgress extends Pane implements Themable {
 
     private final BooleanProperty indeterminate = new SimpleBooleanProperty(this, "indeterminate", false);
 
+    private final BooleanProperty striped = new SimpleBooleanProperty(this, "striped", false);
+
+    private final BooleanProperty stripedFlow = new SimpleBooleanProperty(this, "stripedFlow", false);
+
     private final DoubleProperty duration = new SimpleDoubleProperty(this, "duration", 3);
 
     private final ObjectProperty<Paint> color = new SimpleObjectProperty<>(this, "color");
+
+    private final ObjectProperty<Function<Double, Paint>> colorFunction = new SimpleObjectProperty<>(this,
+            "colorFunction");
+
+    private final ObservableList<EleFXProgressColorStop> colorStops = FXCollections.observableArrayList();
 
     private final DoubleProperty circleSize = new SimpleDoubleProperty(this, "circleSize", 126);
 
@@ -107,13 +127,16 @@ public class EleFXProgress extends Pane implements Themable {
         lineTrack.getStyleClass().add("ele-progress-bar__outer");
         lineBackground.getStyleClass().add("ele-progress-bar__background");
         lineBar.getStyleClass().add("ele-progress-bar__inner");
+        stripeOverlay.getStyleClass().add("ele-progress-bar__stripe");
+        stripeOverlay.setMouseTransparent(true);
         lineTrack.getChildren().addAll(lineBackground, lineBar);
+        lineTrack.setClip(lineClip);
         HBox.setHgrow(lineTrack, Priority.ALWAYS);
         textSlot.getStyleClass().add("ele-progress__text-slot");
         textSlot.setAlignment(Pos.CENTER_LEFT);
-        textSlot.setMinWidth(50);
-        textSlot.setPrefWidth(50);
-        textSlot.setMaxWidth(50);
+        textSlot.setMinWidth(40);
+        textSlot.setPrefWidth(40);
+        textSlot.setMaxWidth(40);
         lineBox.getChildren().addAll(lineTrack, textSlot);
         circleBox.getStyleClass().add("ele-progress--circle");
         circleBackground.getStyleClass().add("ele-progress-circle__track");
@@ -121,6 +144,9 @@ public class EleFXProgress extends Pane implements Themable {
         for (Arc arc : new Arc[] {circleBackground, circleBar}) {
             arc.setType(ArcType.OPEN);
             arc.setFill(Color.TRANSPARENT);
+            // The arcs use explicitly calculated local coordinates. Leaving
+            // them managed would let StackPane apply a second relocation.
+            arc.setManaged(false);
         }
         circleBox.getChildren().addAll(circleBackground, circleBar, text);
         text.getStyleClass().add("ele-progress__text");
@@ -151,11 +177,15 @@ public class EleFXProgress extends Pane implements Themable {
         textInside.addListener((o, a, b) -> refresh());
         status.addListener((o, a, b) -> refresh());
         color.addListener((o, a, b) -> refresh());
+        colorFunction.addListener((o, a, b) -> refresh());
+        colorStops.addListener((javafx.collections.ListChangeListener<EleFXProgressColorStop>) change -> refresh());
         showText.addListener((o, a, b) -> refresh());
         format.addListener((o, a, b) -> refresh());
         content.addListener((o, a, b) -> refresh());
         strokeLineCap.addListener((o, a, b) -> refresh());
         indeterminate.addListener((o, a, b) -> restartAnimation());
+        striped.addListener((o, a, b) -> refresh());
+        stripedFlow.addListener((o, a, b) -> restartAnimation());
         refresh();
         sceneBuilderIntegration();
     }
@@ -237,6 +267,33 @@ public class EleFXProgress extends Pane implements Themable {
         return indeterminate;
     }
 
+    public boolean isStriped() {
+        return striped.get();
+    }
+
+    public void setStriped(boolean value) {
+        if (!value) stripedFlow.set(false);
+        striped.set(value);
+    }
+
+    public BooleanProperty stripedProperty() {
+        return striped;
+    }
+
+    public boolean isStripedFlow() {
+        return stripedFlow.get();
+    }
+
+    /** Enables flowing diagonal bands and, like Element Plus, also enables stripes. */
+    public void setStripedFlow(boolean value) {
+        if (value) setStriped(true);
+        stripedFlow.set(value);
+    }
+
+    public BooleanProperty stripedFlowProperty() {
+        return stripedFlow;
+    }
+
     public double getDuration() {
         return duration.get();
     }
@@ -259,6 +316,38 @@ public class EleFXProgress extends Pane implements Themable {
 
     public ObjectProperty<Paint> colorProperty() {
         return color;
+    }
+
+    /**
+     * Returns the percentage-to-colour resolver used when no fixed colour has
+     * been supplied with {@link #setColor(Paint)}.
+     */
+    public Function<Double, Paint> getColorFunction() {
+        return colorFunction.get();
+    }
+
+    public void setColorFunction(Function<Double, Paint> value) {
+        colorFunction.set(value);
+    }
+
+    public ObjectProperty<Function<Double, Paint>> colorFunctionProperty() {
+        return colorFunction;
+    }
+
+    /**
+     * Mutable percentage colour stops. Their order is not significant: the
+     * progress control sorts them before resolving a current colour.
+     */
+    public ObservableList<EleFXProgressColorStop> getColorStops() {
+        return colorStops;
+    }
+
+    public void setColorStops(EleFXProgressColorStop... values) {
+        colorStops.setAll(values == null ? new EleFXProgressColorStop[0] : values);
+    }
+
+    public void clearColorStops() {
+        colorStops.clear();
     }
 
     /** Diameter of circular and dashboard progress indicators. */
@@ -336,9 +425,11 @@ public class EleFXProgress extends Pane implements Themable {
     private void refresh() {
         boolean line = getType() == EleFXProgressType.LINE;
         getChildren().setAll(line ? lineBox : circleBox);
+        updateLineTrackHeight();
         text.setText(labelText());
         Paint paint = progressPaint();
         lineBar.setFill(paint);
+        if (!isIndeterminate()) lineBar.setTranslateX(0);
         circleBar.setStroke(paint);
         circleBar.setStrokeLineCap(getStrokeLineCap());
         updateStatusIcon();
@@ -346,12 +437,27 @@ public class EleFXProgress extends Pane implements Themable {
         requestLayout();
     }
 
+    /**
+     * Equivalent to Element Plus's flex item whose outer bar has an explicit
+     * height. Giving the HBox this constraint lets its CENTER alignment place
+     * the bar and the trailing text from one shared layout pass.
+     */
+    private void updateLineTrackHeight() {
+        double height = getStrokeWidth();
+        lineTrack.setMinHeight(height);
+        lineTrack.setPrefHeight(height);
+        lineTrack.setMaxHeight(height);
+    }
+
     private void updateTextNode(boolean line) {
         Node display = displayNode();
         // A label/icon can move between the line and circle containers when
         // type changes, so detach it before assigning its new parent.
         lineBox.getChildren().setAll(lineTrack);
-        lineTrack.getChildren().setAll(lineBackground, lineBar);
+        if (isStriped())
+            lineTrack.getChildren().setAll(lineBackground, lineBar, stripeOverlay);
+        else
+            lineTrack.getChildren().setAll(lineBackground, lineBar);
         textSlot.getChildren().clear();
         circleBox.getChildren().setAll(circleBackground, circleBar);
         if (line) {
@@ -369,16 +475,22 @@ public class EleFXProgress extends Pane implements Themable {
 
     private Node displayNode() {
         if (getContent() != null) return getContent();
-        return !isTextInside() && getStatus() != null ? statusIcon : text;
+        // Element Plus replaces circular/dashboard status text with an icon.
+        // textInside applies only to line progress, where status content stays
+        // inside the filled bar as text.
+        boolean useStatusIcon = getStatus() != null
+                && (getType() != EleFXProgressType.LINE || !isTextInside());
+        return useStatusIcon ? statusIcon : text;
     }
 
     private void updateStatusIcon() {
         EleFXProgressStatus value = getStatus();
         if (value == null) return;
+        boolean line = getType() == EleFXProgressType.LINE;
         switch (value) {
-            case SUCCESS -> statusIcon.setType(EleFXIconType.CIRCLE_CHECK);
+            case SUCCESS -> statusIcon.setType(line ? EleFXIconType.CIRCLE_CHECK : EleFXIconType.CHECK);
             case WARNING -> statusIcon.setType(EleFXIconType.WARNING_FILLED);
-            case EXCEPTION -> statusIcon.setType(EleFXIconType.CIRCLE_CLOSE);
+            case EXCEPTION -> statusIcon.setType(line ? EleFXIconType.CIRCLE_CLOSE : EleFXIconType.CLOSE);
         }
         statusIcon.setFill(progressPaint());
     }
@@ -391,19 +503,28 @@ public class EleFXProgress extends Pane implements Themable {
             lineBox.applyCss();
             lineBox.layout();
             double trackWidth = lineTrack.getWidth();
-            double y = Math.max(0, (h - getStrokeWidth()) / 2);
-            lineTrack.resizeRelocate(lineTrack.getLayoutX(), y, trackWidth, getStrokeWidth());
+            lineTrack.resize(trackWidth, getStrokeWidth());
+            lineClip.setWidth(trackWidth);
+            lineClip.setHeight(getStrokeWidth());
             lineBackground.setWidth(trackWidth);
             lineBackground.setHeight(getStrokeWidth());
             lineBar.setWidth(trackWidth * displayedFraction());
             lineBar.setHeight(getStrokeWidth());
+            if (isIndeterminate()) {
+                // Element Plus animates the inner bar's left edge from -100%
+                // to 100% of the track, independently of bar width.
+                lineBar.setTranslateX(trackWidth * (2 * animationOffset - 1));
+            }
             double radius = getStrokeWidth() / 2;
+            lineClip.setArcWidth(radius * 2);
+            lineClip.setArcHeight(radius * 2);
             lineBackground.setArcWidth(radius * 2);
             lineBackground.setArcHeight(radius * 2);
             lineBar.setArcWidth(radius * 2);
             lineBar.setArcHeight(radius * 2);
+            updateStripeOverlay(radius);
             if (isTextInside() && isShowText() && lineTrack.getChildren().size() > 2) {
-                Node label = lineTrack.getChildren().get(2);
+                Node label = lineTrack.getChildren().get(lineTrack.getChildren().size() - 1);
                 double labelWidth = label.prefWidth(-1);
                 double labelHeight = label.prefHeight(-1);
                 // Position the label against the filled segment rather than the
@@ -413,13 +534,21 @@ public class EleFXProgress extends Pane implements Themable {
             }
         } else {
             double size = Math.min(Math.min(w, h), getCircleSize());
-            double x = (w - size) / 2, y = (h - size) / 2, radius = (size - getStrokeWidth()) / 2;
+            if (size <= 0) return;
+            double x = (w - size) / 2, y = (h - size) / 2;
+            // Element Plus calculates its SVG radius in percentage space and
+            // rounds it down. Preserve the small outer inset that results,
+            // rather than allowing the stroke to touch the canvas edge.
+            double relativeStrokeWidth = Math.round(getStrokeWidth() / size * 1000d) / 10d;
+            double radius = Math.floor(50 - relativeStrokeWidth / 2) * size / 100d;
             circleBox.resizeRelocate(x, y, size, size);
             double start = getType() == EleFXProgressType.DASHBOARD ? 225 : 90;
             double length = getType() == EleFXProgressType.DASHBOARD ? -270 : -360;
             for (Arc arc : new Arc[] {circleBackground, circleBar}) {
-                arc.setCenterX(x + size / 2);
-                arc.setCenterY(y + size / 2);
+                // Arc coordinates are local to circleBox, which was already
+                // relocated above. Adding x/y again offsets both rings.
+                arc.setCenterX(size / 2);
+                arc.setCenterY(size / 2);
                 arc.setRadiusX(radius);
                 arc.setRadiusY(radius);
                 arc.setStartAngle(start);
@@ -430,23 +559,45 @@ public class EleFXProgress extends Pane implements Themable {
             circleBar.setLength(length * displayedFraction());
             if (isShowText() && circleBox.getChildren().size() > 2) {
                 Node label = circleBox.getChildren().get(2);
-                label.resizeRelocate(x, y, size, size);
+                double labelWidth = Math.min(size, label.prefWidth(-1));
+                double labelHeight = Math.min(size, label.prefHeight(labelWidth));
+                label.resizeRelocate((size - labelWidth) / 2, (size - labelHeight) / 2,
+                        labelWidth, labelHeight);
             }
         }
     }
 
     @Override
     protected double computePrefWidth(double height) {
-        return getType() == EleFXProgressType.LINE ? 300 : getCircleSize();
+        if (getType() != EleFXProgressType.LINE) return getCircleSize();
+        // Match Element Plus's block-level line progress: when its parent has
+        // a concrete width, the control occupies it and lets the bar absorb
+        // the remaining space before the trailing text slot.
+        Parent parent = getParent();
+        double availableWidth = parent == null ? 0 : parent.getLayoutBounds().getWidth();
+        return Math.max(300, availableWidth);
+    }
+
+    @Override
+    protected double computeMaxWidth(double height) {
+        // Element Plus renders a line progress as a block-level flex container:
+        // it fills the available parent width while the bar grows and the
+        // trailing text area remains at the trailing edge. Pane's default maximum
+        // is its preferred size, so opt in explicitly to that same behaviour.
+        return getType() == EleFXProgressType.LINE ? Double.MAX_VALUE : getCircleSize();
     }
 
     @Override
     protected double computePrefHeight(double width) {
-        return getType() == EleFXProgressType.LINE ? Math.max(18, getStrokeWidth()) : getCircleSize();
+        return getType() == EleFXProgressType.LINE
+                ? Math.max(getStrokeWidth(), lineBox.prefHeight(width))
+                : getCircleSize();
     }
 
     private double displayedFraction() {
-        return isIndeterminate() && getType() == EleFXProgressType.LINE ? .35 : getPercentage() / 100d;
+        // Element Plus keeps the normal percentage width even while its
+        // indeterminate animation moves that width across the track.
+        return getPercentage() / 100d;
     }
 
     private String labelText() {
@@ -454,8 +605,47 @@ public class EleFXProgress extends Pane implements Themable {
         return formatter == null ? Math.round(getPercentage()) + "%" : formatter.apply(getPercentage());
     }
 
+    private void updateStripeOverlay(double radius) {
+        if (!isStriped()) return;
+        stripeOverlay.setWidth(lineBar.getWidth());
+        stripeOverlay.setHeight(lineBar.getHeight());
+        stripeOverlay.setArcWidth(radius * 2);
+        stripeOverlay.setArcHeight(radius * 2);
+        stripeOverlay.setTranslateX(lineBar.getTranslateX());
+        // Element Plus animates background-position from -100% to 100%,
+        // which advances these diagonal bands towards the right.
+        double phase = isStripedFlow() ? 20 * animationOffset : 0;
+        // CSS's 45deg points towards the upper right. JavaFX's screen Y axis
+        // points down, so reverse the gradient's Y coordinates to match it.
+        stripeOverlay.setFill(new LinearGradient(phase, 20, phase + 20, 0, false, CycleMethod.REPEAT,
+                new Stop(0, Color.rgb(0, 0, 0, .10)),
+                new Stop(.25, Color.rgb(0, 0, 0, .10)),
+                new Stop(.25, Color.TRANSPARENT),
+                new Stop(.5, Color.TRANSPARENT),
+                new Stop(.5, Color.rgb(0, 0, 0, .10)),
+                new Stop(.75, Color.rgb(0, 0, 0, .10)),
+                new Stop(.75, Color.TRANSPARENT),
+                new Stop(1, Color.TRANSPARENT)));
+    }
+
     private Paint progressPaint() {
-        if (getColor() != null || getStatus() == null) return getColor() == null ? PRIMARY : getColor();
+        if (getColor() != null) return getColor();
+        Function<Double, Paint> function = getColorFunction();
+        if (function != null) {
+            Paint resolved = function.apply(getPercentage());
+            if (resolved != null) return resolved;
+        }
+        if (!colorStops.isEmpty()) {
+            return colorStops.stream()
+                    .sorted(java.util.Comparator.comparingDouble(EleFXProgressColorStop::getPercentage))
+                    .filter(stop -> getPercentage() <= stop.getPercentage())
+                    .findFirst()
+                    .orElseGet(() -> colorStops.stream()
+                            .max(java.util.Comparator.comparingDouble(EleFXProgressColorStop::getPercentage))
+                            .orElseThrow())
+                    .getColor();
+        }
+        if (getStatus() == null) return PRIMARY;
         return switch (getStatus()) {
             case SUCCESS -> SUCCESS;
             case WARNING -> WARNING;
@@ -469,7 +659,7 @@ public class EleFXProgress extends Pane implements Themable {
 
     private void restartAnimation() {
         if (animation != null) animation.stop();
-        if (!isIndeterminate()) {
+        if (!isIndeterminate() && !isStripedFlow()) {
             animationOffset = 0;
             refresh();
             return;
@@ -479,8 +669,12 @@ public class EleFXProgress extends Pane implements Themable {
         animation.setCycleCount(Animation.INDEFINITE);
         animation.currentTimeProperty().addListener((o, a, b) -> {
             animationOffset = b.toMillis() / (getDuration() * 1000d);
-            if (getType() == EleFXProgressType.LINE) lineBar
-                    .setTranslateX((lineTrack.getWidth() + lineBar.getWidth()) * animationOffset - lineBar.getWidth());
+            if (getType() == EleFXProgressType.LINE) {
+                if (isIndeterminate()) {
+                    lineBar.setTranslateX(lineTrack.getWidth() * (2 * animationOffset - 1));
+                }
+                updateStripeOverlay(getStrokeWidth() / 2);
+            }
         });
         animation.play();
         refresh();
