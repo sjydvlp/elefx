@@ -1,5 +1,8 @@
 package com.sjydvlp.elefx.component.result;
 
+import com.sjydvlp.elefx.component.icon.EleFXIcon;
+import com.sjydvlp.elefx.component.icon.EleFXIconType;
+import com.sjydvlp.elefx.component.icon.EleFXIcons;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
@@ -12,10 +15,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.Group;
-import javafx.scene.shape.SVGPath;
 
 /**
  * An Element Plus-inspired result view for communicating an operation outcome
@@ -204,10 +206,12 @@ public class EleFXResult extends VBox implements Themable {
     private void initialize() {
         getStyleClass().add(STYLE_CLASS);
         setAlignment(Pos.TOP_CENTER);
-        setFillWidth(false);
+        // Result text uses the available content width so long subtitles wrap.
+        setFillWidth(true);
         iconBox.getStyleClass().add("ele-result__icon");
         titleBox.getStyleClass().add("ele-result__title");
         subTitleBox.getStyleClass().add("ele-result__subtitle");
+        subTitleBox.setMaxWidth(Double.MAX_VALUE);
         extra.getStyleClass().add("ele-result__extra");
         extra.setAlignment(Pos.TOP_CENTER);
         titleLabel.getStyleClass().add("ele-result__title-text");
@@ -215,6 +219,7 @@ public class EleFXResult extends VBox implements Themable {
         titleLabel.setAlignment(Pos.CENTER);
         subTitleLabel.getStyleClass().add("ele-result__subtitle-text");
         subTitleLabel.setWrapText(true);
+        subTitleLabel.setTextOverrun(OverrunStyle.CLIP);
         subTitleLabel.setAlignment(Pos.CENTER);
         getChildren().addAll(iconBox, titleBox, subTitleBox, extra);
 
@@ -269,22 +274,16 @@ public class EleFXResult extends VBox implements Themable {
         extra.setVisible(present);
     }
 
-    /** Result's dedicated 48px SVG glyphs, scaled to Element Plus's 64px default. */
-    private static Node createDefaultIcon(EleFXResultIcon state) {
-        SVGPath path = new SVGPath();
-        path.getStyleClass().add("ele-result__icon-svg");
-        path.setContent(switch (state) {
-            case PRIMARY -> "M24,4C35.046,4 44,12.954 44,24C44,35.046 35.046,44 24,44C12.954,44 4,35.046 4,24C4,12.954 12.954,4 24,4ZM24,13C23.172,13 22.5,13.672 22.5,14.5V22.5H14.5C13.672,22.5 13,23.172 13,24C13,24.828 13.672,25.5 14.5,25.5H22.5V33.5C22.5,34.328 23.172,35 24,35C24.828,35 25.5,34.328 25.5,33.5V25.5H33.5C34.328,25.5 35,24.828 35,24C35,23.172 34.328,22.5 33.5,22.5H25.5V14.5C25.5,13.672 24.828,13 24,13Z";
-            case SUCCESS -> "M24,4C35.046,4 44,12.954 44,24C44,35.046 35.046,44 24,44C12.954,44 4,35.046 4,24C4,12.954 12.954,4 24,4ZM34.555,16.449C33.961,15.85 32.999,15.85 32.405,16.449L21.414,27.581L21.403,27.591C21.01,27.978 20.377,27.973 19.989,27.579L15.595,23.112C15.001,22.514 14.039,22.514 13.445,23.112C12.852,23.71 12.852,24.68 13.445,25.278L19.626,31.551C20.22,32.15 21.182,32.15 21.776,31.551L34.555,18.614C35.148,18.016 35.148,17.047 34.555,16.449Z";
-            case WARNING -> "M24,4C35.046,4 44,12.954 44,24C44,35.046 35.046,44 24,44C12.954,44 4,35.046 4,24C4,12.954 12.954,4 24,4ZM24,12.5C23.172,12.5 22.5,13.172 22.5,14V26C22.5,26.828 23.172,27.5 24,27.5C24.828,27.5 25.5,26.828 25.5,26V14C25.5,13.172 24.828,12.5 24,12.5ZM24,31C22.895,31 22,31.895 22,33C22,34.105 22.895,35 24,35C25.105,35 26,34.105 26,33C26,31.895 25.105,31 24,31Z";
-            case ERROR -> "M24,4C35.046,4 44,12.954 44,24C44,35.046 35.046,44 24,44C12.954,44 4,35.046 4,24C4,12.954 12.954,4 24,4ZM17.439,17.439C16.854,18.025 16.854,18.975 17.439,19.561L21.879,24L17.439,28.439C16.854,29.025 16.854,29.975 17.439,30.561C18.025,31.146 18.975,31.146 19.561,30.561L24,26.121L28.439,30.561C29.025,31.146 29.975,31.146 30.561,30.561C31.146,29.975 31.146,29.025 30.561,28.439L26.121,24L30.561,19.561C31.146,18.975 31.146,18.025 30.561,17.439C29.975,16.854 29.025,16.854 28.439,17.439L24,21.879L19.561,17.439C18.975,16.854 18.025,16.854 17.439,17.439Z";
-            case INFO -> "M24,4C35.046,4 44,12.954 44,24C44,35.046 35.046,44 24,44C12.954,44 4,35.046 4,24C4,12.954 12.954,4 24,4ZM24,19H21C20.172,19 19.5,19.672 19.5,20.5C19.5,21.328 20.172,22 21,22H22.5V31H21C20.172,31 19.5,31.672 19.5,32.5C19.5,33.328 20.172,34 21,34H27C27.828,34 28.5,33.328 28.5,32.5C28.5,31.672 27.828,31 27,31H25.5V20.5C25.5,19.672 24.828,19 24,19ZM24,13C22.895,13 22,13.895 22,15C22,16.105 22.895,17 24,17C25.105,17 26,16.105 26,15C26,13.895 25.105,13 24,13Z";
-        });
-        Group icon = new Group(path);
+    /** Creates the result state glyph from EleFX's shared icon library. */
+    private static EleFXIcon createDefaultIcon(EleFXResultIcon state) {
+        EleFXIcon icon = EleFXIcons.of(switch (state) {
+            case PRIMARY -> EleFXIconType.INFO_FILLED;
+            case SUCCESS -> EleFXIconType.CIRCLE_CHECK_FILLED;
+            case WARNING -> EleFXIconType.WARNING_FILLED;
+            case ERROR -> EleFXIconType.CIRCLE_CLOSE_FILLED;
+            case INFO -> EleFXIconType.INFO_FILLED;
+        }, DEFAULT_ICON_SIZE);
         icon.getStyleClass().add("ele-result__default-icon");
-        double scale = DEFAULT_ICON_SIZE / 48.0;
-        icon.setScaleX(scale);
-        icon.setScaleY(scale);
         return icon;
     }
 }

@@ -8,8 +8,8 @@
 .ele-result__extra { -fx-alignment: top-center; -fx-padding: 30px 0 0 0; }
 .ele-result__title-text { -fx-text-fill: -elefx-ct-primary; -fx-font-family: "Roboto"; -fx-font-size: 20px; -fx-line-spacing: 0; -fx-alignment: center; -fx-text-alignment: center; }
 .ele-result__subtitle-text { -fx-text-fill: -elefx-ct-regular; -fx-font-family: "Roboto"; -fx-font-size: 14px; -fx-line-spacing: 0; -fx-alignment: center; -fx-text-alignment: center; }
-.ele-result--primary .ele-result__icon-svg { -fx-fill: -elefx-cp-1; }
-.ele-result--success .ele-result__icon-svg { -fx-fill: -elefx-cs-1; }
-.ele-result--warning .ele-result__icon-svg { -fx-fill: -elefx-cw-1; }
-.ele-result--error .ele-result__icon-svg { -fx-fill: -elefx-cd-1; }
-.ele-result--info .ele-result__icon-svg { -fx-fill: -elefx-ci-1; }
+.ele-result--primary .ele-result__default-icon .ele-icon__svg { -fx-fill: -elefx-cp-1; }
+.ele-result--success .ele-result__default-icon .ele-icon__svg { -fx-fill: -elefx-cs-1; }
+.ele-result--warning .ele-result__default-icon .ele-icon__svg { -fx-fill: -elefx-cw-1; }
+.ele-result--error .ele-result__default-icon .ele-icon__svg { -fx-fill: -elefx-cd-1; }
+.ele-result--info .ele-result__default-icon .ele-icon__svg { -fx-fill: -elefx-ci-1; }
