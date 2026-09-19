@@ -1,0 +1,27 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-timeline { -fx-padding: 0; }
+.ele-timeline-item { -fx-min-height: 44px; -fx-padding: 0; }
+.ele-timeline-item__rail { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; }
+.ele-timeline-item__tail { -fx-min-width: 2px; -fx-pref-width: 2px; -fx-max-width: 2px; -fx-background-color: -elefx-cb-light; -fx-translate-y: 9px; }
+.ele-timeline-item__node { -fx-min-width: 14px; -fx-pref-width: 14px; -fx-max-width: 14px; -fx-min-height: 14px; -fx-pref-height: 14px; -fx-max-height: 14px; -fx-alignment: center; -fx-translate-y: 2px; }
+.ele-timeline-item__default-dot { -fx-min-width: 12px; -fx-pref-width: 12px; -fx-max-width: 12px; -fx-min-height: 12px; -fx-pref-height: 12px; -fx-max-height: 12px; -fx-background-color: -elefx-ci-1; -fx-background-radius: 50%; -fx-border-color: -elefx-ci-1; -fx-border-radius: 50%; -fx-border-width: 1px; }
+.ele-timeline-item__body { -fx-spacing: 8px; -fx-padding: 0 0 20px 8px; }
+.ele-timeline-item__timestamp { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 13px; }
+.ele-timeline-item__content { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }
+.ele-timeline-item--last .ele-timeline-item__body { -fx-padding: 0 0 0 8px; }.ele-timeline-item--last .ele-timeline-item__tail { -fx-opacity: 0; }
+.ele-timeline-item--side-end .ele-timeline-item__body { -fx-padding: 0 8px 20px 0; }.ele-timeline-item--last.ele-timeline-item--side-end .ele-timeline-item__body { -fx-padding: 0 8px 0 0; }
+.ele-timeline--mode-alternate .ele-timeline-item--side-start .ele-timeline-item__body, .ele-timeline--mode-alternate-reverse .ele-timeline-item--side-start .ele-timeline-item__body { -fx-padding: 0 8px 20px 0; }
+.ele-timeline--mode-alternate .ele-timeline-item--side-end .ele-timeline-item__body, .ele-timeline--mode-alternate-reverse .ele-timeline-item--side-end .ele-timeline-item__body { -fx-padding: 0 0 20px 8px; }
+.ele-timeline--mode-alternate .ele-timeline-item--last.ele-timeline-item--side-start .ele-timeline-item__body, .ele-timeline--mode-alternate-reverse .ele-timeline-item--last.ele-timeline-item--side-start .ele-timeline-item__body { -fx-padding: 0 8px 0 0; }
+.ele-timeline--mode-alternate .ele-timeline-item--last.ele-timeline-item--side-end .ele-timeline-item__body, .ele-timeline--mode-alternate-reverse .ele-timeline-item--last.ele-timeline-item--side-end .ele-timeline-item__body { -fx-padding: 0 0 0 8px; }
+.ele-timeline-item--type-primary .ele-timeline-item__default-dot { -fx-background-color: -elefx-cp-1; -fx-border-color: -elefx-cp-1; }
+.ele-timeline-item--type-success .ele-timeline-item__default-dot { -fx-background-color: -elefx-cs-1; -fx-border-color: -elefx-cs-1; }
+.ele-timeline-item--type-warning .ele-timeline-item__default-dot { -fx-background-color: -elefx-cw-1; -fx-border-color: -elefx-cw-1; }
+.ele-timeline-item--type-danger .ele-timeline-item__default-dot { -fx-background-color: -elefx-cd-1; -fx-border-color: -elefx-cd-1; }
+.ele-timeline-item--type-info .ele-timeline-item__default-dot { -fx-background-color: -elefx-ci-1; -fx-border-color: -elefx-ci-1; }
+.ele-timeline-item--type-primary .ele-timeline-item__node .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-timeline-item--type-success .ele-timeline-item__node .ele-icon__svg { -fx-fill: -elefx-cs-1; }.ele-timeline-item--type-warning .ele-timeline-item__node .ele-icon__svg { -fx-fill: -elefx-cw-1; }.ele-timeline-item--type-danger .ele-timeline-item__node .ele-icon__svg { -fx-fill: -elefx-cd-1; }.ele-timeline-item--type-info .ele-timeline-item__node .ele-icon__svg { -fx-fill: -elefx-ci-1; }
+.ele-timeline-item--size-large .ele-timeline-item__node { -fx-min-width: 18px; -fx-pref-width: 18px; -fx-max-width: 18px; -fx-min-height: 18px; -fx-pref-height: 18px; -fx-max-height: 18px; }.ele-timeline-item--size-large .ele-timeline-item__default-dot { -fx-min-width: 16px; -fx-pref-width: 16px; -fx-max-width: 16px; -fx-min-height: 16px; -fx-pref-height: 16px; -fx-max-height: 16px; }
+.ele-timeline-item--hollow .ele-timeline-item__default-dot { -fx-background-color: -elefx-co-white-bg; }
+.ele-timeline-item--center .ele-timeline-item__body { -fx-alignment: center-left; }.ele-timeline-item--center.ele-timeline-item--side-end .ele-timeline-item__body { -fx-alignment: center-right; }

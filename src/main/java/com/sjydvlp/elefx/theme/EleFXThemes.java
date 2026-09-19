@@ -13,6 +13,7 @@ public enum EleFXThemes implements Theme {
     IMAGE("css/component/image/EleFXImage.css"),
     CARD("css/component/card/EleFXCard.css"),
     DESCRIPTIONS("css/component/descriptions/EleFXDescriptions.css"),
+    TIMELINE("css/component/timeline/EleFXTimeline.css"),
     EMPTY("css/component/empty/EleFXEmpty.css"),
     SKELETON("css/component/skeleton/EleFXSkeleton.css"),
     RESULT("css/component/result/EleFXResult.css"),
