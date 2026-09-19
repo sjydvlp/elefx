@@ -1,0 +1,9 @@
+@import "../../common/EleFXColor.css";
+
+.ele-statistic { -fx-alignment: top-center; -fx-spacing: 4px; }
+.ele-statistic__head { -fx-alignment: center; -fx-min-height: 20px; -fx-pref-height: 20px; }
+.ele-statistic__head-title { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }
+.ele-statistic__content { -fx-alignment: center; -fx-spacing: 4px; }
+.ele-statistic__number { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 30px; -fx-font-weight: 600; }
+.ele-statistic__prefix, .ele-statistic__suffix { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 30px; }
+.ele-countdown .ele-statistic__number { -fx-font-size: 30px; }
