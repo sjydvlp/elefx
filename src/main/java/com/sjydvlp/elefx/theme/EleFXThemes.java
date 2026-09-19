@@ -19,6 +19,7 @@ public enum EleFXThemes implements Theme {
     LAYOUT("css/component/layout/EleFXLayout.css"),
     CONTAINER("css/component/container/EleFXContainer.css"),
     LINK("css/component/link/EleFXLink.css"),
+    TAG("css/component/tag/EleFXTag.css"),
     TEXT("css/component/text/EleFXText.css"),
     SCROLLBAR("css/component/scrollbar/EleFXScrollbar.css"),
     INFINITE_SCROLL("css/component/infinitescroll/EleFXInfiniteScroll.css"),
