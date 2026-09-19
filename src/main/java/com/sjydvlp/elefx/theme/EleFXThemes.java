@@ -49,6 +49,7 @@ public enum EleFXThemes implements Theme {
     PAGINATION("css/component/pagination/EleFXPagination.css"),
     PROGRESS("css/component/progress/EleFXProgress.css"),
     STATISTIC("css/component/statistic/EleFXStatistic.css"),
+    SEGMENTED("css/component/segmented/EleFXSegmented.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
