@@ -546,6 +546,11 @@
 .ele-scrollbar--custom > .scroll-bar > .decrement-button { -fx-padding: 0; -fx-opacity: 0; }
 .ele-scrollbar--custom > .corner { -fx-background-color: transparent; }
 
+/* ------------------------------ affix ------------------------------ */
+.ele-affix { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.ele-affix:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-affix--fixed { -fx-background-color: transparent; }
+
 /* -------------------------- infinite scroll -------------------------- */
 .ele-infinite-scroll { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
 .ele-infinite-scroll:focused { -fx-background-color: transparent; -fx-background-insets: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
