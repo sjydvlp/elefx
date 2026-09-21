@@ -1,0 +1,6 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-tooltip { -fx-padding: 6px 12px; -fx-background-color: #303133; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: #303133; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.12), 8, 0, 0, 2); -fx-font-family: "Roboto"; }
+.ele-tooltip__content { -fx-text-fill: -elefx-co-basic-white; -fx-font-size: 12px; -fx-line-spacing: 2px; }.ele-tooltip__arrow { -fx-managed: false; -fx-min-width: 10px; -fx-pref-width: 10px; -fx-max-width: 10px; -fx-min-height: 10px; -fx-pref-height: 10px; -fx-max-height: 10px; -fx-background-color: #303133; -fx-background-insets: 0; -fx-border-color: #303133; -fx-border-insets: 0; -fx-border-width: 0 1px 1px 0; -fx-rotate: 45; }
+.ele-tooltip--light { -fx-background-color: -elefx-co-white-bg; -fx-border-color: -elefx-cb-light; }.ele-tooltip--light .ele-tooltip__content { -fx-text-fill: -elefx-ct-regular; }.ele-tooltip--light .ele-tooltip__arrow { -fx-background-color: -elefx-co-white-bg; -fx-border-color: -elefx-cb-light; }
