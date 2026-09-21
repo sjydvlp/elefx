@@ -1,0 +1,17 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-divider { -fx-font-family: "Roboto"; }
+.ele-divider--horizontal { -fx-padding: 24px 0; -fx-max-width: Infinity; }
+.ele-divider--vertical { -fx-min-width: 1px; -fx-pref-width: 1px; -fx-max-width: 1px; -fx-min-height: 14px; -fx-pref-height: 14px; -fx-max-height: 14px; -fx-padding: 0 8px; }
+.ele-divider__line { -fx-background-color: -elefx-cb-base; -fx-background-insets: 0; }
+.ele-divider--dashed .ele-divider__line { -fx-border-color: -elefx-cb-base; -fx-border-width: 1px 0 0 0; -fx-border-style: dashed; -fx-background-color: transparent; }
+.ele-divider--dotted .ele-divider__line { -fx-border-color: -elefx-cb-base; -fx-border-width: 1px 0 0 0; -fx-border-style: dotted; -fx-background-color: transparent; }
+.ele-divider--double .ele-divider__line { -fx-background-color: -elefx-cb-base, transparent, -elefx-cb-base; -fx-background-insets: 0, 1px 0, 2px 0; }
+.ele-divider--vertical .ele-divider__line { -fx-background-color: -elefx-cb-base; }
+.ele-divider--vertical.ele-divider--dashed .ele-divider__line { -fx-border-width: 0 0 0 1px; }
+.ele-divider--vertical.ele-divider--dotted .ele-divider__line { -fx-border-width: 0 0 0 1px; }
+.ele-divider--vertical.ele-divider--double { -fx-min-width: 3px; -fx-pref-width: 3px; -fx-max-width: 3px; }
+.ele-divider--vertical.ele-divider--double .ele-divider__line { -fx-background-insets: 0, 0 1px, 0 2px; }
+.ele-divider__text { -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-padding: 0 20px; }
+.ele-divider__text-label { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 14px; }

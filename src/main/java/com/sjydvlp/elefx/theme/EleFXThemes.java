@@ -17,6 +17,7 @@ public enum EleFXThemes implements Theme {
     TOOLTIP("css/component/tooltip/EleFXTooltip.css"),
     DRAWER("css/component/drawer/EleFXDrawer.css"),
     CARD("css/component/card/EleFXCard.css"),
+    DIVIDER("css/component/divider/EleFXDivider.css"),
     DESCRIPTIONS("css/component/descriptions/EleFXDescriptions.css"),
     TIMELINE("css/component/timeline/EleFXTimeline.css"),
     STEPS("css/component/steps/EleFXSteps.css"),

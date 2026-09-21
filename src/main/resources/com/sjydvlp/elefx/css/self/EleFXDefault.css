@@ -76,6 +76,22 @@
 /* ------------------------------- drawer ------------------------------ */
 .ele-drawer__wrapper { -fx-background-color: transparent; -fx-background-insets: 0; }.ele-drawer__wrapper:modal { -fx-background-color: rgba(0, 0, 0, .5); }.ele-drawer { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-font-family: "Roboto"; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 18, .16, 0, 0); }.ele-drawer__header { -fx-min-height: 56px; -fx-padding: 20px 20px 10px 20px; -fx-spacing: 12px; -fx-alignment: center-left; }.ele-drawer__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 18px; -fx-font-weight: normal; }.ele-drawer__close-btn, .ele-drawer__close-btn:focused { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 3px; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }.ele-drawer__close-btn .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-drawer__close-btn:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-drawer__close-btn:focused { -fx-border-color: -elefx-cp-1; }.ele-drawer__body { -fx-padding: 20px; -fx-spacing: 12px; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }.ele-drawer__footer { -fx-padding: 10px 20px 20px 20px; -fx-spacing: 12px; -fx-alignment: center-right; }.ele-drawer__resize-handle { -fx-background-color: transparent; -fx-background-insets: 0; }.ele-drawer__resize-handle--left, .ele-drawer__resize-handle--right { -fx-min-width: 6px; -fx-pref-width: 6px; -fx-max-width: 6px; -fx-max-height: Infinity; -fx-cursor: h-resize; }.ele-drawer__resize-handle--top, .ele-drawer__resize-handle--bottom { -fx-min-height: 6px; -fx-pref-height: 6px; -fx-max-height: 6px; -fx-max-width: Infinity; -fx-cursor: v-resize; }
 
+/* ----------------------------- divider ----------------------------- */
+.ele-divider { -fx-font-family: "Roboto"; }
+.ele-divider--horizontal { -fx-padding: 24px 0; -fx-max-width: Infinity; }
+.ele-divider--vertical { -fx-min-width: 1px; -fx-pref-width: 1px; -fx-max-width: 1px; -fx-min-height: 14px; -fx-pref-height: 14px; -fx-max-height: 14px; -fx-padding: 0 8px; }
+.ele-divider__line { -fx-background-color: -elefx-cb-base; -fx-background-insets: 0; }
+.ele-divider--dashed .ele-divider__line { -fx-border-color: -elefx-cb-base; -fx-border-width: 1px 0 0 0; -fx-border-style: dashed; -fx-background-color: transparent; }
+.ele-divider--dotted .ele-divider__line { -fx-border-color: -elefx-cb-base; -fx-border-width: 1px 0 0 0; -fx-border-style: dotted; -fx-background-color: transparent; }
+.ele-divider--double .ele-divider__line { -fx-background-color: -elefx-cb-base, transparent, -elefx-cb-base; -fx-background-insets: 0, 1px 0, 2px 0; }
+.ele-divider--vertical .ele-divider__line { -fx-background-color: -elefx-cb-base; }
+.ele-divider--vertical.ele-divider--dashed .ele-divider__line { -fx-border-width: 0 0 0 1px; }
+.ele-divider--vertical.ele-divider--dotted .ele-divider__line { -fx-border-width: 0 0 0 1px; }
+.ele-divider--vertical.ele-divider--double { -fx-min-width: 3px; -fx-pref-width: 3px; -fx-max-width: 3px; }
+.ele-divider--vertical.ele-divider--double .ele-divider__line { -fx-background-insets: 0, 0 1px, 0 2px; }
+.ele-divider__text { -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-padding: 0 20px; }
+.ele-divider__text-label { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 14px; }
+
 /* ----------------------------- skeleton ----------------------------- */
 .ele-skeleton { -fx-alignment: top-left; }
 .ele-skeleton__rendered, .ele-skeleton__content { -fx-alignment: top-left; }
