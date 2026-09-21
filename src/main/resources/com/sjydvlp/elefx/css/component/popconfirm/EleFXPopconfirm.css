@@ -1,0 +1,6 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-popconfirm { -fx-padding: 12px; -fx-spacing: 12px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 12, 0, 0, 2); -fx-font-family: "Roboto"; }
+.ele-popconfirm__main { -fx-spacing: 8px; -fx-alignment: top-left; }.ele-popconfirm__icon { -fx-min-width: 16px; -fx-pref-width: 16px; -fx-max-width: 16px; }.ele-popconfirm__icon .ele-icon__svg { -fx-fill: #f90; }.ele-popconfirm__message { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }.ele-popconfirm__actions { -fx-alignment: center-right; }.ele-popconfirm__arrow { -fx-managed: false; -fx-min-width: 10px; -fx-pref-width: 10px; -fx-max-width: 10px; -fx-min-height: 10px; -fx-pref-height: 10px; -fx-max-height: 10px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-rotate: 45; }
+.ele-popconfirm--dark { -fx-background-color: #303133; }.ele-popconfirm--dark .ele-popconfirm__message { -fx-text-fill: white; }.ele-popconfirm--dark .ele-popconfirm__arrow { -fx-background-color: #303133; }.ele-popconfirm .ele-button:focused { -fx-background-insets: 0; -fx-border-insets: 0; }
