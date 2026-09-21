@@ -58,6 +58,7 @@ public enum EleFXThemes implements Theme {
     PROGRESS("css/component/progress/EleFXProgress.css"),
     STATISTIC("css/component/statistic/EleFXStatistic.css"),
     SEGMENTED("css/component/segmented/EleFXSegmented.css"),
+    TABS("css/component/tabs/EleFXTabs.css"),
     // LEGACY("css/legacy/LegacyControls.css"),
     // CHECKBOX("css/MFXCheckBox.css"),
     // CHECK_LIST_CELL("css/MFXCheckListCell.css"),
