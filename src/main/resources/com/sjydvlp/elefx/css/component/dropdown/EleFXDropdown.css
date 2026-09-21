@@ -1,0 +1,13 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-dropdown { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.ele-dropdown__trigger { -fx-text-fill: -elefx-cp-1; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4px; }
+.ele-dropdown__trigger:focused { -fx-border-color: -elefx-cp-1; -fx-border-width: 1px; -fx-border-insets: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.ele-dropdown__split { -fx-spacing: 0; }.ele-dropdown__split .ele-button:first-child { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; }.ele-dropdown__split .ele-button:last-child { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; }
+.ele-dropdown__menu { -fx-padding: 5px 0; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.12), 12, .12, 0, 2); }
+.ele-dropdown__menu--arrow { -fx-border-width: 1px; }
+.ele-dropdown__menu--dark { -fx-background-color: #303133; -fx-border-color: #303133; }
+.ele-dropdown__item { -fx-min-width: 120px; -fx-padding: 5px 16px; -fx-min-height: 32px; -fx-cursor: hand; -fx-font-size: 14px; -fx-text-fill: -elefx-ct-regular; }
+.ele-dropdown__item .label { -fx-text-fill: -elefx-ct-regular; }.ele-dropdown__item:hover { -fx-background-color: -elefx-cp-l8; }.ele-dropdown__item:focused { -fx-background-color: -elefx-cp-l8; -fx-border-color: -elefx-cp-1; -fx-border-width: 1px; -fx-border-insets: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }.ele-dropdown__item:disabled { -fx-opacity: 1; -fx-cursor: default; }.ele-dropdown__item:disabled .label { -fx-text-fill: -elefx-ct-disabled; }
+.ele-dropdown__menu--dark .ele-dropdown__item .label { -fx-text-fill: -elefx-co-white-bg; }.ele-dropdown__menu--dark .ele-dropdown__item:hover, .ele-dropdown__menu--dark .ele-dropdown__item:focused { -fx-background-color: #52555b; }.ele-dropdown__divider { -fx-min-height: 1px; -fx-pref-height: 1px; -fx-max-height: 1px; -fx-background-color: -elefx-cb-light; -fx-background-insets: 0; -fx-margin: 6px 0; }
