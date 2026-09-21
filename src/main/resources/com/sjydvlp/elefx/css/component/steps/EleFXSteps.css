@@ -1,0 +1,18 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-steps { -fx-background-color: transparent; -fx-padding: 0; }
+.ele-step { -fx-background-color: transparent; -fx-padding: 0; }
+.ele-step__head { -fx-alignment: center; -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-background-color: -elefx-co-white-bg; -fx-background-radius: 50%; -fx-border-color: -elefx-ct-disabled; -fx-border-radius: 50%; -fx-border-width: 2px; }
+.ele-step__icon-inner { -fx-text-fill: -elefx-ct-disabled; -fx-font-size: 12px; -fx-font-weight: bold; }
+.ele-step__head .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
+.ele-step__line { -fx-background-color: -elefx-cb-light; -fx-background-insets: 0; }
+.ele-step__main { -fx-spacing: 7px; }
+.ele-step__title { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 16px; -fx-font-weight: normal; }
+.ele-step__description { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 12px; -fx-line-spacing: 2px; }
+.ele-step--process .ele-step__head { -fx-border-color: -elefx-cp-1; }.ele-step--process .ele-step__icon-inner { -fx-text-fill: -elefx-cp-1; }.ele-step--process .ele-step__head .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-step--process .ele-step__title { -fx-text-fill: -elefx-cp-1; -fx-font-weight: bold; }.ele-step--process .ele-step__description { -fx-text-fill: -elefx-ct-regular; }
+.ele-step--finish .ele-step__head, .ele-step--success .ele-step__head { -fx-border-color: -elefx-cs-1; }.ele-step--finish .ele-step__icon-inner, .ele-step--success .ele-step__icon-inner { -fx-text-fill: -elefx-cs-1; }.ele-step--finish .ele-step__head .ele-icon__svg, .ele-step--success .ele-step__head .ele-icon__svg { -fx-fill: -elefx-cs-1; }.ele-step--finish .ele-step__title, .ele-step--success .ele-step__title { -fx-text-fill: -elefx-cs-1; }.ele-step--finish .ele-step__description, .ele-step--success .ele-step__description { -fx-text-fill: -elefx-ct-regular; }.ele-step--finish .ele-step__line, .ele-step--success .ele-step__line { -fx-background-color: -elefx-cs-1; }
+.ele-step--error .ele-step__head { -fx-border-color: -elefx-cd-1; }.ele-step--error .ele-step__icon-inner { -fx-text-fill: -elefx-cd-1; }.ele-step--error .ele-step__head .ele-icon__svg { -fx-fill: -elefx-cd-1; }.ele-step--error .ele-step__title, .ele-step--error .ele-step__description { -fx-text-fill: -elefx-cd-1; }.ele-step--error .ele-step__line { -fx-background-color: -elefx-cd-1; }
+.ele-steps--center .ele-step__main { -fx-alignment: top-center; }.ele-steps--center .ele-step__title, .ele-steps--center .ele-step__description { -fx-text-alignment: center; -fx-alignment: top-center; }
+.ele-steps--vertical .ele-step__line { -fx-background-color: -elefx-cb-light; }.ele-steps--vertical .ele-step--finish .ele-step__line, .ele-steps--vertical .ele-step--success .ele-step__line { -fx-background-color: -elefx-cs-1; }.ele-steps--vertical .ele-step--error .ele-step__line { -fx-background-color: -elefx-cd-1; }
+.ele-steps--simple { -fx-background-color: -elefx-cf-light; -fx-padding: 10px 16px; }.ele-step--simple .ele-step__main { -fx-spacing: 0; }.ele-step--simple .ele-step__title { -fx-font-size: 14px; }.ele-step--simple .ele-step__line { -fx-background-color: -elefx-ct-secondary; }.ele-step--simple.ele-step--process .ele-step__line { -fx-background-color: -elefx-cp-1; }.ele-step--simple.ele-step--finish .ele-step__line, .ele-step--simple.ele-step--success .ele-step__line { -fx-background-color: -elefx-cs-1; }.ele-step--simple.ele-step--error .ele-step__line { -fx-background-color: -elefx-cd-1; }
