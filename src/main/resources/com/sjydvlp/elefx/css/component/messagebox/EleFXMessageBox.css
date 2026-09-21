@@ -1,0 +1,16 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-message-box__wrapper { -fx-alignment: center; -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-message-box__wrapper--modal { -fx-background-color: rgba(0, 0, 0, .5); }
+.ele-message-box { -fx-min-width: 360px; -fx-pref-width: 420px; -fx-max-width: 420px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 18, .16, 0, 4); -fx-font-family: "Roboto"; }
+.ele-message-box__header { -fx-padding: 15px 15px 10px 15px; -fx-spacing: 12px; -fx-alignment: center-left; }
+.ele-message-box__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 18px; }
+.ele-message-box__headerbtn, .ele-message-box__headerbtn:focused { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }
+.ele-message-box__headerbtn .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-message-box__headerbtn:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-message-box__headerbtn:focused { -fx-border-color: -elefx-cp-1; -fx-border-radius: 3px; }
+.ele-message-box__content { -fx-padding: 10px 15px; -fx-spacing: 12px; -fx-alignment: top-left; }
+.ele-message-box__status { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-alignment: top-center; }.ele-message-box__status .ele-icon__svg { -fx-fill: -elefx-ci-1; }.ele-message-box__status--primary .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-message-box__status--success .ele-icon__svg { -fx-fill: -elefx-cs-1; }.ele-message-box__status--warning .ele-icon__svg { -fx-fill: -elefx-cw-1; }.ele-message-box__status--error .ele-icon__svg { -fx-fill: -elefx-cd-1; }
+.ele-message-box__message-area { -fx-spacing: 10px; -fx-alignment: center-left; }.ele-message-box__message { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }
+.ele-message-box__input, .ele-message-box__input:focused { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-padding: 0 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }.ele-message-box__input:hover { -fx-border-color: -elefx-ct-placeholder; }.ele-message-box__input:focused { -fx-border-color: -elefx-cp-1; }
+.ele-message-box__input-error { -fx-text-fill: -elefx-cd-1; -fx-font-size: 12px; }
+.ele-message-box__btns { -fx-padding: 5px 15px 15px 15px; -fx-spacing: 12px; -fx-alignment: center-right; }.ele-message-box--center .ele-message-box__header, .ele-message-box--center .ele-message-box__content, .ele-message-box--center .ele-message-box__message-area, .ele-message-box--center .ele-message-box__btns { -fx-alignment: center; }.ele-message-box--center .ele-message-box__message { -fx-text-alignment: center; }.ele-message-box.is-dragging { -fx-opacity: .65; }
