@@ -26,6 +26,7 @@ public enum EleFXThemes implements Theme {
     AFFIX("css/component/affix/EleFXAffix.css"),
     ANCHOR("css/component/anchor/EleFXAnchor.css"),
     BREADCRUMB("css/component/breadcrumb/EleFXBreadcrumb.css"),
+    MENU("css/component/menu/EleFXMenu.css"),
     DROPDOWN("css/component/dropdown/EleFXDropdown.css"),
     BACKTOP("css/component/backtop/EleFXBacktop.css"),
     INFINITE_SCROLL("css/component/infinitescroll/EleFXInfiniteScroll.css"),
