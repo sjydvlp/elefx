@@ -3,6 +3,7 @@ package com.sjydvlp.elefx.component.anchor;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -76,6 +77,8 @@ public class EleFXAnchor extends StackPane implements Themable {
     private final HBox horizontalLinks = new HBox();
 
     private Timeline scrollAnimation;
+
+    private EleFXAnchorLink preferredDuplicateTargetLink;
 
     private ScrollPane observedContainer;
 
@@ -229,13 +232,14 @@ public class EleFXAnchor extends StackPane implements Themable {
 
     /** Scrolls to a link's target, resolving an id href when necessary. */
     public void scrollTo(String href) {
-        forEachLink(link -> {
+        forEachNavigableLink(link -> {
             if (link.getHref().equals(href)) scrollTo(link);
         });
     }
 
     /** Scrolls to a specific link's target. */
     public void scrollTo(EleFXAnchorLink link) {
+        if (getDirection() == EleFXAnchorDirection.HORIZONTAL && !links.contains(link)) return;
         ScrollPane pane = getContainer();
         Node target = resolveTarget(link);
         if (pane == null || target == null || pane.getContent() == null) return;
@@ -263,6 +267,8 @@ public class EleFXAnchor extends StackPane implements Themable {
     }
 
     void activate(EleFXAnchorLink link) {
+        preferredDuplicateTargetLink = link;
+        setActive(link);
         EleFXAnchorEvent event = new EleFXAnchorEvent(this, this, EleFXAnchorEvent.CLICK, link);
         if (getOnClick() != null) getOnClick().handle(event);
         fireEvent(event);
@@ -285,8 +291,11 @@ public class EleFXAnchor extends StackPane implements Themable {
         offset.addListener(o -> queueUpdate());
         bound.addListener(o -> queueUpdate());
         selectScrollTop.addListener(o -> queueUpdate());
-        marker.addListener(o -> markerNode.setVisible(isMarker()));
-        type.addListener(o -> updateClasses());
+        marker.addListener(o -> updateMarker());
+        type.addListener(o -> {
+            updateClasses();
+            updateMarker();
+        });
         direction.addListener(o -> rebuild());
         layoutBoundsProperty().addListener(o -> updateMarker());
         markerNode.setVisible(isMarker());
@@ -335,6 +344,7 @@ public class EleFXAnchor extends StackPane implements Themable {
     }
 
     private void updateActiveLink() {
+        if (scrollAnimation != null && scrollAnimation.getStatus() == Animation.Status.RUNNING) return;
         ScrollPane pane = getContainer();
         if (pane == null || pane.getContent() == null) {
             setActive(null);
@@ -343,14 +353,21 @@ public class EleFXAnchor extends StackPane implements Themable {
         Bounds viewport = viewportInScene(pane);
         if (viewport == null) return;
         final EleFXAnchorLink[] candidate = {null};
+        final double[] candidateY = {Double.NEGATIVE_INFINITY};
         double trigger = viewport.getMinY() + getOffset() + getBound();
-        forEachLink(link -> {
+        forEachNavigableLink(link -> {
             Node target = resolveTarget(link);
             if (target == null || !target.isVisible()) return;
             Bounds targetBounds = target.localToScene(target.getBoundsInLocal());
-            if (targetBounds != null && targetBounds.getMinY() <= trigger) candidate[0] = link;
+            if (targetBounds == null || targetBounds.getMinY() > trigger) return;
+            double targetY = targetBounds.getMinY();
+            if (targetY > candidateY[0]
+                    || (Double.compare(targetY, candidateY[0]) == 0 && link == preferredDuplicateTargetLink)) {
+                candidate[0] = link;
+                candidateY[0] = targetY;
+            }
         });
-        if (candidate[0] == null && isSelectScrollTop()) forEachLink(link -> {
+        if (candidate[0] == null && isSelectScrollTop()) forEachNavigableLink(link -> {
             if (candidate[0] == null && resolveTarget(link) != null) candidate[0] = link;
         });
         setActive(candidate[0]);
@@ -373,11 +390,13 @@ public class EleFXAnchor extends StackPane implements Themable {
 
     private void updateMarker() {
         EleFXAnchorLink current = getActiveLink();
-        if (!isMarker() || current == null || getDirection() != EleFXAnchorDirection.VERTICAL) {
+        if (!isMarker() || current == null || getDirection() != EleFXAnchorDirection.VERTICAL
+                || getType() == EleFXAnchorType.UNDERLINE) {
             markerNode.setVisible(false);
             return;
         }
-        Bounds sceneBounds = current.localToScene(current.getBoundsInLocal());
+        Node currentNode = current.navigationNode();
+        Bounds sceneBounds = currentNode.localToScene(currentNode.getBoundsInLocal());
         Bounds bounds = sceneBounds == null ? null : sceneToLocal(sceneBounds);
         if (bounds == null) return;
         markerNode.setVisible(true);
@@ -402,12 +421,21 @@ public class EleFXAnchor extends StackPane implements Themable {
         }
         scrollAnimation = new Timeline(new KeyFrame(Duration.millis(getDuration()),
                 new KeyValue(pane.vvalueProperty(), value, Interpolator.EASE_BOTH)));
+        scrollAnimation.setOnFinished(event -> queueUpdate());
         scrollAnimation.play();
     }
 
     private void forEachLink(java.util.function.Consumer<EleFXAnchorLink> consumer) {
         for (EleFXAnchorLink link : links)
             visit(link, consumer);
+    }
+
+    private void forEachNavigableLink(java.util.function.Consumer<EleFXAnchorLink> consumer) {
+        if (getDirection() == EleFXAnchorDirection.HORIZONTAL) {
+            links.forEach(consumer);
+            return;
+        }
+        forEachLink(consumer);
     }
 
     private void visit(EleFXAnchorLink link, java.util.function.Consumer<EleFXAnchorLink> consumer) {

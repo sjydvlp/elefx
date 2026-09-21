@@ -118,6 +118,9 @@ public class EleFXAnchorLink extends VBox {
 
     void setOwner(EleFXAnchor value) {
         owner = value;
+        boolean showSubLinks = value == null || value.getDirection() == EleFXAnchorDirection.VERTICAL;
+        childrenBox.setVisible(showSubLinks);
+        childrenBox.setManaged(showSubLinks);
         for (EleFXAnchorLink link : subLinks)
             link.setOwner(value);
     }
@@ -129,6 +132,10 @@ public class EleFXAnchorLink extends VBox {
 
     Label titleLabel() {
         return titleLabel;
+    }
+
+    Node navigationNode() {
+        return getContent() == null ? titleLabel : getContent();
     }
 
     private void refreshContent() {

@@ -5,6 +5,7 @@ import com.sjydvlp.elefx.EleFXResourcesLoader;
 import java.io.InputStream;
 
 public enum EleFXThemes implements Theme {
+
     DEFAULT("css/self/EleFXDefault.css"),
     BUTTON("css/component/button/EleFXButton.css"),
     ICON("css/component/icon/EleFXIcon.css"),
