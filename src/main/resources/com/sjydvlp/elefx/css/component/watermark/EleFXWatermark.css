@@ -1,0 +1,6 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-watermark { -fx-background-color: transparent; -fx-background-insets: 0; -fx-font-family: "Roboto"; }
+.ele-watermark__content { -fx-alignment: top-left; }
+.ele-watermark__overlay { -fx-opacity: 1; }
