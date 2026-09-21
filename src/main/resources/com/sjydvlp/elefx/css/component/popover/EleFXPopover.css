@@ -1,0 +1,6 @@
+@import "../../common/EleFXFonts.css";
+@import "../../common/EleFXColor.css";
+
+.ele-popover { -fx-padding: 12px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.12), 12, 0, 0, 3); -fx-font-family: "Roboto"; }
+.ele-popover__body { -fx-spacing: 8px; -fx-alignment: top-left; }.ele-popover__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 16px; -fx-font-weight: 500; }.ele-popover__content { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }.ele-popover__arrow { -fx-managed: false; -fx-min-width: 10px; -fx-pref-width: 10px; -fx-max-width: 10px; -fx-min-height: 10px; -fx-pref-height: 10px; -fx-max-height: 10px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-light; -fx-border-insets: 0; -fx-border-width: 0 1px 1px 0; -fx-rotate: 45; }
+.ele-popover--dark { -fx-background-color: #303133; -fx-border-color: #303133; }.ele-popover--dark .ele-popover__title, .ele-popover--dark .ele-popover__content { -fx-text-fill: -elefx-co-basic-white; }.ele-popover--dark .ele-popover__arrow { -fx-background-color: #303133; -fx-border-color: #303133; }

@@ -13,6 +13,7 @@ public enum EleFXThemes implements Theme {
     IMAGE("css/component/image/EleFXImage.css"),
     DIALOG("css/component/dialog/EleFXDialog.css"),
     POPCONFIRM("css/component/popconfirm/EleFXPopconfirm.css"),
+    POPOVER("css/component/popover/EleFXPopover.css"),
     DRAWER("css/component/drawer/EleFXDrawer.css"),
     CARD("css/component/card/EleFXCard.css"),
     DESCRIPTIONS("css/component/descriptions/EleFXDescriptions.css"),
