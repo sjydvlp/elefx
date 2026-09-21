@@ -43,7 +43,6 @@ public enum EleFXThemes implements Theme {
     DROPDOWN("css/component/dropdown/EleFXDropdown.css"),
     BACKTOP("css/component/backtop/EleFXBacktop.css"),
     PAGE_HEADER("css/component/pageheader/EleFXPageHeader.css"),
-    INFINITE_SCROLL("css/component/infinitescroll/EleFXInfiniteScroll.css"),
     SPACE("css/component/space/EleFXSpace.css"),
     SPLITTER("css/component/splitter/EleFXSplitter.css"),
     TYPOGRAPHY("css/component/typography/EleFXTypography.css"),
