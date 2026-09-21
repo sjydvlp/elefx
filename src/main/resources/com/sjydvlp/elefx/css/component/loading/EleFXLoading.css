@@ -1,0 +1,8 @@
+@import url("../../common/EleFXColor.css");
+@import url("../../common/EleFXFonts.css");
+
+.ele-loading-mask { -fx-background-color: rgba(255,255,255,.9); -fx-background-insets: 0; -fx-font-family: "Roboto"; }
+.ele-loading-mask--fullscreen { -fx-background-color: rgba(255,255,255,.9); }
+.ele-loading-spinner { -fx-alignment: center; -fx-spacing: 8px; }
+.ele-loading-spinner__arc { -fx-stroke: -elefx-cp-1; -fx-stroke-width: 3px; -fx-fill: transparent; }
+.ele-loading-text { -fx-text-fill: -elefx-cp-1; -fx-font-size: 14px; -fx-text-alignment: center; }
