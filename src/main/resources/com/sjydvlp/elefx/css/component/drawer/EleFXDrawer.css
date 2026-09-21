@@ -1,0 +1,15 @@
+@import url("../../common/EleFXColor.css");
+@import url("../../common/EleFXFonts.css");
+
+.ele-drawer__wrapper { -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-drawer__wrapper:modal { -fx-background-color: rgba(0, 0, 0, .5); }
+.ele-drawer { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-font-family: "Roboto"; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 18, .16, 0, 0); }
+.ele-drawer__header { -fx-min-height: 56px; -fx-padding: 20px 20px 10px 20px; -fx-spacing: 12px; -fx-alignment: center-left; }
+.ele-drawer__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 18px; -fx-font-weight: normal; }
+.ele-drawer__close-btn, .ele-drawer__close-btn:focused { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 3px; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }
+.ele-drawer__close-btn .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-drawer__close-btn:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-drawer__close-btn:focused { -fx-border-color: -elefx-cp-1; }
+.ele-drawer__body { -fx-padding: 20px; -fx-spacing: 12px; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; }
+.ele-drawer__footer { -fx-padding: 10px 20px 20px 20px; -fx-spacing: 12px; -fx-alignment: center-right; }
+.ele-drawer__resize-handle { -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-drawer__resize-handle--left, .ele-drawer__resize-handle--right { -fx-min-width: 6px; -fx-pref-width: 6px; -fx-max-width: 6px; -fx-max-height: Infinity; -fx-cursor: h-resize; }
+.ele-drawer__resize-handle--top, .ele-drawer__resize-handle--bottom { -fx-min-height: 6px; -fx-pref-height: 6px; -fx-max-height: 6px; -fx-max-width: Infinity; -fx-cursor: v-resize; }
