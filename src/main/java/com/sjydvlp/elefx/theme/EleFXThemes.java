@@ -21,6 +21,7 @@ public enum EleFXThemes implements Theme {
     SKELETON("css/component/skeleton/EleFXSkeleton.css"),
     RESULT("css/component/result/EleFXResult.css"),
     ALERT("css/component/alert/EleFXAlert.css"),
+    MESSAGE("css/component/message/EleFXMessage.css"),
     LOADING("css/component/loading/EleFXLoading.css"),
     LAYOUT("css/component/layout/EleFXLayout.css"),
     CONTAINER("css/component/container/EleFXContainer.css"),
