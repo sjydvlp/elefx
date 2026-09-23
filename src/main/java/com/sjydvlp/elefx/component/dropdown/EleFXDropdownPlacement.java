@@ -7,11 +7,5 @@ public enum EleFXDropdownPlacement {
     TOP_END,
     BOTTOM_START,
     BOTTOM,
-    BOTTOM_END,
-    LEFT_START,
-    LEFT,
-    LEFT_END,
-    RIGHT_START,
-    RIGHT,
-    RIGHT_END
+    BOTTOM_END
 }
