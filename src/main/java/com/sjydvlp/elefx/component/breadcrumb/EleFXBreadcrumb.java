@@ -1,5 +1,6 @@
 package com.sjydvlp.elefx.component.breadcrumb;
 
+import com.sjydvlp.elefx.component.icon.EleFXIcon;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
@@ -24,6 +25,8 @@ import java.util.function.Supplier;
  *
  * <p>
  * Use {@link #setSeparatorIcon(Node)} to override the text {@link #setSeparator(String) separator}.
+ * An {@link EleFXIcon} is copied for every separator, matching Element Plus's component-based
+ * {@code separator-icon} behavior. Use {@link #setSeparatorIconFactory(Supplier)} for other node types.
  * Register {@link #setOnNavigate(EventHandler)} to connect item targets to your application's router.
  * </p>
  */
@@ -62,7 +65,11 @@ public class EleFXBreadcrumb extends HBox implements Themable {
         return separator;
     }
 
-    /** Icon used between items; when set, it takes precedence over {@link #getSeparator()}. */
+    /**
+     * Icon used between items; when set, it takes precedence over {@link #getSeparator()}.
+     * {@link EleFXIcon} values are copied for every separator. For another {@link Node} type with more
+     * than one separator, use {@link #setSeparatorIconFactory(Supplier)} to supply a fresh node each time.
+     */
     public Node getSeparatorIcon() {
         return separatorIcon.get();
     }
@@ -163,8 +170,17 @@ public class EleFXBreadcrumb extends HBox implements Themable {
         }
         Node icon = getSeparatorIcon();
         if (icon != null) {
-            // A node can have only one parent. Reuse is supported by cloning only through a factory-less API,
-            // so the supplied icon is used for the first separator and later separators retain the text fallback.
+            if (icon instanceof EleFXIcon template) {
+                EleFXIcon copy = new EleFXIcon(template.getType(), template.getSize());
+                copy.setColor(template.getColor());
+                copy.setLoading(template.isLoading());
+                copy.setStyle(template.getStyle());
+                copy.setOpacity(template.getOpacity());
+                copy.getStyleClass().setAll(template.getStyleClass());
+                copy.getStyleClass().add("ele-breadcrumb__separator-icon");
+                return copy;
+            }
+            // A JavaFX node can have only one parent. Custom node types need a factory when reused.
             if (icon.getParent() == null) {
                 icon.getStyleClass().add("ele-breadcrumb__separator-icon");
                 return icon;

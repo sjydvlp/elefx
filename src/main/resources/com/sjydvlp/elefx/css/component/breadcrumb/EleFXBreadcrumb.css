@@ -1,12 +1,13 @@
 @import "../../common/EleFXFonts.css";
 @import "../../common/EleFXColor.css";
 
-.ele-breadcrumb { -fx-spacing: 8px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; }
+.ele-breadcrumb { -fx-spacing: 9px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; }
 .ele-breadcrumb__item { -fx-alignment: center-left; -fx-background-color: transparent; -fx-background-insets: 0; }
 .ele-breadcrumb__inner { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-font-weight: normal; -fx-padding: 0; }
 .ele-breadcrumb__item--navigable { -fx-cursor: hand; }
+.ele-breadcrumb__item--navigable .ele-breadcrumb__inner { -fx-text-fill: -elefx-ct-primary; -fx-font-weight: bold; }
 .ele-breadcrumb__item--navigable:hover .ele-breadcrumb__inner { -fx-text-fill: -elefx-cp-1; }
-.ele-breadcrumb__item--navigable:focused { -fx-border-color: -elefx-cp-1; -fx-border-insets: -2; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
-.ele-breadcrumb__item--last .ele-breadcrumb__inner { -fx-text-fill: -elefx-ct-primary; -fx-font-weight: bold; }
-.ele-breadcrumb__separator, .ele-breadcrumb__separator-icon { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-padding: 0; -fx-opacity: 1; }
-.ele-breadcrumb__separator-icon .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
+.ele-breadcrumb__item--last .ele-breadcrumb__inner { -fx-text-fill: -elefx-ct-regular; -fx-font-weight: normal; }
+.ele-breadcrumb__separator { -fx-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 0; -fx-opacity: 1; }
+.ele-breadcrumb__separator-icon { -fx-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; -fx-font-weight: normal; -fx-padding: 0; -fx-opacity: 1; }
+.ele-breadcrumb__separator-icon .ele-icon__svg { -fx-fill: -elefx-ct-placeholder; }
