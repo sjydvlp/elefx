@@ -291,8 +291,8 @@ public class EleFXBacktop extends StackPane implements Themable {
         updateShowing(pane.getVvalue() * range >= getVisibilityHeight() && range > 0 && !isDisabled());
         Bounds viewport = viewportBoundsInScene(pane);
         Bounds parentBounds = getParent().sceneToLocal(viewport);
-        if (parentBounds != null) relocate(parentBounds.getMaxX() - getRight() - SIZE,
-                parentBounds.getMaxY() - getBottom() - SIZE);
+        if (parentBounds != null) resizeRelocate(parentBounds.getMaxX() - getRight() - SIZE,
+                parentBounds.getMaxY() - getBottom() - SIZE, SIZE, SIZE);
     }
 
     private void updateShowing(boolean value) {
