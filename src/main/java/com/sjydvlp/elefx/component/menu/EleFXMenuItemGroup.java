@@ -23,6 +23,8 @@ public class EleFXMenuItemGroup extends VBox implements EleFXMenuEntry {
 
     EleFXMenu menu;
 
+    EleFXSubMenu parent;
+
     public EleFXMenuItemGroup() {
         getStyleClass().add("ele-menu-item-group");
         titleLabel.getStyleClass().add("ele-menu-item-group__title");
@@ -72,7 +74,12 @@ public class EleFXMenuItemGroup extends VBox implements EleFXMenuEntry {
     }
 
     void install(EleFXMenu owner) {
+        install(owner, null);
+    }
+
+    void install(EleFXMenu owner, EleFXSubMenu parent) {
         menu = owner;
+        this.parent = parent;
         refresh();
     }
 
@@ -91,8 +98,9 @@ public class EleFXMenuItemGroup extends VBox implements EleFXMenuEntry {
     private void install(EleFXMenuEntry entry) {
         if (entry instanceof EleFXMenuItem item)
             item.menu = menu;
-        else if (entry instanceof EleFXSubMenu submenu)
+        else if (entry instanceof EleFXSubMenu submenu) {
+            submenu.parent = parent;
             submenu.install(menu);
-        else if (entry instanceof EleFXMenuItemGroup group) group.install(menu);
+        } else if (entry instanceof EleFXMenuItemGroup group) group.install(menu, parent);
     }
 }

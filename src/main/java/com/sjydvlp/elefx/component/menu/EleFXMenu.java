@@ -14,15 +14,18 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Element Plus inspired navigation menu.
@@ -47,6 +50,8 @@ public class EleFXMenu extends VBox implements Themable {
 
     private final StringProperty activeIndex = new SimpleStringProperty(this, "activeIndex", "");
 
+    private final StringProperty rightAlignedAfterIndex = new SimpleStringProperty(this, "rightAlignedAfterIndex", "");
+
     private final StringProperty backgroundColor = new SimpleStringProperty(this, "backgroundColor", "");
 
     private final StringProperty textColor = new SimpleStringProperty(this, "textColor", "");
@@ -65,7 +70,7 @@ public class EleFXMenu extends VBox implements Themable {
 
     private final ObservableList<String> defaultOpeneds = FXCollections.observableArrayList();
 
-    private final FlowPane horizontalContent = new FlowPane(Orientation.HORIZONTAL);
+    private final HBox horizontalContent = new HBox();
 
     private final ObjectProperty<EventHandler<EleFXMenuEvent>> onSelect = new SimpleObjectProperty<>(this, "onSelect");
 
@@ -169,6 +174,19 @@ public class EleFXMenu extends VBox implements Themable {
 
     public StringProperty activeIndexProperty() {
         return activeIndex;
+    }
+
+    /** In horizontal mode, places the entries following this top-level index on the right. */
+    public String getRightAlignedAfterIndex() {
+        return rightAlignedAfterIndex.get();
+    }
+
+    public void setRightAlignedAfterIndex(String value) {
+        rightAlignedAfterIndex.set(value == null ? "" : value);
+    }
+
+    public StringProperty rightAlignedAfterIndexProperty() {
+        return rightAlignedAfterIndex;
     }
 
     public ObservableList<String> getDefaultOpeneds() {
@@ -328,7 +346,7 @@ public class EleFXMenu extends VBox implements Themable {
 
     void select(EleFXMenuItem item) {
         setActiveIndex(item.getIndex());
-        closeAll();
+        if (getMode() == EleFXMenuMode.HORIZONTAL || isCollapse()) closeAll();
         emit(EleFXMenuEvent.SELECT, item.getIndex(), pathFor(item), item);
     }
 
@@ -340,6 +358,9 @@ public class EleFXMenu extends VBox implements Themable {
     }
 
     void close(EleFXSubMenu sub) {
+        if (!sub.isExpanded()) return;
+        for (EleFXSubMenu candidate : submenus())
+            if (candidate.parent == sub) close(candidate);
         sub.setExpandedFromMenu(false);
         emit(EleFXMenuEvent.CLOSE, sub.getIndex(), pathFor(sub), null);
     }
@@ -361,9 +382,11 @@ public class EleFXMenu extends VBox implements Themable {
     private void initialize() {
         getStyleClass().add("ele-menu");
         horizontalContent.getStyleClass().add("ele-menu__horizontal-content");
+        horizontalContent.setMaxWidth(Double.MAX_VALUE);
         items.addListener((javafx.collections.ListChangeListener<EleFXMenuEntry>) c -> refresh());
         mode.addListener(o -> refresh());
         collapse.addListener(o -> refresh());
+        rightAlignedAfterIndex.addListener(o -> refresh());
         activeIndex.addListener(o -> refreshStates());
         backgroundColor.addListener(o -> applyInlineColors());
         textColor.addListener(o -> applyInlineColors());
@@ -379,9 +402,19 @@ public class EleFXMenu extends VBox implements Themable {
             horizontalContent.getChildren().clear();
             getChildren().add(container);
         }
+        String rightAlignedAfter = getRightAlignedAfterIndex();
+        boolean spacerInserted = false;
         for (EleFXMenuEntry entry : items) {
             install(entry, null);
             (container == null ? getChildren() : horizontalContent.getChildren()).add(entry.node());
+            if (container != null && !spacerInserted && !rightAlignedAfter.isBlank()
+                    && (entry instanceof EleFXMenuItem item && rightAlignedAfter.equals(item.getIndex())
+                            || entry instanceof EleFXSubMenu sub && rightAlignedAfter.equals(sub.getIndex()))) {
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                horizontalContent.getChildren().add(spacer);
+                spacerInserted = true;
+            }
         }
         for (String index : defaultOpeneds)
             open(index);
@@ -398,22 +431,43 @@ public class EleFXMenu extends VBox implements Themable {
         else if (entry instanceof EleFXSubMenu sub) {
             sub.parent = parent;
             sub.install(this);
-        } else if (entry instanceof EleFXMenuItemGroup group) group.install(this);
+        } else if (entry instanceof EleFXMenuItemGroup group) group.install(this, parent);
     }
 
     private void refreshStates() {
         for (EleFXMenuItem item : menuItems())
             item.refresh();
+        for (EleFXSubMenu sub : submenus())
+            sub.refreshState();
     }
 
     private void applyInlineColors() {
         StringBuilder css = new StringBuilder();
-        if (!getBackgroundColor().isBlank())
-            css.append("-fx-background-color: ").append(getBackgroundColor()).append(';');
-        if (!getTextColor().isBlank()) css.append("-fx-text-fill: ").append(getTextColor()).append(';');
+        if (!getBackgroundColor().isBlank()) {
+            css.append("-elefx-menu-bg-color: ").append(getBackgroundColor()).append(';');
+            try {
+                Color color = Color.web(getBackgroundColor());
+                css.append("-elefx-menu-hover-bg-color: ").append(shade(color)).append(';');
+            } catch (IllegalArgumentException ignored) {
+                // Leave the stylesheet's hover color in place for unsupported CSS colors.
+            }
+        }
+        if (!getTextColor().isBlank())
+            css.append("-elefx-menu-text-color: ").append(getTextColor()).append(';');
         if (!getActiveTextColor().isBlank())
             css.append("-elefx-menu-active-color: ").append(getActiveTextColor()).append(';');
         setStyle(css.toString());
+        for (EleFXSubMenu sub : submenus())
+            sub.applyMenuStyle();
+    }
+
+    private static String shade(Color color) {
+        int red = (int) Math.round(color.getRed() * 255 * 0.8);
+        int green = (int) Math.round(color.getGreen() * 255 * 0.8);
+        int blue = (int) Math.round(color.getBlue() * 255 * 0.8);
+        if (color.getOpacity() == 1)
+            return String.format(Locale.ROOT, "#%02x%02x%02x", red, green, blue);
+        return String.format(Locale.ROOT, "rgba(%d,%d,%d,%s)", red, green, blue, color.getOpacity());
     }
 
     private void closeAll() {

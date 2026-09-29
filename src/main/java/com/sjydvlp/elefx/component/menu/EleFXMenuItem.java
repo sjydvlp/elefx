@@ -111,7 +111,8 @@ public class EleFXMenuItem extends HBox implements EleFXMenuEntry {
 
     void refresh() {
         getStyleClass().removeAll("ele-menu-item--active", "ele-menu-item--collapsed");
-        if (menu != null && getIndex().equals(menu.getActiveIndex())) getStyleClass().add("ele-menu-item--active");
+        if (menu != null && !getIndex().isEmpty() && getIndex().equals(menu.getActiveIndex()))
+            getStyleClass().add("ele-menu-item--active");
         if (menu != null && menu.isCollapse() && menu.getMode() == EleFXMenuMode.VERTICAL)
             getStyleClass().add("ele-menu-item--collapsed");
     }
