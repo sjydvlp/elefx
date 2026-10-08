@@ -286,6 +286,37 @@
     -fx-text-fill: -elefx-button-solid-text; -fx-background-color: -elefx-button-main; -fx-border-color: -elefx-button-main;
 }
 
+.ele-button--default:focused {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-darker;
+}
+
+.ele-button--primary:focused,
+.ele-button--success:focused,
+.ele-button--info:focused,
+.ele-button--warning:focused,
+.ele-button--danger:focused {
+    -fx-background-color: -elefx-button-main;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--plain:focused {
+    -elefx-button-icon-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -fx-background-color: -elefx-button-light;
+    -fx-border-color: -elefx-button-main;
+}
+
+.ele-button--link:focused,
+.ele-button--text:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.ele-button--text-bg:focused {
+    -fx-background-color: -elefx-button-light;
+}
+
 .ele-button:hover { -fx-background-color: -elefx-button-hover; -fx-border-color: -elefx-button-hover; }
 .ele-button:pressed { -fx-opacity: 0.86; }
 
@@ -367,37 +398,6 @@
     -fx-border-insets: 0;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
-}
-
-.ele-button--default:focused {
-    -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
-}
-
-.ele-button--primary:focused,
-.ele-button--success:focused,
-.ele-button--info:focused,
-.ele-button--warning:focused,
-.ele-button--danger:focused {
-    -fx-background-color: -elefx-button-main;
-    -fx-border-color: -elefx-button-main;
-}
-
-.ele-button--plain:focused {
-    -elefx-button-icon-color: -elefx-button-main;
-    -fx-text-fill: -elefx-button-main;
-    -fx-background-color: -elefx-button-light;
-    -fx-border-color: -elefx-button-main;
-}
-
-.ele-button--link:focused,
-.ele-button--text:focused {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-}
-
-.ele-button--text-bg:focused {
-    -fx-background-color: -elefx-button-light;
 }
 
 .ele-button--round:focused,
