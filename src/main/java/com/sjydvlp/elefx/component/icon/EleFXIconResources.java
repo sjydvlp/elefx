@@ -36,7 +36,9 @@ final class EleFXIconResources {
             StringBuilder pathData = new StringBuilder();
             while (matcher.find()) {
                 if (pathData.length() > 0) {
-                    pathData.append(' ');
+                    // Each SVG <path> starts with its own coordinate origin. Reset the
+                    // current point before appending a path that may start with "m".
+                    pathData.append(" M0 0 ");
                 }
                 pathData.append(matcher.group(1));
             }

@@ -5,20 +5,27 @@ import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import javafx.beans.DefaultProperty;
+import javafx.css.PseudoClass;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -28,11 +35,14 @@ import javafx.scene.layout.VBox;
  * <p>
  * The named Element Plus slots map to node properties: {@linkplain #breadcrumbProperty()
  * breadcrumb}, {@linkplain #iconProperty() icon}, {@linkplain #titleProperty() title},
- * {@linkplain #contentProperty() content}, and {@linkplain #extraProperty() extra}. Add the
- * default-slot content through {@link #getBodyChildren()}.
+ * {@linkplain #contentProperty() content}, and {@linkplain #extraProperty() extra}. Set the
+ * default content with {@link #setDefault(Node...)} or as direct child elements in FXML.
  * </p>
  */
+@DefaultProperty("bodyChildren")
 public class EleFXPageHeader extends VBox implements Themable {
+
+    private static final PseudoClass KEYBOARD_FOCUSED = PseudoClass.getPseudoClass("keyboard-focused");
 
     private final StringProperty titleText = new SimpleStringProperty(this, "titleText", "Back");
 
@@ -41,7 +51,7 @@ public class EleFXPageHeader extends VBox implements Themable {
     private final ObjectProperty<Node> breadcrumb = new SimpleObjectProperty<>(this, "breadcrumb");
 
     private final ObjectProperty<Node> icon = new SimpleObjectProperty<>(this, "icon",
-            new EleFXIcon(EleFXIconType.BACK, 20));
+            new EleFXIcon(EleFXIconType.BACK, 16));
 
     private final ObjectProperty<Node> title = new SimpleObjectProperty<>(this, "title");
 
@@ -56,7 +66,11 @@ public class EleFXPageHeader extends VBox implements Themable {
 
     private final HBox header = new HBox();
 
+    private final HBox left = new HBox();
+
     private final HBox back = new HBox();
+
+    private final Region divider = new Region();
 
     private final StackPane iconBox = new StackPane();
 
@@ -72,13 +86,27 @@ public class EleFXPageHeader extends VBox implements Themable {
 
     private final Label contentLabel = new Label();
 
+    private boolean keyboardNavigation;
+
+    private final EventHandler<KeyEvent> keyboardNavigationHandler = event -> {
+        if (event.getCode() == KeyCode.TAB) {
+            keyboardNavigation = true;
+            updateBackFocusStyle();
+        }
+    };
+
+    private final EventHandler<MouseEvent> mouseNavigationHandler = event -> {
+        keyboardNavigation = false;
+        updateBackFocusStyle();
+    };
+
     public EleFXPageHeader() {
         initialize();
     }
 
-    public EleFXPageHeader(Node... bodyContent) {
-        this();
-        if (bodyContent != null) getBodyChildren().addAll(bodyContent);
+    /** Replaces the default content. Passing {@code null} clears it. */
+    public void setDefault(Node... content) {
+        body.getChildren().setAll(content == null ? java.util.List.of() : java.util.Arrays.asList(content));
     }
 
     /** Text used when no custom {@link #getTitle() title node} is present. Defaults to {@code Back}. */
@@ -160,11 +188,6 @@ public class EleFXPageHeader extends VBox implements Themable {
         return icon;
     }
 
-    /** Convenience replacement for the icon slot. A {@code null} type hides the icon. */
-    public void setIconType(EleFXIconType value) {
-        setIcon(value == null ? null : new EleFXIcon(value, 20));
-    }
-
     /** Custom node for the back title; it overrides {@link #getTitleText()}. */
     public Node getTitleNode() {
         return title.get();
@@ -215,21 +238,9 @@ public class EleFXPageHeader extends VBox implements Themable {
         return onBack;
     }
 
-    /** Container for the Element Plus default slot. */
-    public VBox getBody() {
-        return body;
-    }
-
+    /** Default content list. Direct child elements in FXML are added here. */
     public ObservableList<Node> getBodyChildren() {
         return body.getChildren();
-    }
-
-    public HBox getHeader() {
-        return header;
-    }
-
-    public HBox getBack() {
-        return back;
     }
 
     /** Emits the {@link EleFXPageHeaderEvent#BACK} event unless this header is disabled. */
@@ -262,9 +273,25 @@ public class EleFXPageHeader extends VBox implements Themable {
         breadcrumbBox.getStyleClass().add("ele-page-header__breadcrumb");
         header.getStyleClass().add("ele-page-header__header");
         header.setAlignment(Pos.CENTER_LEFT);
-        back.getStyleClass().add("ele-page-header__left");
+        left.getStyleClass().add("ele-page-header__left");
+        left.setAlignment(Pos.CENTER_LEFT);
+        back.getStyleClass().add("ele-page-header__back");
         back.setAlignment(Pos.CENTER_LEFT);
         back.setFocusTraversable(true);
+        back.focusedProperty().addListener((observable, oldValue, newValue) -> updateBackFocusStyle());
+        sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (oldScene != null) {
+                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, keyboardNavigationHandler);
+                oldScene.removeEventFilter(MouseEvent.MOUSE_PRESSED, mouseNavigationHandler);
+            }
+            keyboardNavigation = false;
+            updateBackFocusStyle();
+            if (newScene != null) {
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, keyboardNavigationHandler);
+                newScene.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseNavigationHandler);
+            }
+        });
+        divider.getStyleClass().add("ele-page-header__divider");
         iconBox.getStyleClass().add("ele-page-header__icon");
         titleBox.getStyleClass().add("ele-page-header__title");
         contentBox.getStyleClass().add("ele-page-header__content");
@@ -274,10 +301,12 @@ public class EleFXPageHeader extends VBox implements Themable {
         contentLabel.getStyleClass().add("ele-page-header__content-text");
         body.getStyleClass().add("ele-page-header__body");
         body.setFillWidth(true);
-        HBox.setHgrow(contentBox, Priority.ALWAYS);
+        HBox.setHgrow(left, Priority.ALWAYS);
         HBox.setHgrow(extraBox, Priority.NEVER);
+        HBox.setMargin(divider, new Insets(0, 0, 0, 16));
         back.getChildren().addAll(iconBox, titleBox);
-        header.getChildren().addAll(back, contentBox, extraBox);
+        left.getChildren().addAll(back, divider, contentBox);
+        header.getChildren().addAll(left, extraBox);
         getChildren().addAll(breadcrumbBox, header, body);
         titleText.addListener(observable -> refreshTitle());
         contentText.addListener(observable -> refreshContent());
@@ -285,7 +314,8 @@ public class EleFXPageHeader extends VBox implements Themable {
         icon.addListener(observable -> refreshNode(iconBox, getIcon()));
         title.addListener(observable -> refreshTitle());
         content.addListener(observable -> refreshContent());
-        extra.addListener(observable -> refreshNode(extraBox, getExtra()));
+        extra.addListener(observable -> refreshExtra());
+        body.getChildren().addListener((ListChangeListener<Node>) change -> refreshBody());
         disabledProperty().addListener(observable -> back.setDisable(isDisabled()));
         back.setOnMouseClicked(event -> fireBackEvent());
         back.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
@@ -298,18 +328,37 @@ public class EleFXPageHeader extends VBox implements Themable {
         refreshNode(iconBox, getIcon());
         refreshTitle();
         refreshContent();
-        refreshNode(extraBox, getExtra());
+        refreshExtra();
+        refreshBody();
         sceneBuilderIntegration();
     }
 
     private void refreshTitle() {
-        refreshNode(titleBox, getTitleNode() == null ? titleLabel : getTitleNode());
         titleLabel.setText(getTitleText());
+        refreshNode(titleBox, getTitleNode() == null ? titleLabel : getTitleNode());
     }
 
     private void refreshContent() {
-        refreshNode(contentBox, getContentNode() == null ? contentLabel : getContentNode());
         contentLabel.setText(getContentText());
+        refreshNode(contentBox, getContentNode() == null ? contentLabel : getContentNode());
+        boolean hasContent = contentBox.isManaged();
+        divider.setVisible(hasContent);
+        divider.setManaged(hasContent);
+    }
+
+    private void refreshExtra() {
+        refreshNode(extraBox, getExtra());
+        HBox.setMargin(left, extraBox.isManaged() ? new Insets(0, 40, 0, 0) : Insets.EMPTY);
+    }
+
+    private void refreshBody() {
+        boolean hasBody = !body.getChildren().isEmpty();
+        body.setVisible(hasBody);
+        body.setManaged(hasBody);
+    }
+
+    private void updateBackFocusStyle() {
+        back.pseudoClassStateChanged(KEYBOARD_FOCUSED, keyboardNavigation && back.isFocused());
     }
 
     private static void refreshNode(StackPane box, Node node) {
