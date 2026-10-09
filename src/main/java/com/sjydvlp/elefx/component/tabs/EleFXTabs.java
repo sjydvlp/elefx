@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.util.Callback;
 
 import java.util.IdentityHashMap;
@@ -78,11 +79,27 @@ public class EleFXTabs extends BorderPane implements Themable {
 
     private final ObjectProperty<EventHandler<EleFXTabsEvent>> onEdit = new SimpleObjectProperty<>(this, "onEdit");
 
-    private final HBox horizontalNav = new HBox();
+    private final HBox horizontalNav = new HBox() {
 
-    private final VBox verticalNav = new VBox();
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            layoutActiveLine();
+        }
+    };
+
+    private final VBox verticalNav = new VBox() {
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            layoutActiveLine();
+        }
+    };
 
     private final StackPane content = new StackPane();
+
+    private final Region activeLine = new Region();
 
     private final Map<EleFXTabPane, Button> tabButtons = new IdentityHashMap<>();
 
@@ -346,14 +363,23 @@ public class EleFXTabs extends BorderPane implements Themable {
     private void initialize() {
         getStyleClass().add("ele-tabs");
         horizontalNav.getStyleClass().add("ele-tabs__nav");
+        horizontalNav.setAlignment(Pos.CENTER_LEFT);
+        BorderPane.setAlignment(horizontalNav, Pos.CENTER_LEFT);
         verticalNav.getStyleClass().add("ele-tabs__nav");
+        activeLine.getStyleClass().add("ele-tabs__active-line");
+        activeLine.setManaged(false);
+        activeLine.setMouseTransparent(true);
         content.getStyleClass().add("ele-tabs__content");
         panes.addListener((ListChangeListener<EleFXTabPane>) c -> rebuild());
         value.addListener((o, oldValue, newValue) -> selectChanged(oldValue, newValue));
         defaultValue.addListener((o, oldValue, newValue) -> {
             if (getValue() == null) setValue(newValue);
         });
-        type.addListener(o -> updateClasses());
+        type.addListener(o -> {
+            updateClasses();
+            horizontalNav.requestLayout();
+            verticalNav.requestLayout();
+        });
         tabPosition.addListener(o -> rebuild());
         closable.addListener(o -> rebuild());
         addable.addListener(o -> rebuild());
@@ -380,6 +406,8 @@ public class EleFXTabs extends BorderPane implements Themable {
                 if (pane.getName() == null) pane.setName(i);
                 install(pane);
                 Button button = createButton(pane);
+                if (i == 0) button.getStyleClass().add("ele-tabs__item--first");
+                if (i == panes.size() - 1) button.getStyleClass().add("ele-tabs__item--last");
                 tabButtons.put(pane, button);
                 nav().getChildren().add(button);
                 StackPane holder = new StackPane();
@@ -388,6 +416,7 @@ public class EleFXTabs extends BorderPane implements Themable {
                 content.getChildren().add(holder);
             }
             if (canAdd()) nav().getChildren().add(createAddButton());
+            nav().getChildren().add(activeLine);
             if (getValue() == null && !panes.isEmpty())
                 setValue(getDefaultValue() != null ? getDefaultValue() : panes.get(0).getName());
             if (selectedPane() == null && !panes.isEmpty()) setValue(panes.get(0).getName());
@@ -416,6 +445,9 @@ public class EleFXTabs extends BorderPane implements Themable {
         button.setContentDisplay(ContentDisplay.LEFT);
         button.setFocusTraversable(true);
         renderLabel(button, pane);
+        button.fontProperty().addListener(o -> horizontalNav.requestLayout());
+        if (button.getGraphic() != null)
+            button.getGraphic().layoutBoundsProperty().addListener(o -> horizontalNav.requestLayout());
         button.setDisable(isDisable() || pane.isDisabled());
         button.setOnAction(e -> activate(pane, null));
         button.setOnKeyPressed(e -> navigate(pane, e));
@@ -513,6 +545,8 @@ public class EleFXTabs extends BorderPane implements Themable {
                     holder.getChildren().setAll(pane.getContent() == null ? new Region() : pane.getContent());
             }
         }
+        horizontalNav.requestLayout();
+        verticalNav.requestLayout();
     }
 
     private void remove(EleFXTabPane pane) {
@@ -556,8 +590,58 @@ public class EleFXTabs extends BorderPane implements Themable {
     private void updateStretch() {
         for (Button b : tabButtons.values()) {
             HBox.setHgrow(b, isStretch() && nav() == horizontalNav ? Priority.ALWAYS : Priority.NEVER);
-            b.setMaxWidth(isStretch() && nav() == horizontalNav ? Double.MAX_VALUE : Region.USE_COMPUTED_SIZE);
+            b.setMaxWidth(nav() == verticalNav || isStretch() ? Double.MAX_VALUE : Region.USE_COMPUTED_SIZE);
         }
+    }
+
+    private void layoutActiveLine() {
+        if (getType() != EleFXTabsType.DEFAULT && getType() != EleFXTabsType.CARD
+                && getType() != EleFXTabsType.BORDER_CARD) {
+            activeLine.setVisible(false);
+            return;
+        }
+        Button button = tabButtons.get(selectedPane());
+        if (button == null || button.getWidth() <= 0) {
+            activeLine.setVisible(false);
+            return;
+        }
+        if (getType() == EleFXTabsType.DEFAULT && nav() == verticalNav) {
+            double x = getTabPosition() == EleFXTabsPosition.RIGHT ? 0 : verticalNav.getWidth() - 2;
+            activeLine.resizeRelocate(x, button.getLayoutY(), 2, button.getHeight());
+            activeLine.setVisible(true);
+            return;
+        }
+        if (getType() == EleFXTabsType.CARD || getType() == EleFXTabsType.BORDER_CARD) {
+            if (nav() == horizontalNav) {
+                double y = getTabPosition() == EleFXTabsPosition.BOTTOM ? 0 : horizontalNav.getHeight() - 1;
+                activeLine.resizeRelocate(button.getLayoutX(), y, button.getWidth(), 1);
+            } else {
+                double x = getTabPosition() == EleFXTabsPosition.RIGHT ? 0 : verticalNav.getWidth() - 1;
+                activeLine.resizeRelocate(x, button.getLayoutY(), 1, button.getHeight());
+            }
+            activeLine.setVisible(true);
+            return;
+        }
+        double labelWidth = 0;
+        if (button.getText() != null && !button.getText().isEmpty()) {
+            Text text = new Text(button.getText());
+            text.setFont(button.getFont());
+            labelWidth = text.getLayoutBounds().getWidth();
+        }
+        if (button.getGraphic() != null) {
+            double graphicWidth = button.getGraphic().getLayoutBounds().getWidth();
+            labelWidth += graphicWidth + (labelWidth > 0 ? button.getGraphicTextGap() : 0);
+        }
+        labelWidth = Math.min(labelWidth, button.getWidth());
+        double leftPadding = button.getPadding().getLeft();
+        double rightPadding = button.getPadding().getRight();
+        double contentWidth = Math.max(0, button.getWidth() - leftPadding - rightPadding);
+        double x = button.getLayoutX() + leftPadding + Math.max(0, (contentWidth - labelWidth) / 2);
+        double y = getTabPosition() == EleFXTabsPosition.BOTTOM
+                ? button.getLayoutY()
+                : button.getLayoutY() + button.getHeight() - 2;
+        activeLine.resizeRelocate(x, y, labelWidth, 2);
+        activeLine.setVisible(true);
     }
 
     private EleFXTabPane selectedPane() {
