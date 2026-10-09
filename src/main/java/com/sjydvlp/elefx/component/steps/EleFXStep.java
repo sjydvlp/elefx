@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
 
 /**
  * One item in {@link EleFXSteps}. Text properties are convenient defaults;
@@ -20,6 +21,10 @@ import javafx.scene.layout.VBox;
  * {@link #iconProperty()} accept arbitrary JavaFX nodes, like Element Plus slots.
  */
 public class EleFXStep extends Pane {
+
+    private static final double CUSTOM_ICON_SIZE = 25;
+
+    private static final double CUSTOM_ICON_HEAD_WIDTH = 40;
 
     private final StringProperty title = new SimpleStringProperty(this, "title", "");
 
@@ -41,11 +46,15 @@ public class EleFXStep extends Pane {
 
     private final EleFXIcon errorIcon = new EleFXIcon(EleFXIconType.CLOSE, 16);
 
-    private final Pane line = new Pane();
+    private final StackPane line = new StackPane();
+
+    private final SVGPath arrow = new SVGPath();
 
     private final VBox text = new VBox();
 
     private final Label titleLabel = new Label();
+
+    private final Label titleWidthProbe = new Label();
 
     private final Label descriptionLabel = new Label();
 
@@ -54,6 +63,8 @@ public class EleFXStep extends Pane {
     private int index;
 
     private boolean last;
+
+    private boolean lineComplete;
 
     private EleFXStepsDirection direction = EleFXStepsDirection.HORIZONTAL;
 
@@ -148,10 +159,12 @@ public class EleFXStep extends Pane {
         descriptionNode.set(value);
     }
 
-    void configure(int index, boolean last, EleFXStepStatus calculatedStatus, EleFXStepsDirection direction,
+    void configure(int index, boolean last, boolean lineComplete, EleFXStepStatus calculatedStatus,
+                   EleFXStepsDirection direction,
                    boolean simple, boolean alignCenter) {
         this.index = index;
         this.last = last;
+        this.lineComplete = lineComplete;
         this.effectiveStatus = getStatus() == null ? calculatedStatus : getStatus();
         this.direction = direction;
         this.simple = simple;
@@ -166,9 +179,16 @@ public class EleFXStep extends Pane {
         finishIcon.getStyleClass().add("ele-step__icon-inner");
         errorIcon.getStyleClass().add("ele-step__icon-inner");
         line.getStyleClass().add("ele-step__line");
+        arrow.setContent("M1 1 L7 7 L1 13");
+        arrow.getStyleClass().add("ele-step__arrow");
+        line.getChildren().add(arrow);
         text.getStyleClass().add("ele-step__main");
         titleLabel.getStyleClass().add("ele-step__title");
+        titleWidthProbe.getStyleClass().addAll("ele-step__title", "ele-step__title-width-probe");
+        titleWidthProbe.setManaged(false);
+        titleWidthProbe.setVisible(false);
         descriptionLabel.getStyleClass().add("ele-step__description");
+        getChildren().addAll(line, indicator, text, titleWidthProbe);
         titleLabel.setWrapText(true);
         descriptionLabel.setWrapText(true);
         InvalidationListener refresh = ignored -> refresh();
@@ -188,13 +208,22 @@ public class EleFXStep extends Pane {
 
     private void refresh() {
         titleLabel.setText(getTitle());
+        titleWidthProbe.setText(getTitle());
         descriptionLabel.setText(getDescription());
         Node visual = getIcon();
+        if (visual instanceof EleFXIcon customIcon && customIcon.getSize() == EleFXIcon.DEFAULT_SIZE)
+            customIcon.setSize(CUSTOM_ICON_SIZE);
         if (visual == null)
             visual = effectiveStatus == EleFXStepStatus.FINISH || effectiveStatus == EleFXStepStatus.SUCCESS
                     ? finishIcon
                     : effectiveStatus == EleFXStepStatus.ERROR ? errorIcon : number;
         number.setText(Integer.toString(index + 1));
+        arrow.setVisible(simple && !last);
+        arrow.setManaged(simple && !last);
+        if (getIcon()instanceof EleFXIcon customIcon) {
+            customIcon.setScaleX(simple ? 0.72 : 1);
+            customIcon.setScaleY(simple ? 0.72 : 1);
+        }
         indicator.getChildren().setAll(visual);
         Node actualTitle = getTitleNode() == null ? titleLabel : getTitleNode();
         Node actualDescription = getDescriptionNode() == null ? descriptionLabel : getDescriptionNode();
@@ -207,8 +236,10 @@ public class EleFXStep extends Pane {
         getStyleClass().add("ele-step--" + direction.name().toLowerCase());
         if (simple) getStyleClass().add("ele-step--simple");
         if (alignCenter) getStyleClass().add("ele-step--center");
+        if (getIcon() != null) getStyleClass().add("ele-step--custom-icon");
         if (last) getStyleClass().add("is-last");
-        text.setAlignment(alignCenter ? Pos.TOP_CENTER : Pos.TOP_LEFT);
+        if (lineComplete) getStyleClass().add("ele-step--line-complete");
+        text.setAlignment(simple ? Pos.CENTER_LEFT : alignCenter ? Pos.TOP_CENTER : Pos.TOP_LEFT);
         requestLayout();
     }
 
@@ -216,34 +247,54 @@ public class EleFXStep extends Pane {
     protected void layoutChildren() {
         double w = getWidth(), h = getHeight();
         if (simple) {
-            indicator.resizeRelocate(0, 0, 0, 0);
-            text.resizeRelocate(0, 0, Math.max(0, w - (last ? 0 : 20)), h);
-            line.resizeRelocate(Math.max(0, w - 16), 9, last ? 0 : 12, 2);
+            double availableTextWidth = Math.max(0, w - 26);
+            double titleWidth = Math.min(simpleTitleWidth(),
+                    last ? availableTextWidth : availableTextWidth / 2);
+            indicator.resizeRelocate(0, Math.max(0, (h - 16) / 2), 16, 16);
+            text.resizeRelocate(26, getTitleNode() == null ? -2 : 0, titleWidth, h);
+            line.resizeRelocate(26 + titleWidth, 0,
+                    last ? 0 : Math.max(0, availableTextWidth - titleWidth), h);
             return;
         }
         if (direction == EleFXStepsDirection.VERTICAL) {
             indicator.resizeRelocate(0, 0, 24, 24);
-            text.resizeRelocate(36, 2, Math.max(0, w - 36), h - 2);
-            line.resizeRelocate(11, 28, 2, Math.max(0, h - 28));
+            text.resizeRelocate(34, 0, Math.max(0, w - 34), h);
+            line.resizeRelocate(11, 24, 2, last ? 0 : Math.max(0, h - 24));
         } else if (alignCenter) {
-            indicator.resizeRelocate(Math.max(0, (w - 24) / 2), 0, 24, 24);
-            text.resizeRelocate(0, 32, w, Math.max(0, h - 32));
-            line.resizeRelocate(w - 2, 11, last ? 0 : Math.max(0, w / 2), 2);
+            double headWidth = getIcon() == null ? 24 : CUSTOM_ICON_HEAD_WIDTH;
+            double indicatorX = Math.max(0, (w - headWidth) / 2);
+            indicator.resizeRelocate(indicatorX, 0, headWidth, 24);
+            text.resizeRelocate(0, 24, w, Math.max(0, h - 24));
+            line.resizeRelocate(indicatorX + headWidth, 11, last ? 0 : Math.max(0, w - 24), 2);
         } else {
-            indicator.resizeRelocate(0, 0, 24, 24);
-            text.resizeRelocate(36, 2, Math.max(0, w - 36), h - 2);
-            line.resizeRelocate(30, 11, last ? 0 : Math.max(0, w - 30), 2);
+            double headWidth = getIcon() == null ? 24 : CUSTOM_ICON_HEAD_WIDTH;
+            indicator.resizeRelocate(0, 0, headWidth, 24);
+            text.resizeRelocate(0, 24, w, Math.max(0, h - 24));
+            line.resizeRelocate(headWidth, 11, last ? 0 : Math.max(0, w - headWidth), 2);
         }
     }
 
     @Override
     protected double computePrefHeight(double width) {
-        if (simple) return 32;
-        double contentWidth = direction == EleFXStepsDirection.VERTICAL || !alignCenter
-                ? Math.max(0, width - 36)
-                : width;
-        return Math.max(24,
-                text.prefHeight(contentWidth) + (direction == EleFXStepsDirection.HORIZONTAL && alignCenter ? 32 : 2))
-                + (direction == EleFXStepsDirection.VERTICAL ? 24 : 0);
+        if (simple) {
+            double availableTextWidth = Math.max(0, width - 26);
+            double titleWidth = Math.min(simpleTitleWidth(),
+                    last ? availableTextWidth : availableTextWidth / 2);
+            return Math.max(20, text.prefHeight(titleWidth));
+        }
+        if (direction == EleFXStepsDirection.HORIZONTAL)
+            return Math.max(getDescriptionNode() != null || !getDescription().isBlank() ? 77 : 62,
+                    text.prefHeight(width) + 24);
+        return Math.max(24, text.prefHeight(Math.max(0, width - 34))) + (last ? 0 : 24);
+    }
+
+    @Override
+    protected double computePrefWidth(double height) {
+        return simple ? 26 + simpleTitleWidth() : super.computePrefWidth(height);
+    }
+
+    private double simpleTitleWidth() {
+        double width = text.prefWidth(-1);
+        return Math.ceil(getTitleNode() == null ? Math.max(width, titleWidthProbe.prefWidth(-1)) : width);
     }
 }

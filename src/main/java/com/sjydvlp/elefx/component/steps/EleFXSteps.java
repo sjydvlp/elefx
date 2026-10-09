@@ -17,6 +17,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 
 /** Element Plus inspired progress-navigation component. */
 public class EleFXSteps extends Pane implements Themable {
@@ -36,7 +37,7 @@ public class EleFXSteps extends Pane implements Themable {
 
     private final BooleanProperty simple = new SimpleBooleanProperty(this, "simple", false);
 
-    /** Positive fixed item width; zero lets horizontal steps share available width. */
+    /** Fixed item width horizontally or height vertically; zero uses automatic sizing. */
     private final DoubleProperty space = new SimpleDoubleProperty(this, "space", 0);
 
     private final ObservableList<EleFXStep> items = FXCollections.observableArrayList();
@@ -173,6 +174,10 @@ public class EleFXSteps extends Pane implements Themable {
     private void initialize() {
         getStyleClass().add("ele-steps");
         setMaxWidth(Double.MAX_VALUE);
+        Rectangle viewport = new Rectangle();
+        viewport.widthProperty().bind(widthProperty());
+        viewport.heightProperty().bind(heightProperty());
+        setClip(viewport);
         active.addListener((observable, oldValue, newValue) -> {
             refresh();
             EleFXStepsChangeEvent event = new EleFXStepsChangeEvent(this, this, oldValue.intValue(),
@@ -199,7 +204,7 @@ public class EleFXSteps extends Pane implements Themable {
         if (isSimple()) getStyleClass().add("ele-steps--simple");
         if (isAlignCenter() && !isSimple()) getStyleClass().add("ele-steps--center");
         for (int i = 0; i < items.size(); i++)
-            items.get(i).configure(i, i == items.size() - 1,
+            items.get(i).configure(i, i == items.size() - 1, i + 1 < getActive(),
                     i < getActive() ? getFinishStatus() : i == getActive() ? getProcessStatus() : EleFXStepStatus.WAIT,
                     actualDirection, isSimple(), isAlignCenter() && !isSimple());
         requestLayout();
@@ -209,32 +214,64 @@ public class EleFXSteps extends Pane implements Themable {
     protected void layoutChildren() {
         double x = 0, y = 0, w = getWidth();
         if (!isSimple() && getDirection() == EleFXStepsDirection.VERTICAL) {
-            for (EleFXStep item : items) {
-                double h = item.prefHeight(w);
+            for (int i = 0; i < items.size(); i++) {
+                EleFXStep item = items.get(i);
+                double h = verticalItemHeight(i, w);
                 item.resizeRelocate(0, y, w, h);
                 y += h;
             }
         } else {
-            double itemWidth = !isSimple() && getSpace() > 0 ? getSpace() : (items.isEmpty() ? 0 : w / items.size());
-            for (EleFXStep item : items) {
-                item.resizeRelocate(x, 0, itemWidth, getHeight());
-                x += itemWidth;
+            double inset = isSimple() ? w * 0.08 : 0;
+            x = inset;
+            double contentWidth = Math.max(0, w - inset * 2);
+            double lastWidth = isSimple() && !items.isEmpty()
+                    ? Math.min(contentWidth, items.get(items.size() - 1).prefWidth(-1))
+                    : 0;
+            double itemWidth = !isSimple() && getSpace() > 0
+                    ? Math.min(getSpace(), items.isEmpty() ? 0 : contentWidth / items.size())
+                    : isSimple()
+                            ? (items.size() < 2 ? 0 : Math.max(0, contentWidth - lastWidth) / (items.size() - 1))
+                            : (items.isEmpty() ? 0 : contentWidth / items.size());
+            for (int i = 0; i < items.size(); i++) {
+                EleFXStep item = items.get(i);
+                double width = isSimple() && i == items.size() - 1 ? lastWidth : itemWidth;
+                item.resizeRelocate(x, getInsets().getTop(), width,
+                        Math.max(0, getHeight() - getInsets().getTop() - getInsets().getBottom()));
+                x += width;
             }
         }
     }
 
     @Override
     protected double computePrefHeight(double width) {
-        return !isSimple() && getDirection() == EleFXStepsDirection.VERTICAL
-                ? items.stream().mapToDouble(item -> item.prefHeight(width)).sum()
-                : items.stream().mapToDouble(item -> item.prefHeight(items.isEmpty() ? width : width / items.size()))
-                        .max().orElse(0);
+        double availableWidth = width < 0 ? computePrefWidth(-1) : width;
+        double itemWidth = !isSimple() && getSpace() > 0
+                ? Math.min(getSpace(), items.isEmpty() ? 0 : availableWidth / items.size())
+                : items.isEmpty() ? availableWidth : availableWidth / items.size();
+        if (!isSimple() && getDirection() == EleFXStepsDirection.VERTICAL) {
+            double height = 0;
+            for (int i = 0; i < items.size(); i++)
+                height += verticalItemHeight(i, availableWidth);
+            return height;
+        }
+        return items.stream().mapToDouble(item -> item.prefHeight(itemWidth)).max().orElse(0)
+                + getInsets().getTop() + getInsets().getBottom();
+    }
+
+    private double verticalItemHeight(int index, double width) {
+        double height = items.get(index).prefHeight(width);
+        return index == items.size() - 1 ? height : Math.max(getSpace(), height);
+    }
+
+    @Override
+    protected double computeMaxHeight(double width) {
+        return computePrefHeight(width);
     }
 
     @Override
     protected double computePrefWidth(double height) {
         return !isSimple() && getDirection() == EleFXStepsDirection.VERTICAL
                 ? items.stream().mapToDouble(item -> item.prefWidth(height)).max().orElse(0)
-                : getSpace() > 0 ? getSpace() * items.size() : Math.max(1, items.size()) * 160;
+                : !isSimple() && getSpace() > 0 ? getSpace() * items.size() : Math.max(1, items.size()) * 160;
     }
 }
