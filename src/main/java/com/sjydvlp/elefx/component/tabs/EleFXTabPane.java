@@ -17,7 +17,7 @@ public class EleFXTabPane {
 
     private final ObjectProperty<Node> content = new SimpleObjectProperty<>(this, "content");
 
-    private final ObjectProperty<Node> labelGraphic = new SimpleObjectProperty<>(this, "labelGraphic");
+    private final ObjectProperty<Node> labelNode = new SimpleObjectProperty<>(this, "labelNode");
 
     private final BooleanProperty disabled = new SimpleBooleanProperty(this, "disabled", false);
 
@@ -74,16 +74,17 @@ public class EleFXTabPane {
         return content;
     }
 
-    public Node getLabelGraphic() {
-        return labelGraphic.get();
+    /** Custom node that replaces the tab label text when present. */
+    public Node getLabelNode() {
+        return labelNode.get();
     }
 
-    public void setLabelGraphic(Node value) {
-        labelGraphic.set(value);
+    public void setLabelNode(Node value) {
+        labelNode.set(value);
     }
 
-    public ObjectProperty<Node> labelGraphicProperty() {
-        return labelGraphic;
+    public ObjectProperty<Node> labelNodeProperty() {
+        return labelNode;
     }
 
     public boolean isDisabled() {

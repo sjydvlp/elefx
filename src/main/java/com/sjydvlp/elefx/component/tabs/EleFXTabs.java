@@ -1,16 +1,25 @@
 package com.sjydvlp.elefx.component.tabs;
 
+import com.sjydvlp.elefx.component.icon.EleFXIcon;
+import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -25,8 +34,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -88,6 +99,8 @@ public class EleFXTabs extends BorderPane implements Themable {
         }
     };
 
+    private final StackPane horizontalHeader = new StackPane();
+
     private final VBox verticalNav = new VBox() {
 
         @Override
@@ -103,11 +116,15 @@ public class EleFXTabs extends BorderPane implements Themable {
 
     private final Map<EleFXTabPane, Button> tabButtons = new IdentityHashMap<>();
 
+    private final Map<EleFXTabPane, CloseAnimation> closeAnimations = new IdentityHashMap<>();
+
     private final Map<EleFXTabPane, StackPane> paneNodes = new IdentityHashMap<>();
 
     private boolean rebuilding;
 
     private boolean bypassBeforeLeave;
+
+    private static final Duration CLOSE_TRANSITION_DURATION = Duration.millis(300);
 
     public EleFXTabs() {
         initialize();
@@ -364,7 +381,7 @@ public class EleFXTabs extends BorderPane implements Themable {
         getStyleClass().add("ele-tabs");
         horizontalNav.getStyleClass().add("ele-tabs__nav");
         horizontalNav.setAlignment(Pos.CENTER_LEFT);
-        BorderPane.setAlignment(horizontalNav, Pos.CENTER_LEFT);
+        horizontalHeader.getChildren().add(horizontalNav);
         verticalNav.getStyleClass().add("ele-tabs__nav");
         activeLine.getStyleClass().add("ele-tabs__active-line");
         activeLine.setManaged(false);
@@ -397,8 +414,12 @@ public class EleFXTabs extends BorderPane implements Themable {
         rebuilding = true;
         try {
             tabButtons.clear();
+            closeAnimations.values().forEach(CloseAnimation::stop);
+            closeAnimations.clear();
             paneNodes.clear();
             horizontalNav.getChildren().clear();
+            horizontalHeader.getChildren().removeIf(node -> node != horizontalNav);
+            horizontalNav.setPadding(Insets.EMPTY);
             verticalNav.getChildren().clear();
             content.getChildren().clear();
             for (int i = 0; i < panes.size(); i++) {
@@ -415,7 +436,18 @@ public class EleFXTabs extends BorderPane implements Themable {
                 paneNodes.put(pane, holder);
                 content.getChildren().add(holder);
             }
-            if (canAdd()) nav().getChildren().add(createAddButton());
+            if (canAdd()) {
+                Button addButton = createAddButton();
+                if (nav() == horizontalNav) {
+                    horizontalNav.setPadding(new Insets(0, 30, 0, 0));
+                    StackPane.setAlignment(addButton, Pos.CENTER_RIGHT);
+                    StackPane.setMargin(addButton, new Insets(10, 0, 10, 0));
+                    horizontalHeader.getChildren().add(addButton);
+                } else {
+                    VBox.setMargin(addButton, new Insets(10, 0, 0, 0));
+                    verticalNav.getChildren().add(addButton);
+                }
+            }
             nav().getChildren().add(activeLine);
             if (getValue() == null && !panes.isEmpty())
                 setValue(getDefaultValue() != null ? getDefaultValue() : panes.get(0).getName());
@@ -433,7 +465,7 @@ public class EleFXTabs extends BorderPane implements Themable {
         pane.labelProperty().addListener(o -> rebuild());
         pane.nameProperty().addListener(o -> rebuild());
         pane.contentProperty().addListener(o -> refreshSelection());
-        pane.labelGraphicProperty().addListener(o -> rebuild());
+        pane.labelNodeProperty().addListener(o -> rebuild());
         pane.disabledProperty().addListener(o -> refreshSelection());
         pane.closableProperty().addListener(o -> rebuild());
         pane.lazyProperty().addListener(o -> refreshSelection());
@@ -445,6 +477,7 @@ public class EleFXTabs extends BorderPane implements Themable {
         button.setContentDisplay(ContentDisplay.LEFT);
         button.setFocusTraversable(true);
         renderLabel(button, pane);
+        button.hoverProperty().addListener(o -> updateCloseButton(pane, button));
         button.fontProperty().addListener(o -> horizontalNav.requestLayout());
         if (button.getGraphic() != null)
             button.getGraphic().layoutBoundsProperty().addListener(o -> horizontalNav.requestLayout());
@@ -455,31 +488,52 @@ public class EleFXTabs extends BorderPane implements Themable {
     }
 
     private void renderLabel(Button button, EleFXTabPane pane) {
-        Node visual = getLabelRenderer() == null ? pane.getLabelGraphic() : getLabelRenderer().call(pane);
-        button.setText(visual == null ? pane.getLabel() : "");
-        button.setGraphic(visual);
+        Node visual = getLabelRenderer() == null ? pane.getLabelNode() : getLabelRenderer().call(pane);
         if (canClose(pane)) {
-            Button close = new Button("×");
+            Button close = new Button();
             close.getStyleClass().add("ele-tabs__close");
+            close.setGraphic(new EleFXIcon(EleFXIconType.CLOSE, 12));
             close.setFocusTraversable(false);
             close.setOnAction(e -> {
                 e.consume();
                 remove(pane);
             });
-            HBox box = new HBox(6, visual == null ? new javafx.scene.control.Label(pane.getLabel()) : visual, close);
+            Node label = visual;
+            if (label == null) {
+                javafx.scene.control.Label textLabel = new javafx.scene.control.Label(pane.getLabel());
+                textLabel.getStyleClass().add("ele-tabs__label");
+                label = textLabel;
+            }
+            StackPane closeSlot = new StackPane(close);
+            closeSlot.setAlignment(Pos.CENTER_LEFT);
+            StackPane.setMargin(close, new Insets(0, 0, 0, 5));
+            closeSlot.setMinWidth(0);
+            closeSlot.setPrefWidth(0);
+            closeSlot.setMaxWidth(Region.USE_PREF_SIZE);
+            Rectangle clip = new Rectangle();
+            clip.widthProperty().bind(closeSlot.widthProperty());
+            clip.heightProperty().bind(closeSlot.heightProperty());
+            closeSlot.setClip(clip);
+            close.setOpacity(0);
+            HBox box = new HBox(label, closeSlot);
             box.setAlignment(Pos.CENTER);
+            closeAnimations.put(pane, new CloseAnimation(button, closeSlot, close));
+            button.getStyleClass().add("ele-tabs__item--closable");
+            updateCloseButton(pane, button);
             button.setText("");
             button.setGraphic(box);
             button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        } else {
+            button.setText(visual == null ? pane.getLabel() : "");
+            button.setGraphic(visual);
         }
     }
 
     private Button createAddButton() {
         Button b = new Button();
         b.getStyleClass().add("ele-tabs__new-tab");
-        b.setText(getAddGraphic() == null ? "+" : "");
-        b.setGraphic(getAddGraphic());
-        b.setContentDisplay(getAddGraphic() == null ? ContentDisplay.TEXT_ONLY : ContentDisplay.GRAPHIC_ONLY);
+        b.setGraphic(getAddGraphic() == null ? new EleFXIcon(EleFXIconType.PLUS, 12) : getAddGraphic());
+        b.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         b.setOnAction(e -> addTab());
         return b;
     }
@@ -491,8 +545,8 @@ public class EleFXTabs extends BorderPane implements Themable {
         setRight(null);
         setCenter(content);
         switch (getTabPosition()) {
-            case TOP -> setTop(nav());
-            case BOTTOM -> setBottom(nav());
+            case TOP -> setTop(horizontalHeader);
+            case BOTTOM -> setBottom(horizontalHeader);
             case LEFT -> setLeft(nav());
             case RIGHT -> setRight(nav());
         }
@@ -537,6 +591,7 @@ public class EleFXTabs extends BorderPane implements Themable {
             if (button != null) {
                 toggle(button, "ele-tabs__item--active", active);
                 button.setDisable(isDisable() || pane.isDisabled());
+                updateCloseButton(pane, button);
             }
             if (holder != null) {
                 holder.setVisible(active);
@@ -547,6 +602,62 @@ public class EleFXTabs extends BorderPane implements Themable {
         }
         horizontalNav.requestLayout();
         verticalNav.requestLayout();
+    }
+
+    private void updateCloseButton(EleFXTabPane pane, Button tabButton) {
+        CloseAnimation animation = closeAnimations.get(pane);
+        if (animation == null) return;
+        boolean active = Objects.equals(pane.getName(), getValue());
+        animation.update(active || tabButton.isHover(), active, tabButton.getScene() != null);
+    }
+
+    private static final class CloseAnimation {
+
+        private final Button tabButton;
+
+        private final StackPane closeSlot;
+
+        private final Button closeButton;
+
+        private final DoubleProperty horizontalPadding = new SimpleDoubleProperty(20);
+
+        private Timeline transition;
+
+        private double targetWidth = Double.NaN;
+
+        private double targetPadding = Double.NaN;
+
+        private CloseAnimation(Button tabButton, StackPane closeSlot, Button closeButton) {
+            this.tabButton = tabButton;
+            this.closeSlot = closeSlot;
+            this.closeButton = closeButton;
+            horizontalPadding.addListener((o, oldValue, value) -> tabButton
+                    .setPadding(new Insets(0, value.doubleValue(), 0, value.doubleValue())));
+        }
+
+        private void update(boolean show, boolean active, boolean animate) {
+            double width = show ? 19 : 0;
+            double padding = show && !active ? 13 : 20;
+            if (width == targetWidth && padding == targetPadding) return;
+            targetWidth = width;
+            targetPadding = padding;
+            stop();
+            if (!animate) {
+                closeSlot.setPrefWidth(width);
+                closeButton.setOpacity(show ? 1 : 0);
+                horizontalPadding.set(padding);
+                return;
+            }
+            transition = new Timeline(new KeyFrame(CLOSE_TRANSITION_DURATION,
+                    new KeyValue(closeSlot.prefWidthProperty(), width, Interpolator.EASE_BOTH),
+                    new KeyValue(closeButton.opacityProperty(), show ? 1 : 0, Interpolator.EASE_BOTH),
+                    new KeyValue(horizontalPadding, padding, Interpolator.EASE_BOTH)));
+            transition.play();
+        }
+
+        private void stop() {
+            if (transition != null) transition.stop();
+        }
     }
 
     private void remove(EleFXTabPane pane) {
