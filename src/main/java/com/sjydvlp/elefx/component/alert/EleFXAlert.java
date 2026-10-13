@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -41,6 +42,10 @@ public class EleFXAlert extends StackPane implements Themable {
     public static final EventType<Event> CLOSE = new EventType<>(Event.ANY, "ELEFX_ALERT_CLOSE");
 
     private static final String STYLE_CLASS = "ele-alert";
+
+    private static final double ICON_SIZE = 16;
+
+    private static final double LARGE_ICON_SIZE = 28;
 
     private final StringProperty title = new SimpleStringProperty(this, "title", "");
 
@@ -353,6 +358,10 @@ public class EleFXAlert extends StackPane implements Themable {
 
     private void refreshDescription() {
         refreshTextBox(descriptionBox, descriptionLabel, getDescriptionNode(), getDescription());
+        updateBooleanStyle(descriptionBox.isManaged(), "ele-alert--with-description");
+        if (!iconBox.getChildren().isEmpty() && iconBox.getChildren().get(0)instanceof EleFXIcon icon) {
+            icon.setSize(alertIconSize());
+        }
     }
 
     private static void refreshTextBox(StackPane box, Label label, Node custom, String text) {
@@ -366,9 +375,15 @@ public class EleFXAlert extends StackPane implements Themable {
 
     private void refreshIcon() {
         boolean present = isShowIcon();
-        iconBox.getChildren().setAll(getIconNode() == null ? defaultIcon() : getIconNode());
+        Node icon = getIconNode() == null ? defaultIcon() : getIconNode();
+        if (icon instanceof EleFXIcon eleFXIcon) eleFXIcon.setSize(alertIconSize());
+        iconBox.getChildren().setAll(icon);
         iconBox.setVisible(present);
         iconBox.setManaged(present);
+    }
+
+    private double alertIconSize() {
+        return descriptionBox.isManaged() ? LARGE_ICON_SIZE : ICON_SIZE;
     }
 
     private Node defaultIcon() {
@@ -377,7 +392,7 @@ public class EleFXAlert extends StackPane implements Themable {
             case SUCCESS -> EleFXIconType.CIRCLE_CHECK_FILLED;
             case WARNING -> EleFXIconType.WARNING_FILLED;
             case ERROR -> EleFXIconType.CIRCLE_CLOSE_FILLED;
-        }, 16);
+        }, alertIconSize());
         icon.getStyleClass().add("ele-alert__default-icon");
         return icon;
     }
@@ -411,6 +426,8 @@ public class EleFXAlert extends StackPane implements Themable {
         Pos alignment = value ? Pos.CENTER : Pos.CENTER_LEFT;
         setAlignment(alignment);
         body.setAlignment(alignment);
+        HBox.setHgrow(messageBox, value ? Priority.NEVER : Priority.ALWAYS);
+        messageBox.setMaxWidth(value ? Region.USE_PREF_SIZE : Double.MAX_VALUE);
         messageBox.setAlignment(value ? Pos.CENTER : Pos.CENTER_LEFT);
         titleBox.setAlignment(alignment);
         descriptionBox.setAlignment(alignment);
