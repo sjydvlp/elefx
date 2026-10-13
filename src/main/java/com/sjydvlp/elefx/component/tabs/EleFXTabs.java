@@ -344,7 +344,7 @@ public class EleFXTabs extends BorderPane implements Themable {
         return onEdit;
     }
 
-    /** Fires the Element Plus compatible add/edit notifications. Applications add the actual pane in the handler. */
+    /** Requests a new tab. Applications add the pane and select it in the edit handler. */
     public void addTab() {
         if (canAdd()) {
             emit(EleFXTabsEvent.TAB_ADD, null, null, "add", null);
@@ -352,7 +352,7 @@ public class EleFXTabs extends BorderPane implements Themable {
         }
     }
 
-    /** Removes a closable pane and selects its next available neighbour when necessary. */
+    /** Requests removal of a closable pane. Applications update the selection and pane list in the edit handler. */
     public void removeTab(EleFXTabPane pane) {
         if (pane != null && panes.contains(pane) && canClose(pane)) remove(pane);
     }
@@ -449,6 +449,7 @@ public class EleFXTabs extends BorderPane implements Themable {
                 }
             }
             nav().getChildren().add(activeLine);
+            if (panes.isEmpty()) setValue(null);
             if (getValue() == null && !panes.isEmpty())
                 setValue(getDefaultValue() != null ? getDefaultValue() : panes.get(0).getName());
             if (selectedPane() == null && !panes.isEmpty()) setValue(panes.get(0).getName());
@@ -661,17 +662,10 @@ public class EleFXTabs extends BorderPane implements Themable {
     }
 
     private void remove(EleFXTabPane pane) {
-        int index = panes.indexOf(pane);
-        Object old = getValue();
-        if (Objects.equals(old, pane.getName())) {
-            EleFXTabPane next = index + 1 < panes.size()
-                    ? panes.get(index + 1)
-                    : index > 0 ? panes.get(index - 1) : null;
-            setValue(next == null ? null : next.getName());
-        }
-        panes.remove(pane);
-        emit(EleFXTabsEvent.TAB_REMOVE, pane, old, "remove", null);
-        emit(EleFXTabsEvent.EDIT, pane, old, "remove", null);
+        if (!panes.contains(pane)) return;
+        Object activeName = getValue();
+        emit(EleFXTabsEvent.TAB_REMOVE, pane, activeName, "remove", null);
+        emit(EleFXTabsEvent.EDIT, pane, activeName, "remove", null);
     }
 
     private void navigate(EleFXTabPane current, KeyEvent event) {
