@@ -8,7 +8,7 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.*;
-import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -18,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -39,13 +40,15 @@ import java.util.Set;
  * An Element Plus inspired dialog window with modal, draggable and composable content areas.
  *
  * <p>
- * Set content through {@link #getBodyChildren()}, and use {@link #setHeader(Node)} and
+ * Set content through {@link #setBody(Node...)}, and use {@link #setHeader(Node)} and
  * {@link #setFooter(Node)} for the equivalent of Element Plus named slots. The dialog is
  * intentionally a window-owned overlay rather than a layout child; call {@link #show(Window)}
  * once an owner window is available.
  * </p>
  */
 public final class EleFXDialog {
+
+    private static final PseudoClass KEYBOARD_FOCUS = PseudoClass.getPseudoClass("keyboard-focus");
 
     public static final EventType<Event> OPEN = new EventType<>(Event.ANY, "ELEFX_DIALOG_OPEN");
 
@@ -76,7 +79,7 @@ public final class EleFXDialog {
 
     private final StringProperty title = new SimpleStringProperty(this, "title", "");
 
-    private final DoubleProperty width = new SimpleDoubleProperty(this, "width", 500);
+    private final DoubleProperty width = new SimpleDoubleProperty(this, "width", Double.NaN);
 
     private final DoubleProperty top = new SimpleDoubleProperty(this, "top", Double.NaN);
 
@@ -149,6 +152,8 @@ public final class EleFXDialog {
 
     private final Label titleLabel = new Label();
 
+    private final Region headerSpacer = new Region();
+
     private final Button closeButton = new Button();
 
     private final Set<String> appliedHeaderClasses = new HashSet<>(), appliedBodyClasses = new HashSet<>(),
@@ -164,15 +169,12 @@ public final class EleFXDialog {
 
     private boolean closing;
 
+    private boolean keyboardFocus;
+
     private double dragX, dragY, dialogX, dialogY;
 
     public EleFXDialog() {
         initialize();
-    }
-
-    public EleFXDialog(Node... content) {
-        this();
-        body.getChildren().addAll(content);
     }
 
     public void show() {
@@ -219,12 +221,12 @@ public final class EleFXDialog {
         if (stage != null) position();
     }
 
-    public ObservableList<Node> getBodyChildren() {
-        return body.getChildren();
-    }
-
-    public VBox getBody() {
-        return body;
+    /** Replaces the body content with the supplied nodes. Pass no nodes or {@code null} to clear it. */
+    public void setBody(Node... content) {
+        if (content == null)
+            body.getChildren().clear();
+        else
+            body.getChildren().setAll(content);
     }
 
     public HBox getHeaderBox() {
@@ -267,8 +269,9 @@ public final class EleFXDialog {
         return width;
     }
 
+    /** Sets a pixel width, or {@link Double#NaN} to use half the owner window's width. */
     public void setWidth(double v) {
-        width.set(Math.max(100, v));
+        width.set(Double.isNaN(v) ? Double.NaN : Math.max(100, v));
     }
 
     public double getTop() {
@@ -495,6 +498,11 @@ public final class EleFXDialog {
         return beforeClose;
     }
 
+    /**
+     * Guards close requests from the close button, modal backdrop, Escape key, or
+     * {@link #requestClose()}. Call {@code done.run()} to close, or leave it
+     * uncalled to keep the dialog open. Programmatic {@link #close()} bypasses this guard.
+     */
     public void setBeforeClose(BeforeCloseHandler v) {
         beforeClose.set(v);
     }
@@ -644,11 +652,14 @@ public final class EleFXDialog {
         footerBox.getStyleClass().add("ele-dialog__footer");
         footerBox.setAlignment(Pos.CENTER_RIGHT);
         titleLabel.getStyleClass().add("ele-dialog__title");
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
         closeButton.getStyleClass().add("ele-dialog__headerbtn");
         closeButton.setAccessibleText("Close dialog");
         closeButton.setOnAction(e -> requestClose());
         closeButton.setGraphic(defaultCloseIcon());
+        closeButton.focusedProperty().addListener(o -> refreshCloseFocus());
         title.addListener(o -> refreshHeader());
         header.addListener(o -> refreshHeader());
         footer.addListener(o -> refreshFooter());
@@ -670,8 +681,9 @@ public final class EleFXDialog {
             position();
             fire(getOnOpen(), OPEN);
             stage.show();
+            dialog.requestFocus();
             play(true, () -> {
-                focusFirst();
+                focusDialog();
                 fire(getOnOpened(), OPENED);
             });
         };
@@ -685,9 +697,15 @@ public final class EleFXDialog {
         if (stage != null) return;
         dialog = new VBox(headerBox, body, footerBox);
         dialog.getStyleClass().add("ele-dialog");
+        dialog.setFocusTraversable(true);
+        dialog.setMaxWidth(Region.USE_PREF_SIZE);
         dialog.setMaxHeight(Region.USE_PREF_SIZE);
         overlay = new StackPane(dialog);
         overlay.getStyleClass().add("ele-dialog__wrapper");
+        overlay.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            keyboardFocus = false;
+            refreshCloseFocus();
+        });
         overlay.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getTarget() == overlay && isModal() && isCloseOnClickModal()) requestClose();
         });
@@ -696,6 +714,10 @@ public final class EleFXDialog {
         Scene scene = new Scene(overlay, Color.TRANSPARENT);
         scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         scene.getStylesheets().add(EleFXThemes.DIALOG.toData());
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            keyboardFocus = true;
+            refreshCloseFocus();
+        });
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE && isCloseOnPressEscape()) {
                 requestClose();
@@ -730,12 +752,15 @@ public final class EleFXDialog {
         stage.setHeight(bounds.getHeight());
         if (isFullscreen()) {
             dialog.setPrefWidth(bounds.getWidth());
+            dialog.setMaxWidth(Double.MAX_VALUE);
             dialog.setPrefHeight(bounds.getHeight());
             dialog.setMaxHeight(Double.MAX_VALUE);
             StackPane.setAlignment(dialog, Pos.CENTER);
             return;
         }
-        dialog.setPrefWidth(Math.min(getWidth(), bounds.getWidth() - 32));
+        dialog.setPrefWidth(Math.min(Double.isNaN(getWidth()) ? bounds.getWidth() * .5 : getWidth(),
+                bounds.getWidth() - 32));
+        dialog.setMaxWidth(Region.USE_PREF_SIZE);
         dialog.setPrefHeight(Region.USE_COMPUTED_SIZE);
         dialog.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(dialog, isAlignCenter() ? Pos.CENTER : Pos.TOP_CENTER);
@@ -765,29 +790,31 @@ public final class EleFXDialog {
     private void play(boolean opening, Runnable finished) {
         Duration d = Duration.millis(getTransitionDuration());
         if (d.lessThanOrEqualTo(Duration.ZERO)) {
+            dialog.setOpacity(opening ? 1 : 0);
+            dialog.setScaleX(1);
+            dialog.setScaleY(1);
             finished.run();
             return;
         }
+        Transition effect = getTransition();
         dialog.setOpacity(opening ? 0 : 1);
-        dialog.setScaleX(opening ? .9 : 1);
-        dialog.setScaleY(opening ? .9 : 1);
-        dialog.setTranslateY(dialog.getTranslateY() + (opening && getTransition() == Transition.SLIDE ? -32 : 0));
+        boolean scale = effect == Transition.SCALE || effect == Transition.BOUNCE;
+        dialog.setScaleX(opening && scale ? .9 : 1);
+        dialog.setScaleY(opening && scale ? .9 : 1);
         FadeTransition fade = new FadeTransition(d, dialog);
         fade.setToValue(opening ? 1 : 0);
-        if (getTransition() == Transition.FADE) {
-            fade.setOnFinished(e -> finished.run());
-            fade.play();
-            return;
-        }
         javafx.animation.Transition extra;
-        if (getTransition() == Transition.SLIDE) {
+        if (effect == Transition.FADE || effect == Transition.SLIDE) {
+            double y = dialog.getTranslateY();
+            double offset = effect == Transition.FADE ? 20 : 32;
+            if (opening) dialog.setTranslateY(y - offset);
             TranslateTransition t = new TranslateTransition(d, dialog);
-            t.setByY(opening ? 32 : -32);
+            t.setToY(opening ? y : y - offset);
             extra = t;
         } else {
             ScaleTransition s = new ScaleTransition(d, dialog);
-            s.setToX(opening ? 1 : (getTransition() == Transition.BOUNCE ? .3 : .9));
-            s.setToY(opening ? 1 : (getTransition() == Transition.BOUNCE ? .3 : .9));
+            s.setToX(opening ? 1 : (effect == Transition.BOUNCE ? .3 : .9));
+            s.setToY(opening ? 1 : (effect == Transition.BOUNCE ? .3 : .9));
             extra = s;
         }
         ParallelTransition all = new ParallelTransition(fade, extra);
@@ -796,9 +823,13 @@ public final class EleFXDialog {
     }
 
     private void refreshHeader() {
-        headerBox.getChildren().setAll(getHeader() == null ? titleLabel : getHeader());
+        Node headerContent = getHeader() == null ? titleLabel : getHeader();
+        headerBox.getChildren().setAll(headerContent);
         if (getHeader() == null) titleLabel.setText(getTitle());
-        if (isShowClose()) headerBox.getChildren().add(closeButton);
+        if (isShowClose()) {
+            if (headerContent != titleLabel) headerBox.getChildren().add(headerSpacer);
+            headerBox.getChildren().add(closeButton);
+        }
         boolean present = getHeader() != null || !getTitle().isBlank() || isShowClose();
         headerBox.setVisible(present);
         headerBox.setManaged(present);
@@ -820,6 +851,10 @@ public final class EleFXDialog {
         closeButton.setGraphic(getCloseIcon() == null ? defaultCloseIcon() : getCloseIcon());
     }
 
+    private void refreshCloseFocus() {
+        closeButton.pseudoClassStateChanged(KEYBOARD_FOCUS, keyboardFocus && closeButton.isFocused());
+    }
+
     private Node defaultCloseIcon() {
         EleFXIcon icon = new EleFXIcon(EleFXIconType.CLOSE, 18);
         icon.setMouseTransparent(true);
@@ -829,9 +864,11 @@ public final class EleFXDialog {
     private void refreshAlignment() {
         if (isCenter()) {
             headerBox.setAlignment(Pos.CENTER);
+            titleLabel.setAlignment(Pos.CENTER);
             footerBox.setAlignment(Pos.CENTER);
         } else {
             headerBox.setAlignment(Pos.CENTER_LEFT);
+            titleLabel.setAlignment(Pos.CENTER_LEFT);
             footerBox.setAlignment(Pos.CENTER_RIGHT);
         }
     }
@@ -862,8 +899,8 @@ public final class EleFXDialog {
         pause.play();
     }
 
-    private void focusFirst() {
-        closeButton.requestFocus();
+    private void focusDialog() {
+        dialog.requestFocus();
         fire(getOnOpenAutoFocus(), OPEN_AUTO_FOCUS);
     }
 
