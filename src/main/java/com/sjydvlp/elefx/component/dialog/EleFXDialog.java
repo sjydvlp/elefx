@@ -4,7 +4,9 @@ import com.sjydvlp.elefx.component.icon.EleFXIcon;
 import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
 import javafx.animation.ParallelTransition;
+import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.*;
@@ -12,10 +14,14 @@ import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -33,6 +39,7 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +56,8 @@ import java.util.Set;
 public final class EleFXDialog {
 
     private static final PseudoClass KEYBOARD_FOCUS = PseudoClass.getPseudoClass("keyboard-focus");
+
+    private static final double PENETRABLE_SHADOW_SPACE = 24;
 
     public static final EventType<Event> OPEN = new EventType<>(Event.ANY, "ELEFX_DIALOG_OPEN");
 
@@ -69,10 +78,15 @@ public final class EleFXDialog {
     }
 
     public enum Transition {
-        FADE,
+
+        DEFAULT,
         SCALE,
         SLIDE,
-        BOUNCE
+        BOUNCE,
+        OBJECT_CONFIG;
+
+        @Deprecated
+        public static final Transition FADE = DEFAULT;
     }
 
     private final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
@@ -120,7 +134,7 @@ public final class EleFXDialog {
     private final ObjectProperty<BeforeCloseHandler> beforeClose = new SimpleObjectProperty<>(this, "beforeClose");
 
     private final ObjectProperty<Transition> transition = new SimpleObjectProperty<>(this, "transition",
-            Transition.FADE);
+            Transition.DEFAULT);
 
     private final IntegerProperty transitionDuration = new SimpleIntegerProperty(this, "transitionDuration", 200);
 
@@ -152,7 +166,7 @@ public final class EleFXDialog {
 
     private final Label titleLabel = new Label();
 
-    private final Region headerSpacer = new Region();
+    private final StackPane customHeaderContainer = new StackPane();
 
     private final Button closeButton = new Button();
 
@@ -171,7 +185,17 @@ public final class EleFXDialog {
 
     private boolean keyboardFocus;
 
+    private boolean dragArmed;
+
+    private boolean dragging;
+
+    private String draggingStyle = "";
+
+    private String styleBeforeDragging;
+
     private double dragX, dragY, dialogX, dialogY;
+
+    private double dragStageX, dragStageY;
 
     public EleFXDialog() {
         initialize();
@@ -318,6 +342,7 @@ public final class EleFXDialog {
         return modalPenetrable;
     }
 
+    /** Lets clicks outside the dialog reach the owner window when {@link #isModal()} is false. */
     public void setModalPenetrable(boolean v) {
         modalPenetrable.set(v);
     }
@@ -462,6 +487,9 @@ public final class EleFXDialog {
         return header;
     }
 
+    /**
+     * Sets custom header content. Resizable content fills the space before the built-in close button.
+     */
     public void setHeader(Node v) {
         header.set(v);
     }
@@ -516,7 +544,7 @@ public final class EleFXDialog {
     }
 
     public void setTransition(Transition v) {
-        transition.set(v == null ? Transition.FADE : v);
+        transition.set(v == null ? Transition.DEFAULT : v);
     }
 
     public int getTransitionDuration() {
@@ -529,6 +557,12 @@ public final class EleFXDialog {
 
     public void setTransitionDuration(int v) {
         transitionDuration.set(Math.max(0, v));
+    }
+
+    /** Sets inline CSS declarations applied only while the dialog is being dragged. */
+    public void setDraggingStyle(String v) {
+        draggingStyle = v == null ? "" : v;
+        if (dragging) applyDraggingStyle();
     }
 
     public String getHeaderClass() {
@@ -654,7 +688,8 @@ public final class EleFXDialog {
         titleLabel.getStyleClass().add("ele-dialog__title");
         titleLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+        customHeaderContainer.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(customHeaderContainer, Priority.ALWAYS);
         closeButton.getStyleClass().add("ele-dialog__headerbtn");
         closeButton.setAccessibleText("Close dialog");
         closeButton.setOnAction(e -> requestClose());
@@ -666,17 +701,36 @@ public final class EleFXDialog {
         closeIcon.addListener(o -> refreshCloseIcon());
         showClose.addListener(o -> refreshHeader());
         center.addListener(o -> refreshAlignment());
+        draggable.addListener((o, oldValue, enabled) -> {
+            if (!enabled) endDrag();
+            refreshDragCursor();
+        });
+        fullscreen.addListener((o, oldValue, enabled) -> {
+            if (enabled) endDrag();
+            refreshDragCursor();
+        });
+        modalPenetrable.addListener(o -> {
+            if (stage != null && stage.isShowing() && !isModal() && !isFullscreen()) position();
+        });
         headerClass.addListener(o -> applyClasses(headerBox, headerClass.get(), appliedHeaderClasses));
         bodyClass.addListener(o -> applyClasses(body, bodyClass.get(), appliedBodyClasses));
         footerClass.addListener(o -> applyClasses(footerBox, footerClass.get(), appliedFooterClasses));
         refreshHeader();
         refreshFooter();
+        refreshDragCursor();
     }
 
     private void open() {
         if (stage != null && stage.isShowing()) return;
         Runnable action = () -> {
+            boolean reopening = stage != null;
             createIfNeeded();
+            if (reopening) {
+                // A hidden Stage can retain stale CSS for focused footer controls.
+                var stylesheets = new ArrayList<>(stage.getScene().getStylesheets());
+                stage.getScene().getStylesheets().clear();
+                stage.getScene().getStylesheets().addAll(stylesheets);
+            }
             configureStage();
             position();
             fire(getOnOpen(), OPEN);
@@ -712,6 +766,7 @@ public final class EleFXDialog {
         headerBox.addEventFilter(MouseEvent.MOUSE_PRESSED, this::startDrag);
         headerBox.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::drag);
         Scene scene = new Scene(overlay, Color.TRANSPARENT);
+        scene.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> endDrag());
         scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         scene.getStylesheets().add(EleFXThemes.DIALOG.toData());
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
@@ -726,6 +781,9 @@ public final class EleFXDialog {
         });
         stage = new Stage(StageStyle.TRANSPARENT);
         stage.setScene(scene);
+        stage.focusedProperty().addListener((o, wasFocused, focused) -> {
+            if (!focused) endDrag();
+        });
         stage.setOnCloseRequest(e -> {
             e.consume();
             requestClose();
@@ -743,14 +801,16 @@ public final class EleFXDialog {
     }
 
     private void position() {
-        var bounds = owner == null
-                ? Screen.getPrimary().getVisualBounds()
-                : new javafx.geometry.Rectangle2D(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
+        Rectangle2D bounds = ownerBounds();
+        boolean penetrable = isPenetrable();
+        overlay.setPadding(penetrable ? new Insets(PENETRABLE_SHADOW_SPACE) : Insets.EMPTY);
+        dialog.setTranslateX(0);
+        dialog.setTranslateY(0);
         if (isFullscreen()) {
+            stage.setX(bounds.getMinX());
+            stage.setY(bounds.getMinY());
+            stage.setWidth(bounds.getWidth());
+            stage.setHeight(bounds.getHeight());
             dialog.setPrefWidth(bounds.getWidth());
             dialog.setMaxWidth(Double.MAX_VALUE);
             dialog.setPrefHeight(bounds.getHeight());
@@ -759,17 +819,46 @@ public final class EleFXDialog {
             return;
         }
         dialog.setPrefWidth(Math.min(Double.isNaN(getWidth()) ? bounds.getWidth() * .5 : getWidth(),
-                bounds.getWidth() - 32));
+                bounds.getWidth() - 32 - (penetrable ? PENETRABLE_SHADOW_SPACE * 2 : 0)));
         dialog.setMaxWidth(Region.USE_PREF_SIZE);
         dialog.setPrefHeight(Region.USE_COMPUTED_SIZE);
         dialog.setMaxHeight(Region.USE_PREF_SIZE);
+        if (penetrable) {
+            // A full-size transparent Stage still intercepts clicks outside the dialog.
+            StackPane.setAlignment(dialog, Pos.CENTER);
+            overlay.applyCss();
+            double width = overlay.prefWidth(-1);
+            double height = overlay.prefHeight(width);
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setX(bounds.getMinX() + (bounds.getWidth() - width) / 2);
+            stage.setY(isAlignCenter()
+                    ? bounds.getMinY() + (bounds.getHeight() - height) / 2
+                    : bounds.getMinY() + (Double.isNaN(getTop()) ? bounds.getHeight() * .15 : getTop())
+                            - PENETRABLE_SHADOW_SPACE);
+            return;
+        }
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+        stage.setWidth(bounds.getWidth());
+        stage.setHeight(bounds.getHeight());
         StackPane.setAlignment(dialog, isAlignCenter() ? Pos.CENTER : Pos.TOP_CENTER);
-        dialog.setTranslateX(0);
         dialog.setTranslateY(isAlignCenter() ? 0 : (Double.isNaN(getTop()) ? bounds.getHeight() * .15 : getTop()));
+    }
+
+    private Rectangle2D ownerBounds() {
+        return owner == null
+                ? Screen.getPrimary().getVisualBounds()
+                : new Rectangle2D(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+    }
+
+    private boolean isPenetrable() {
+        return !isModal() && isModalPenetrable() && !isFullscreen();
     }
 
     private void finishClose() {
         if (stage == null || !stage.isShowing() || closing) return;
+        endDrag();
         closing = true;
         fire(getOnClose(), CLOSE);
         Runnable action = () -> play(false, () -> {
@@ -793,29 +882,66 @@ public final class EleFXDialog {
             dialog.setOpacity(opening ? 1 : 0);
             dialog.setScaleX(1);
             dialog.setScaleY(1);
+            dialog.setRotate(0);
             finished.run();
             return;
         }
         Transition effect = getTransition();
         dialog.setOpacity(opening ? 0 : 1);
-        boolean scale = effect == Transition.SCALE || effect == Transition.BOUNCE;
-        dialog.setScaleX(opening && scale ? .9 : 1);
-        dialog.setScaleY(opening && scale ? .9 : 1);
+        double initialScale = effect == Transition.BOUNCE ? .3 : .5;
+        boolean scale = effect == Transition.SCALE || effect == Transition.BOUNCE
+                || effect == Transition.OBJECT_CONFIG;
+        dialog.setScaleX(opening && scale ? initialScale : 1);
+        dialog.setScaleY(opening && scale ? initialScale : 1);
+        dialog.setRotate(opening && effect == Transition.OBJECT_CONFIG ? 180 : 0);
         FadeTransition fade = new FadeTransition(d, dialog);
         fade.setToValue(opening ? 1 : 0);
-        javafx.animation.Transition extra;
-        if (effect == Transition.FADE || effect == Transition.SLIDE) {
-            double y = dialog.getTranslateY();
-            double offset = effect == Transition.FADE ? 20 : 32;
-            if (opening) dialog.setTranslateY(y - offset);
-            TranslateTransition t = new TranslateTransition(d, dialog);
-            t.setToY(opening ? y : y - offset);
-            extra = t;
+        javafx.animation.Animation extra;
+        if (effect == Transition.DEFAULT || effect == Transition.SLIDE) {
+            double offset = effect == Transition.DEFAULT ? 20 : 100;
+            if (isPenetrable()) {
+                double y = stage.getY();
+                double from = opening ? y - offset : y;
+                double to = opening ? y : y - offset;
+                stage.setY(from);
+                extra = new javafx.animation.Transition() {
+
+                    {
+                        setCycleDuration(d);
+                    }
+
+                    @Override
+                    protected void interpolate(double fraction) {
+                        stage.setY(from + (to - from) * fraction);
+                    }
+                };
+            } else {
+                double y = dialog.getTranslateY();
+                if (opening) dialog.setTranslateY(y - offset);
+                TranslateTransition t = new TranslateTransition(d, dialog);
+                t.setToY(opening ? y : y - offset);
+                extra = t;
+            }
         } else {
             ScaleTransition s = new ScaleTransition(d, dialog);
-            s.setToX(opening ? 1 : (effect == Transition.BOUNCE ? .3 : .9));
-            s.setToY(opening ? 1 : (effect == Transition.BOUNCE ? .3 : .9));
-            extra = s;
+            s.setToX(opening ? 1 : initialScale);
+            s.setToY(opening ? 1 : initialScale);
+            if (effect == Transition.BOUNCE) {
+                s.setInterpolator(new Interpolator() {
+
+                    @Override
+                    protected double curve(double t) {
+                        return 1 - Math.pow(1 - t, 2) * Math.cos(t * Math.PI * 2.5);
+                    }
+                });
+            }
+            if (effect == Transition.OBJECT_CONFIG) {
+                RotateTransition r = new RotateTransition(d, dialog);
+                r.setToAngle(opening ? 0 : 180);
+                extra = new ParallelTransition(s, r);
+            } else {
+                extra = s;
+            }
         }
         ParallelTransition all = new ParallelTransition(fade, extra);
         all.setOnFinished(e -> finished.run());
@@ -824,10 +950,15 @@ public final class EleFXDialog {
 
     private void refreshHeader() {
         Node headerContent = getHeader() == null ? titleLabel : getHeader();
-        headerBox.getChildren().setAll(headerContent);
+        if (headerContent == titleLabel) {
+            customHeaderContainer.getChildren().clear();
+            headerBox.getChildren().setAll(titleLabel);
+        } else {
+            customHeaderContainer.getChildren().setAll(headerContent);
+            headerBox.getChildren().setAll(customHeaderContainer);
+        }
         if (getHeader() == null) titleLabel.setText(getTitle());
         if (isShowClose()) {
-            if (headerContent != titleLabel) headerBox.getChildren().add(headerSpacer);
             headerBox.getChildren().add(closeButton);
         }
         boolean present = getHeader() != null || !getTitle().isBlank() || isShowClose();
@@ -864,26 +995,61 @@ public final class EleFXDialog {
     private void refreshAlignment() {
         if (isCenter()) {
             headerBox.setAlignment(Pos.CENTER);
+            customHeaderContainer.setAlignment(Pos.CENTER);
             titleLabel.setAlignment(Pos.CENTER);
             footerBox.setAlignment(Pos.CENTER);
         } else {
             headerBox.setAlignment(Pos.CENTER_LEFT);
+            customHeaderContainer.setAlignment(Pos.CENTER_LEFT);
             titleLabel.setAlignment(Pos.CENTER_LEFT);
             footerBox.setAlignment(Pos.CENTER_RIGHT);
         }
     }
 
+    private void refreshDragCursor() {
+        headerBox.setCursor(isDraggable() && !isFullscreen() ? Cursor.MOVE : null);
+    }
+
     private void startDrag(MouseEvent e) {
-        if (!isDraggable() || isFullscreen() || e.getTarget() == closeButton) return;
+        endDrag();
+        if (!isDraggable() || isFullscreen() || !e.isPrimaryButtonDown()) return;
+        for (Node target = (Node) e.getTarget(); target != null && target != headerBox; target = target.getParent()) {
+            if (target instanceof ButtonBase) return;
+        }
+        dragArmed = true;
         dragX = e.getScreenX();
         dragY = e.getScreenY();
         dialogX = dialog.getTranslateX();
         dialogY = dialog.getTranslateY();
+        dragStageX = stage.getX();
+        dragStageY = stage.getY();
     }
 
     private void drag(MouseEvent e) {
-        if (!isDraggable() || isFullscreen()) return;
+        if (!dragArmed || !isDraggable() || isFullscreen()) return;
+        if (!e.isPrimaryButtonDown()) {
+            endDrag();
+            return;
+        }
         double x = dialogX + e.getScreenX() - dragX, y = dialogY + e.getScreenY() - dragY;
+        if (!dragging && x == dialogX && y == dialogY) return;
+        if (!dragging) {
+            dragging = true;
+            styleBeforeDragging = dialog.getStyle();
+            applyDraggingStyle();
+        }
+        if (isPenetrable()) {
+            x = dragStageX + e.getScreenX() - dragX;
+            y = dragStageY + e.getScreenY() - dragY;
+            if (!isOverflow()) {
+                Rectangle2D bounds = ownerBounds();
+                x = Math.max(bounds.getMinX(), Math.min(bounds.getMaxX() - stage.getWidth(), x));
+                y = Math.max(bounds.getMinY(), Math.min(bounds.getMaxY() - stage.getHeight(), y));
+            }
+            stage.setX(x);
+            stage.setY(y);
+            return;
+        }
         if (!isOverflow()) {
             double w = Math.max(dialog.getWidth(), getWidth()), h = dialog.getHeight();
             x = Math.max(-(stage.getWidth() - w) / 2, Math.min((stage.getWidth() - w) / 2, x));
@@ -891,6 +1057,26 @@ public final class EleFXDialog {
         }
         dialog.setTranslateX(x);
         dialog.setTranslateY(y);
+    }
+
+    private void endDrag() {
+        dragArmed = false;
+        if (!dragging) return;
+        dragging = false;
+        if (dialog != null) {
+            dialog.setStyle(styleBeforeDragging);
+        }
+        styleBeforeDragging = null;
+    }
+
+    private void applyDraggingStyle() {
+        String style = draggingStyle;
+        if (style == null || style.isBlank()) {
+            dialog.setStyle(styleBeforeDragging);
+            return;
+        }
+        String base = styleBeforeDragging == null ? "" : styleBeforeDragging.strip();
+        dialog.setStyle(base.isEmpty() ? style : base + (base.endsWith(";") ? " " : "; ") + style);
     }
 
     private static void delay(int millis, Runnable action) {
