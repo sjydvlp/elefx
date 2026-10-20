@@ -15,12 +15,14 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -33,6 +35,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -54,6 +57,8 @@ import java.util.Set;
  * </p>
  */
 public final class EleFXDrawer {
+
+    private static final double MIN_RESIZABLE_SIZE = 4;
 
     public static final EventType<Event> OPEN = new EventType<>(Event.ANY, "ELEFX_DRAWER_OPEN");
 
@@ -158,6 +163,8 @@ public final class EleFXDrawer {
 
     private final Label titleLabel = new Label();
 
+    private final Region headerSpacer = new Region();
+
     private final Button closeButton = new Button();
 
     private final Set<String> appliedHeaderClasses = new HashSet<>(), appliedBodyClasses = new HashSet<>(),
@@ -167,11 +174,33 @@ public final class EleFXDrawer {
 
     private StackPane overlay;
 
+    private Region mask;
+
+    private Region ownerOutline;
+
     private VBox drawer;
+
+    private StackPane drawerLayer;
+
+    private Rectangle compactClip;
 
     private Region resizeHandle;
 
     private Window owner;
+
+    private Window observedOwner;
+
+    private Scene observedOwnerScene;
+
+    private final ChangeListener<Number> ownerPositionListener = (observable, oldValue,
+                                                                  newValue) -> syncOwnerPosition();
+
+    private final ChangeListener<Number> ownerSizeListener = (observable, oldValue, newValue) -> fitOwnerIfShowing();
+
+    private final ChangeListener<Scene> ownerSceneListener = (observable, oldValue, newValue) -> {
+        observeOwnerScene(newValue);
+        fitOwnerIfShowing();
+    };
 
     private boolean closing;
 
@@ -670,7 +699,7 @@ public final class EleFXDrawer {
         footerBox.getStyleClass().add("ele-drawer__footer");
         footerBox.setAlignment(Pos.CENTER_RIGHT);
         titleLabel.getStyleClass().add("ele-drawer__title");
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
         closeButton.getStyleClass().add("ele-drawer__close-btn");
         closeButton.setAccessibleText("Close drawer");
         closeButton.setGraphic(defaultCloseIcon());
@@ -702,6 +731,8 @@ public final class EleFXDrawer {
             fitOwner();
             fire(getOnOpen(), OPEN);
             stage.show();
+            observeOwner();
+            syncOwnerPosition();
             play(true, () -> {
                 closeButton.requestFocus();
                 fire(getOnOpenAutoFocus(), OPEN_AUTO_FOCUS);
@@ -715,19 +746,37 @@ public final class EleFXDrawer {
         if (stage != null) return;
         drawer = new VBox(headerBox, body, footerBox);
         drawer.getStyleClass().add("ele-drawer");
+        drawer.setMinSize(0, 0);
         drawer.setMaxSize(Region.USE_PREF_SIZE, Double.MAX_VALUE);
+        compactClip = new Rectangle();
+        compactClip.widthProperty().bind(drawer.widthProperty());
+        compactClip.heightProperty().bind(drawer.heightProperty());
         resizeHandle = new Region();
         resizeHandle.getStyleClass().add("ele-drawer__resize-handle");
+        resizeHandle.setPickOnBounds(true);
         resizeHandle.addEventFilter(MouseEvent.MOUSE_PRESSED, this::startResize);
         resizeHandle.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::resize);
         resizeHandle.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
             if (isResizable()) fire(getOnResizeEnd(), RESIZE_END);
         });
-        StackPane drawerLayer = new StackPane(drawer, resizeHandle);
-        overlay = new StackPane(drawerLayer);
+        drawerLayer = new StackPane(drawer, resizeHandle);
+        drawerLayer.setMinSize(0, 0);
+        mask = new Region();
+        mask.getStyleClass().add("ele-drawer__mask");
+        mask.setMinSize(0, 0);
+        mask.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        ownerOutline = new Region();
+        ownerOutline.setMouseTransparent(true);
+        ownerOutline.setMinSize(0, 0);
+        ownerOutline.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        overlay = new StackPane(mask, drawerLayer, ownerOutline);
         overlay.getStyleClass().add("ele-drawer__wrapper");
         overlay.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
-            if (e.getTarget() == overlay && isModal() && isCloseOnClickModal()) requestClose();
+            Object eventTarget = e.getTarget();
+            if (isModal() && isCloseOnClickModal() && eventTarget instanceof Node target
+                    && !isWithin(target, drawer) && !isWithin(target, resizeHandle)) {
+                requestClose();
+            }
         });
         Scene scene = new Scene(overlay, Color.TRANSPARENT);
         scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
@@ -744,6 +793,7 @@ public final class EleFXDrawer {
             e.consume();
             requestClose();
         });
+        stage.setOnHidden(e -> stopObservingOwner());
     }
 
     private void configureStage() {
@@ -751,6 +801,8 @@ public final class EleFXDrawer {
         if (isModal() && stage.getModality() == Modality.NONE) stage.initModality(Modality.WINDOW_MODAL);
         overlay.pseudoClassStateChanged(PseudoClass.getPseudoClass("modal"), isModal());
         overlay.pseudoClassStateChanged(PseudoClass.getPseudoClass("penetrable"), isModalPenetrable());
+        mask.pseudoClassStateChanged(PseudoClass.getPseudoClass("modal"), isModal());
+        mask.pseudoClassStateChanged(PseudoClass.getPseudoClass("penetrable"), isModalPenetrable());
         applyClasses(overlay, getModalClass(), appliedModalClasses);
         drawer.getStyleClass().removeIf(c -> c.startsWith("ele-drawer--"));
         drawer.getStyleClass().add("ele-drawer--" + getDirection().name().toLowerCase());
@@ -760,28 +812,99 @@ public final class EleFXDrawer {
     }
 
     private void fitOwner() {
-        var bounds = owner == null
-                ? Screen.getPrimary().getVisualBounds()
-                : new javafx.geometry.Rectangle2D(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+        Rectangle2D bounds = ownerBounds();
+        if (owner != null && owner.getScene() != null
+                && owner.getScene().getRoot()instanceof Region region) {
+            ownerOutline.setBorder(region.getBorder());
+        } else {
+            ownerOutline.setBorder(null);
+        }
         stage.setX(bounds.getMinX());
         stage.setY(bounds.getMinY());
         stage.setWidth(bounds.getWidth());
         stage.setHeight(bounds.getHeight());
         boolean horizontal = getDirection() == EleFXDrawerDirection.RTL || getDirection() == EleFXDrawerDirection.LTR;
-        double extent = Math.max(100, Math.min(horizontal ? bounds.getWidth() : bounds.getHeight(),
-                parseSize(horizontal ? bounds.getWidth() : bounds.getHeight())));
-        drawer.setPrefWidth(horizontal ? extent : bounds.getWidth());
-        drawer.setPrefHeight(horizontal ? bounds.getHeight() : extent);
+        double extent = Math.max(isResizable() ? MIN_RESIZABLE_SIZE : 100,
+                Math.min(horizontal ? bounds.getWidth() : bounds.getHeight(),
+                        parseSize(horizontal ? bounds.getWidth() : bounds.getHeight())));
+        double width = horizontal ? extent : bounds.getWidth();
+        double height = horizontal ? bounds.getHeight() : extent;
+        drawerLayer.setPrefSize(width, height);
+        drawerLayer.setMaxSize(width, height);
+        drawer.setPrefWidth(width);
+        drawer.setPrefHeight(height);
         drawer.setMaxWidth(horizontal ? extent : Double.MAX_VALUE);
         drawer.setMaxHeight(horizontal ? Double.MAX_VALUE : extent);
-        StackPane.setAlignment(drawer, switch (getDirection()) {
+        drawer.setClip(isResizable() && extent < 100 ? compactClip : null);
+        StackPane.setAlignment(drawerLayer, switch (getDirection()) {
             case RTL -> Pos.CENTER_RIGHT;
             case LTR -> Pos.CENTER_LEFT;
             case TTB -> Pos.TOP_CENTER;
             case BTT -> Pos.BOTTOM_CENTER;
         });
-        drawer.setTranslateX(0);
-        drawer.setTranslateY(0);
+        drawerLayer.setTranslateX(0);
+        drawerLayer.setTranslateY(0);
+    }
+
+    private Rectangle2D ownerBounds() {
+        if (owner == null) return Screen.getPrimary().getVisualBounds();
+        Scene ownerScene = owner.getScene();
+        if (ownerScene != null) {
+            return new Rectangle2D(owner.getX() + ownerScene.getX(),
+                    owner.getY() + ownerScene.getY(),
+                    ownerScene.getWidth(), ownerScene.getHeight());
+        }
+        return new Rectangle2D(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+    }
+
+    private void observeOwner() {
+        if (owner == null || observedOwner == owner) return;
+        stopObservingOwner();
+        observedOwner = owner;
+        observedOwner.xProperty().addListener(ownerPositionListener);
+        observedOwner.yProperty().addListener(ownerPositionListener);
+        observedOwner.widthProperty().addListener(ownerSizeListener);
+        observedOwner.heightProperty().addListener(ownerSizeListener);
+        observedOwner.sceneProperty().addListener(ownerSceneListener);
+        observeOwnerScene(observedOwner.getScene());
+    }
+
+    private void observeOwnerScene(Scene scene) {
+        if (observedOwnerScene != null) {
+            observedOwnerScene.xProperty().removeListener(ownerPositionListener);
+            observedOwnerScene.yProperty().removeListener(ownerPositionListener);
+            observedOwnerScene.widthProperty().removeListener(ownerSizeListener);
+            observedOwnerScene.heightProperty().removeListener(ownerSizeListener);
+        }
+        observedOwnerScene = scene;
+        if (scene != null) {
+            scene.xProperty().addListener(ownerPositionListener);
+            scene.yProperty().addListener(ownerPositionListener);
+            scene.widthProperty().addListener(ownerSizeListener);
+            scene.heightProperty().addListener(ownerSizeListener);
+        }
+    }
+
+    private void stopObservingOwner() {
+        observeOwnerScene(null);
+        if (observedOwner == null) return;
+        observedOwner.xProperty().removeListener(ownerPositionListener);
+        observedOwner.yProperty().removeListener(ownerPositionListener);
+        observedOwner.widthProperty().removeListener(ownerSizeListener);
+        observedOwner.heightProperty().removeListener(ownerSizeListener);
+        observedOwner.sceneProperty().removeListener(ownerSceneListener);
+        observedOwner = null;
+    }
+
+    private void syncOwnerPosition() {
+        if (stage == null || !stage.isShowing() || owner == null) return;
+        Rectangle2D bounds = ownerBounds();
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+    }
+
+    private void fitOwnerIfShowing() {
+        if (stage != null && stage.isShowing()) fitOwner();
     }
 
     private void finishClose() {
@@ -802,19 +925,19 @@ public final class EleFXDrawer {
     private void play(boolean opening, Runnable done) {
         Duration duration = Duration.millis(getTransitionDuration());
         if (duration.lessThanOrEqualTo(Duration.ZERO)) {
-            drawer.setTranslateX(opening ? 0 : offsetX());
-            drawer.setTranslateY(opening ? 0 : offsetY());
-            drawer.setOpacity(opening ? 1 : 0);
+            drawerLayer.setTranslateX(opening ? 0 : offsetX());
+            drawerLayer.setTranslateY(opening ? 0 : offsetY());
+            drawerLayer.setOpacity(opening ? 1 : 0);
             done.run();
             return;
         }
-        drawer.setOpacity(opening ? 0.9 : 1);
-        drawer.setTranslateX(opening ? offsetX() : 0);
-        drawer.setTranslateY(opening ? offsetY() : 0);
-        TranslateTransition slide = new TranslateTransition(duration, drawer);
+        drawerLayer.setOpacity(opening ? 0.9 : 1);
+        drawerLayer.setTranslateX(opening ? offsetX() : 0);
+        drawerLayer.setTranslateY(opening ? offsetY() : 0);
+        TranslateTransition slide = new TranslateTransition(duration, drawerLayer);
         slide.setToX(opening ? 0 : offsetX());
         slide.setToY(opening ? 0 : offsetY());
-        FadeTransition fade = new FadeTransition(duration, drawer);
+        FadeTransition fade = new FadeTransition(duration, drawerLayer);
         fade.setToValue(opening ? 1 : 0);
         ParallelTransition all = new ParallelTransition(slide, fade);
         all.setOnFinished(e -> done.run());
@@ -823,16 +946,16 @@ public final class EleFXDrawer {
 
     private double offsetX() {
         return switch (getDirection()) {
-            case RTL -> drawer.getWidth();
-            case LTR -> -drawer.getWidth();
+            case RTL -> drawerLayer.getPrefWidth();
+            case LTR -> -drawerLayer.getPrefWidth();
             default -> 0;
         };
     }
 
     private double offsetY() {
         return switch (getDirection()) {
-            case BTT -> drawer.getHeight();
-            case TTB -> -drawer.getHeight();
+            case BTT -> drawerLayer.getPrefHeight();
+            case TTB -> -drawerLayer.getPrefHeight();
             default -> 0;
         };
     }
@@ -878,7 +1001,7 @@ public final class EleFXDrawer {
     private void startResize(MouseEvent event) {
         if (!isResizable()) return;
         resizeStartCoordinate = isHorizontal() ? event.getScreenX() : event.getScreenY();
-        resizeStartSize = isHorizontal() ? drawer.getWidth() : drawer.getHeight();
+        resizeStartSize = isHorizontal() ? drawerLayer.getWidth() : drawerLayer.getHeight();
         fire(getOnResizeStart(), RESIZE_START);
         event.consume();
     }
@@ -888,7 +1011,7 @@ public final class EleFXDrawer {
         double coordinate = isHorizontal() ? event.getScreenX() : event.getScreenY();
         double delta = coordinate - resizeStartCoordinate;
         if (getDirection() == EleFXDrawerDirection.RTL || getDirection() == EleFXDrawerDirection.BTT) delta = -delta;
-        setSize(Math.max(100, resizeStartSize + delta));
+        setSize(Math.max(MIN_RESIZABLE_SIZE, resizeStartSize + delta));
         fire(getOnResize(), RESIZE);
         event.consume();
     }
@@ -900,7 +1023,7 @@ public final class EleFXDrawer {
     private void refreshHeader() {
         boolean present = isWithHeader();
         if (present) {
-            headerBox.getChildren().setAll(getHeader() == null ? titleLabel : getHeader());
+            headerBox.getChildren().setAll(getHeader() == null ? titleLabel : getHeader(), headerSpacer);
             if (getHeader() == null) titleLabel.setText(getTitle());
             if (isShowClose()) headerBox.getChildren().add(closeButton);
         }
@@ -940,6 +1063,13 @@ public final class EleFXDrawer {
 
     private static void fire(EventHandler<Event> handler, EventType<Event> type) {
         if (handler != null) handler.handle(new Event(type));
+    }
+
+    private static boolean isWithin(Node target, Node ancestor) {
+        for (Node node = target; node != null; node = node.getParent()) {
+            if (node == ancestor) return true;
+        }
+        return false;
     }
 
     private static void applyClasses(Node node, String value, Set<String> applied) {
