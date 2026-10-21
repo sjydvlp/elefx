@@ -9,6 +9,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -39,6 +40,8 @@ public class EleFXMessage extends HBox implements Themable {
     private static final Map<StackKey, List<EleFXMessage>> INSTANCES = new HashMap<>();
 
     private static final double GAP = 16;
+
+    private static final double SHADOW_INSET = 12;
 
     private final StringProperty message = new SimpleStringProperty(this, "message", "");
 
@@ -98,8 +101,14 @@ public class EleFXMessage extends HBox implements Themable {
         setMessage(value);
     }
 
+    /** Shows text in the focused window, or on the primary screen if none is focused. */
     public static EleFXMessage show(String value) {
         return show(new EleFXMessageOptions().message(value));
+    }
+
+    /** Shows a JavaFX node in the focused window, or on the primary screen if none is focused. */
+    public static EleFXMessage show(Node value) {
+        return show(new EleFXMessageOptions().messageNode(value));
     }
 
     public static EleFXMessage primary(String value) {
@@ -124,8 +133,8 @@ public class EleFXMessage extends HBox implements Themable {
 
     public static EleFXMessage show(EleFXMessageOptions options) {
         EleFXMessageOptions o = options == null ? new EleFXMessageOptions() : options;
-        StackKey key = new StackKey(o.getOwner(), o.getPlacement());
         synchronized (INSTANCES) {
+            StackKey key = new StackKey(resolveOwner(o.getOwner()), o.getPlacement());
             List<EleFXMessage> messages = INSTANCES.computeIfAbsent(key, ignored -> new ArrayList<>());
             if (o.isGrouping() && o.getMessageNode() == null)
                 for (EleFXMessage existing : messages)
@@ -141,6 +150,19 @@ public class EleFXMessage extends HBox implements Themable {
             result.open();
             return result;
         }
+    }
+
+    private static Window resolveOwner(Window requested) {
+        if (requested != null) return requested;
+        for (Window window : Window.getWindows()) {
+            if (!window.isFocused()) continue;
+            for (List<EleFXMessage> messages : INSTANCES.values())
+                for (EleFXMessage message : messages)
+                    if (message.stage == window)
+                        return window instanceof Stage stage ? stage.getOwner() : null;
+            return window;
+        }
+        return null;
     }
 
     public static void closeAll() {
@@ -405,7 +427,10 @@ public class EleFXMessage extends HBox implements Themable {
 
     private void open() {
         stage = new Stage(StageStyle.TRANSPARENT);
-        Scene scene = new Scene(new StackPane(this));
+        StackPane wrapper = new StackPane(this);
+        wrapper.setPadding(new Insets(SHADOW_INSET));
+        wrapper.setStyle("-fx-background-color: transparent;");
+        Scene scene = new Scene(wrapper);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         scene.getStylesheets().add(EleFXThemes.MESSAGE.toData());
@@ -450,17 +475,20 @@ public class EleFXMessage extends HBox implements Themable {
         double cursor = edge;
         for (EleFXMessage message : copy) {
             if (message.stage == null || !message.stage.isShowing()) continue;
-            double width = message.stage.getWidth(), height = message.stage.getHeight();
+            double width = message.stage.getWidth() - 2 * SHADOW_INSET;
+            double height = message.stage.getHeight() - 2 * SHADOW_INSET;
             var area = key.owner == null
                     ? Screen.getPrimary().getVisualBounds()
                     : new javafx.geometry.Rectangle2D(key.owner.getX(), key.owner.getY(), key.owner.getWidth(),
                             key.owner.getHeight());
             double x = key.placement.isLeft()
-                    ? area.getMinX() + edge
+                    ? area.getMinX() + edge - SHADOW_INSET
                     : key.placement.isRight()
-                            ? area.getMaxX() - width - edge
-                            : area.getMinX() + (area.getWidth() - width) / 2;
-            double y = key.placement.isBottom() ? area.getMaxY() - cursor - height : area.getMinY() + cursor;
+                            ? area.getMaxX() - width - edge - SHADOW_INSET
+                            : area.getMinX() + (area.getWidth() - width) / 2 - SHADOW_INSET;
+            double y = key.placement.isBottom()
+                    ? area.getMaxY() - cursor - height - SHADOW_INSET
+                    : area.getMinY() + cursor - SHADOW_INSET;
             message.stage.setX(x);
             message.stage.setY(y);
             cursor += height + GAP;

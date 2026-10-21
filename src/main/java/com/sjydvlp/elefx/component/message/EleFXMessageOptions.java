@@ -8,7 +8,8 @@ import javafx.stage.Window;
  *
  * <p>
  * The optional owner replaces Element Plus's browser-only {@code appendTo}: messages are
- * positioned within that JavaFX window. All setters return this object for concise use.
+ * positioned within that JavaFX window. If omitted, the focused window is used when available.
+ * All setters return this object for concise use.
  * </p>
  */
 public final class EleFXMessageOptions {
