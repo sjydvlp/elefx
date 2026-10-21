@@ -17,6 +17,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -74,7 +75,9 @@ public class EleFXLoading extends StackPane implements Themable {
 
     private final Arc defaultSpinner = new Arc(18, 18, 14, 14, 35, 285);
 
-    private final RotateTransition rotation = new RotateTransition(Duration.millis(800), defaultSpinner);
+    private final Pane defaultSpinnerHolder = new Pane(defaultSpinner);
+
+    private final RotateTransition rotation = new RotateTransition(Duration.millis(800), defaultSpinnerHolder);
 
     private final Set<String> appliedCustomClasses = new HashSet<>();
 
@@ -302,9 +305,12 @@ public class EleFXLoading extends StackPane implements Themable {
         defaultSpinner.setType(ArcType.OPEN);
         defaultSpinner.setStroke(Color.web("#409eff"));
         defaultSpinner.setFill(Color.TRANSPARENT);
+        defaultSpinnerHolder.setMinSize(36, 36);
+        defaultSpinnerHolder.setPrefSize(36, 36);
+        defaultSpinnerHolder.setMaxSize(36, 36);
         textLabel.getStyleClass().add("ele-loading-text");
         textLabel.setWrapText(true);
-        indicator.getChildren().addAll(defaultSpinner, textLabel);
+        indicator.getChildren().addAll(defaultSpinnerHolder, textLabel);
         getChildren().add(indicator);
         rotation.setByAngle(360);
         rotation.setCycleCount(Animation.INDEFINITE);
@@ -343,10 +349,10 @@ public class EleFXLoading extends StackPane implements Themable {
     }
 
     private void refreshSpinner() {
-        Node selected = getSpinner() == null ? defaultSpinner : getSpinner();
+        Node selected = getSpinner() == null ? defaultSpinnerHolder : getSpinner();
         if (!indicator.getChildren().contains(selected)) indicator.getChildren().setAll(selected, textLabel);
-        defaultSpinner.setVisible(selected == defaultSpinner);
-        if (selected != defaultSpinner)
+        defaultSpinnerHolder.setVisible(selected == defaultSpinnerHolder);
+        if (selected != defaultSpinnerHolder)
             rotation.stop();
         else if (isLoading()) rotation.play();
     }
