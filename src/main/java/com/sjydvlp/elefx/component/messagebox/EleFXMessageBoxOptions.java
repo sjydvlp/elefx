@@ -7,6 +7,7 @@ import javafx.stage.Window;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /** Fluent options for {@link EleFXMessageBox}. */
@@ -17,6 +18,8 @@ public final class EleFXMessageBoxOptions {
     private String message = "";
 
     private Node messageNode;
+
+    private Function<EleFXMessageBox, Node> messageNodeFactory;
 
     private boolean dangerouslyUseHTMLString;
 
@@ -29,6 +32,8 @@ public final class EleFXMessageBoxOptions {
     private String customClass = "";
 
     private String customStyle = "";
+
+    private String draggingStyle = "";
 
     private boolean modal = true;
 
@@ -123,6 +128,16 @@ public final class EleFXMessageBoxOptions {
         return this;
     }
 
+    public Function<EleFXMessageBox, Node> getMessageNodeFactory() {
+        return messageNodeFactory;
+    }
+
+    /** Builds custom content with access to the box's confirm, cancel, and close actions. */
+    public EleFXMessageBoxOptions messageNodeFactory(Function<EleFXMessageBox, Node> v) {
+        messageNodeFactory = v;
+        return this;
+    }
+
     public boolean isDangerouslyUseHTMLString() {
         return dangerouslyUseHTMLString;
     }
@@ -174,6 +189,16 @@ public final class EleFXMessageBoxOptions {
 
     public EleFXMessageBoxOptions customStyle(String v) {
         customStyle = text(v);
+        return this;
+    }
+
+    public String getDraggingStyle() {
+        return draggingStyle;
+    }
+
+    /** Inline style applied only while a draggable message box is being dragged. */
+    public EleFXMessageBoxOptions draggingStyle(String v) {
+        draggingStyle = text(v);
         return this;
     }
 

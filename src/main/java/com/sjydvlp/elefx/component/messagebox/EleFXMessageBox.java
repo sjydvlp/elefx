@@ -5,8 +5,10 @@ import com.sjydvlp.elefx.component.icon.EleFXIcon;
 import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -86,6 +89,8 @@ public final class EleFXMessageBox {
     private StackPane overlay;
 
     private boolean closing;
+
+    private String styleBeforeDragging;
 
     private double dragAnchorX, dragAnchorY, boxAnchorX, boxAnchorY;
 
@@ -184,8 +189,7 @@ public final class EleFXMessageBox {
 
     private void build() {
         box.getStyleClass().add("ele-message-box");
-        box.setMaxWidth(420);
-        box.setPrefWidth(420);
+        box.setMaxHeight(Region.USE_PREF_SIZE);
         box.setFillWidth(true);
         if (!options.getCustomStyle().isBlank()) box.setStyle(options.getCustomStyle());
         applyCustomClasses(box, options.getCustomClass(), customClasses);
@@ -194,6 +198,10 @@ public final class EleFXMessageBox {
         header.setAlignment(Pos.CENTER_LEFT);
         title.getStyleClass().add("ele-message-box__title");
         title.setText(options.getTitle());
+        title.setMinWidth(0);
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.setWrapText(true);
+        title.setAlignment(options.isCenter() ? Pos.CENTER : Pos.CENTER_LEFT);
         HBox.setHgrow(title, Priority.ALWAYS);
         closeButton.getStyleClass().add("ele-message-box__headerbtn");
         closeButton.setAccessibleText("Close message box");
@@ -202,7 +210,6 @@ public final class EleFXMessageBox {
         closeButton.setOnAction(e -> close());
         closeButton.setVisible(options.isShowClose());
         closeButton.setManaged(options.isShowClose());
-        header.getChildren().addAll(title, closeButton);
 
         content.getStyleClass().add("ele-message-box__content");
         content.setAlignment(options.isCenter() ? Pos.CENTER : Pos.TOP_LEFT);
@@ -217,7 +224,9 @@ public final class EleFXMessageBox {
         message.setText(options.isDangerouslyUseHTMLString()
                 ? options.getMessage().replaceAll("<[^>]*>", "")
                 : options.getMessage());
-        Node suppliedMessage = options.getMessageNode();
+        Node suppliedMessage = options.getMessageNodeFactory() == null
+                ? options.getMessageNode()
+                : options.getMessageNodeFactory().apply(this);
         messageArea.getChildren().add(suppliedMessage == null ? message : suppliedMessage);
         input.getStyleClass().add("ele-message-box__input");
         input.setPromptText(options.getInputPlaceholder());
@@ -229,8 +238,29 @@ public final class EleFXMessageBox {
         inputError.setManaged(false);
         inputError.setVisible(false);
         messageArea.getChildren().addAll(input, inputError);
+        input.textProperty().addListener((observable, oldValue, newValue) -> validateInput());
+        if (!input.getText().isEmpty()) validateInput();
         HBox.setHgrow(messageArea, Priority.ALWAYS);
-        content.getChildren().addAll(iconArea, messageArea);
+        if (options.isCenter()) {
+            // Keep the title and status icon centered as one group while the close button
+            // remains at the right edge of the header.
+            HBox heading = new HBox(8, iconArea, title);
+            heading.setAlignment(Pos.CENTER);
+            heading.setMaxWidth(Region.USE_PREF_SIZE);
+            StackPane centeredHeading = new StackPane(heading);
+            HBox.setHgrow(centeredHeading, Priority.ALWAYS);
+            Region leadingSpace = new Region();
+            leadingSpace.setMinWidth(24);
+            leadingSpace.setPrefWidth(24);
+            leadingSpace.setMaxWidth(24);
+            leadingSpace.setVisible(options.isShowClose());
+            leadingSpace.setManaged(options.isShowClose());
+            header.getChildren().addAll(leadingSpace, centeredHeading, closeButton);
+            content.getChildren().add(messageArea);
+        } else {
+            header.getChildren().addAll(title, closeButton);
+            content.getChildren().addAll(iconArea, messageArea);
+        }
 
         footer.getStyleClass().add("ele-message-box__btns");
         footer.setAlignment(options.isCenter() ? Pos.CENTER : Pos.CENTER_RIGHT);
@@ -274,6 +304,7 @@ public final class EleFXMessageBox {
             if (options.isModal()) stage.initModality(Modality.WINDOW_MODAL);
             overlay = new StackPane(box);
             overlay.getStyleClass().add("ele-message-box__wrapper");
+            overlay.setPadding(new Insets(16));
             if (options.isModal()) overlay.getStyleClass().add("ele-message-box__wrapper--modal");
             applyCustomClasses(overlay, options.getModalClass(), new ArrayList<>());
             overlay.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
@@ -283,6 +314,8 @@ public final class EleFXMessageBox {
             Scene scene = new Scene(overlay, viewport.getWidth(), viewport.getHeight(), Color.TRANSPARENT);
             scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
             scene.getStylesheets().add(EleFXThemes.MESSAGE_BOX.toData());
+            if (options.getOwner() != null && options.getOwner().getScene() != null)
+                scene.getStylesheets().addAll(options.getOwner().getScene().getStylesheets());
             scene.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.ESCAPE && options.isCloseOnPressEscape()) close();
             });
@@ -327,6 +360,10 @@ public final class EleFXMessageBox {
         inputError.setText(error == null ? "" : error);
         inputError.setVisible(error != null);
         inputError.setManaged(error != null);
+        if (error == null)
+            input.getStyleClass().remove("ele-message-box__input--invalid");
+        else if (!input.getStyleClass().contains("ele-message-box__input--invalid"))
+            input.getStyleClass().add("ele-message-box__input--invalid");
         return error == null;
     }
 
@@ -352,7 +389,7 @@ public final class EleFXMessageBox {
             case SUCCESS -> EleFXIconType.CIRCLE_CHECK_FILLED;
             case WARNING -> EleFXIconType.WARNING_FILLED;
             case ERROR -> EleFXIconType.CIRCLE_CLOSE_FILLED;
-        }, 24);
+        }, options.isCenter() ? 20 : 24);
         iconArea.getChildren().setAll(icon == null ? List.of() : List.of(icon));
         if (options.getType() != null)
             iconArea.getStyleClass().add("ele-message-box__status--" + options.getType().name().toLowerCase());
@@ -367,6 +404,7 @@ public final class EleFXMessageBox {
     }
 
     private void installDragging() {
+        header.setCursor(Cursor.MOVE);
         header.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
             dragAnchorX = event.getScreenX();
             dragAnchorY = event.getScreenY();
@@ -385,9 +423,21 @@ public final class EleFXMessageBox {
             }
             box.setTranslateX(x);
             box.setTranslateY(y);
-            if (!box.getStyleClass().contains("is-dragging")) box.getStyleClass().add("is-dragging");
+            if (!box.getStyleClass().contains("is-dragging")) {
+                styleBeforeDragging = box.getStyle();
+                if (!options.getDraggingStyle().isBlank())
+                    box.setStyle((styleBeforeDragging.isBlank() ? "" : styleBeforeDragging + "; ")
+                            + options.getDraggingStyle());
+                box.getStyleClass().add("is-dragging");
+            }
         });
-        header.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> box.getStyleClass().remove("is-dragging"));
+        header.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
+            box.getStyleClass().remove("is-dragging");
+            if (styleBeforeDragging != null) {
+                box.setStyle(styleBeforeDragging);
+                styleBeforeDragging = null;
+            }
+        });
     }
 
     private static void applyCustomClasses(Node node, String classes, List<String> applied) {
