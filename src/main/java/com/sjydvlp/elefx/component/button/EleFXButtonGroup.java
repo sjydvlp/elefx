@@ -111,12 +111,18 @@ public class EleFXButtonGroup extends FlowPane implements Themable {
                 .toList();
         for (Node button : buttons) {
             button.getStyleClass().removeAll(HORIZONTAL_FIRST_STYLE_CLASS, HORIZONTAL_LAST_STYLE_CLASS,
-                    VERTICAL_FIRST_STYLE_CLASS, VERTICAL_LAST_STYLE_CLASS);
+                    VERTICAL_FIRST_STYLE_CLASS, VERTICAL_LAST_STYLE_CLASS,
+                    "ele-button-group__horizontal-divider", "ele-button-group__vertical-divider");
         }
         if (buttons.isEmpty()) {
             return;
         }
         boolean horizontal = getDirection() != Orientation.VERTICAL;
+        for (int i = 0; i < buttons.size() - 1; i++) {
+            buttons.get(i).getStyleClass().add(horizontal
+                    ? "ele-button-group__horizontal-divider"
+                    : "ele-button-group__vertical-divider");
+        }
         buttons.get(0).getStyleClass().add(horizontal
                 ? HORIZONTAL_FIRST_STYLE_CLASS
                 : VERTICAL_FIRST_STYLE_CLASS);

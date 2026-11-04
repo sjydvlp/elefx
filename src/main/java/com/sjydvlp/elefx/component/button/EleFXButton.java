@@ -8,6 +8,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
+import com.sjydvlp.elefx.component.icon.EleFXIcon;
+import com.sjydvlp.elefx.component.icon.EleFXIconType;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -66,7 +73,50 @@ public class EleFXButton extends Button implements Themable {
     private final ObjectProperty<Node> loadingGraphic = new SimpleObjectProperty<>(this, "loadingGraphic",
             createDefaultLoadingGraphic());
 
+    private static Cursor forbiddenCursor;
+
+    private Node cursorTarget;
+
+    private Cursor previousTargetCursor;
+
+    private final javafx.event.EventHandler<javafx.scene.input.MouseEvent> disabledCursorHandler = event -> {
+        restoreDisabledCursor();
+        if (isDisabled() && isVisible() && getScene() != null
+                && contains(sceneToLocal(event.getSceneX(), event.getSceneY()))
+                && event.getEventType() != javafx.scene.input.MouseEvent.MOUSE_EXITED) {
+            Node target = event.getPickResult().getIntersectedNode();
+            if (target != null && !target.cursorProperty().isBound()) {
+                cursorTarget = target;
+                previousTargetCursor = target.getCursor();
+                target.setCursor(getForbiddenCursor());
+            }
+        }
+    };
+
+    private void restoreDisabledCursor() {
+        if (cursorTarget != null) {
+            if (!cursorTarget.cursorProperty().isBound() && cursorTarget.getCursor() == forbiddenCursor) {
+                cursorTarget.setCursor(previousTargetCursor);
+            }
+            cursorTarget = null;
+        }
+    }
+
     private Node contentGraphic;
+
+    private static Cursor getForbiddenCursor() {
+        if (forbiddenCursor == null) {
+            EleFXIcon icon = new EleFXIcon(EleFXIconType.FORBIDDEN, 20);
+            icon.setFill(Color.web("#606266"));
+            icon.resize(24, 24);
+            icon.layout();
+            SnapshotParameters parameters = new SnapshotParameters();
+            parameters.setFill(Color.TRANSPARENT);
+            WritableImage image = icon.snapshot(parameters, new WritableImage(24, 24));
+            forbiddenCursor = new ImageCursor(image, 12, 12);
+        }
+        return forbiddenCursor;
+    }
 
     private boolean updatingGraphic;
 
@@ -306,7 +356,27 @@ public class EleFXButton extends Button implements Themable {
         return Themable.super.sceneBuilderIntegration();
     }
 
+    @Override
+    public void arm() {
+        if (!isLoading()) {
+            super.arm();
+        }
+    }
+
     private void initialize() {
+        addEventFilter(javafx.scene.input.MouseEvent.ANY, event -> {
+            if (isLoading() && (event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_PRESSED
+                    || event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_RELEASED
+                    || event.getEventType() == javafx.scene.input.MouseEvent.MOUSE_CLICKED)) {
+                event.consume();
+            }
+        });
+        addEventFilter(javafx.scene.input.KeyEvent.ANY, event -> {
+            if (isLoading() && (event.getCode() == javafx.scene.input.KeyCode.SPACE
+                    || event.getCode() == javafx.scene.input.KeyCode.ENTER)) {
+                event.consume();
+            }
+        });
         getStyleClass().add(STYLE_CLASS);
         updateTypeStyleClass(null, getType());
         type.addListener((observable, oldType, newType) -> updateTypeStyleClass(oldType, newType));
@@ -338,6 +408,18 @@ public class EleFXButton extends Button implements Themable {
                 showLoadingGraphic();
             }
         });
+        // Disabled nodes are excluded from mouse picking. Observe the Scene and
+        // apply the cursor to the node actually picked beneath the button.
+        sceneProperty().addListener((observable, oldScene, newScene) -> {
+            restoreDisabledCursor();
+            if (oldScene != null) {
+                oldScene.removeEventFilter(javafx.scene.input.MouseEvent.ANY, disabledCursorHandler);
+            }
+            if (newScene != null) {
+                newScene.addEventFilter(javafx.scene.input.MouseEvent.ANY, disabledCursorHandler);
+            }
+        });
+        disabledProperty().addListener(observable -> restoreDisabledCursor());
         setAlignment(Pos.CENTER);
         sceneBuilderIntegration();
     }
@@ -390,6 +472,9 @@ public class EleFXButton extends Button implements Themable {
 
     private void updateLoading(boolean loading) {
         updateBooleanStyleClass(loading, LOADING_STYLE_CLASS);
+        if (loading) {
+            disarm();
+        }
         if (loading) {
             showLoadingGraphic();
         } else {

@@ -231,7 +231,7 @@
 
 /* ------------------------------ button ------------------------------ */
 .ele-button {
-    -fx-padding: 7px 15px;
+    -fx-padding: 0 15px; -fx-pref-height: 32px; -fx-graphic-text-gap: 6px;
     -fx-min-height: 32px;
     -fx-background-insets: 0;
     -fx-border-insets: 0;
@@ -242,8 +242,8 @@
     -fx-cursor: hand;
 }
 
-.ele-button--size-large { -fx-padding: 10px 19px; -fx-min-height: 40px; }
-.ele-button--size-small { -fx-padding: 5px 11px; -fx-min-height: 24px; -fx-font-size: 12px; }
+.ele-button--size-large { -fx-padding: 0 19px; -fx-pref-height: 40px; -fx-min-height: 40px; }
+.ele-button--size-small { -fx-padding: 0 11px; -fx-pref-height: 24px; -fx-min-height: 24px; -fx-font-size: 12px; }
 
 .ele-button--default {
     -elefx-button-main: -elefx-ct-regular;
@@ -253,7 +253,7 @@
     -elefx-button-icon-color: -elefx-ct-regular;
     -fx-text-fill: -elefx-button-solid-text;
     -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
+    -fx-border-color: -elefx-cb-base;
 }
 
 .ele-button--primary {
@@ -288,7 +288,7 @@
 
 .ele-button--default:focused {
     -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
+    -fx-border-color: -elefx-cb-base;
 }
 
 .ele-button--primary:focused,
@@ -371,7 +371,7 @@
 
 .ele-button--text-bg { -fx-background-color: -elefx-button-light; }
 .ele-button--text-bg:hover { -fx-background-color: -elefx-button-light; }
-.ele-button--loading { -fx-opacity: 0.72; -fx-cursor: wait; }
+.ele-button--loading { -fx-opacity: 0.72; -fx-cursor: default; }
 .ele-button:disabled { -fx-opacity: 0.5; -fx-cursor: default; }
 
 .ele-button .ele-icon .ele-icon__svg { -fx-fill: -elefx-button-icon-color; }
@@ -425,6 +425,12 @@
     -fx-background-radius: 0 0 4px 4px;
     -fx-border-radius: 0 0 4px 4px;
 }
+
+.ele-button--default:hover { -fx-text-fill: -elefx-cp-1; -fx-background-color: -elefx-cp-l8; -fx-border-color: -elefx-cp-l6; }
+.ele-button--text:hover, .ele-button--text:focused { -fx-text-fill: -elefx-button-main; -fx-background-color: -elefx-cf-light; -fx-border-color: transparent; }
+.ele-button--text-bg { -fx-background-color: -elefx-cf-light; }
+.ele-button--text-bg:hover, .ele-button--text:pressed { -fx-background-color: -elefx-cf-base; -fx-border-color: transparent; }
+.ele-button--link { -fx-padding: 2px 0; -fx-min-height: 0; -fx-pref-height: -1; }
 
 
 /* ------------------------------ layout ------------------------------ */
@@ -483,7 +489,7 @@
 .ele-link:disabled .ele-icon .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
 
 /* ------------------------------ input ------------------------------ */
-.ele-input { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-size: 14px; }
+.ele-input { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-font-size: 14px; }
 .ele-input:hover { -fx-border-color: -elefx-ct-placeholder; }
 .ele-input:focused, .ele-input:focused:hover { -fx-border-color: -elefx-cp-1; }
 .ele-input:disabled { -fx-opacity: 1; -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
@@ -501,8 +507,8 @@
 .ele-input__password-toggle:hover .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
 .ele-input__count { -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 12px; }
 .ele-input__textarea-wrapper { -fx-min-height: 60px; -fx-alignment: top-left; }
-.ele-input__textarea { -fx-padding: 0; -fx-wrap-text: true; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
-.ele-input__textarea:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input__textarea { -fx-padding: 0; -fx-wrap-text: true; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input__textarea:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-input--textarea:hover .ele-input__textarea { -fx-border-color: -elefx-ct-placeholder; }
 .ele-input--textarea:focused .ele-input__textarea { -fx-border-color: -elefx-cp-1; }
 .ele-input__textarea .scroll-pane, .ele-input__textarea .scroll-pane .viewport { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
@@ -516,11 +522,11 @@
 .ele-input--textarea .ele-input__clear { -fx-translate-x: -11px; }
 .ele-input--textarea .ele-input__count { -fx-padding: 0 11px 7px 0; }
 .ele-input--group, .ele-input--group:hover, .ele-input--group:focused { -fx-padding: 0; -fx-spacing: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; }
-.ele-input__group-wrapper { -fx-min-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input__group-wrapper { -fx-min-height: 32px; -fx-padding: 0 11px; -fx-spacing: 6px; -fx-alignment: center-left; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-input--group:hover .ele-input__group-wrapper { -fx-border-color: -elefx-ct-placeholder; }
 .ele-input--group:focused .ele-input__group-wrapper { -fx-border-color: -elefx-cp-1; }
 .ele-input--group:disabled .ele-input__group-wrapper { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
-.ele-input__prepend, .ele-input__append { -fx-min-height: 32px; -fx-padding: 0 20px; -fx-alignment: center; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-text-fill: -elefx-ct-regular; }
+.ele-input__prepend, .ele-input__append { -fx-min-height: 32px; -fx-padding: 0 20px; -fx-alignment: center; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-text-fill: -elefx-ct-regular; }
 .ele-input__prepend { -fx-background-radius: 4px 0 0 4px; -fx-border-radius: 4px 0 0 4px; -fx-border-width: 1px 0 1px 1px; }
 .ele-input__append { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; -fx-border-width: 1px 1px 1px 0; }
 .ele-input--group-prepend .ele-input__group-wrapper { -fx-background-radius: 0 4px 4px 0; -fx-border-radius: 0 4px 4px 0; }
@@ -528,7 +534,7 @@
 .ele-input--group-prepend.ele-input--group-append .ele-input__group-wrapper { -fx-background-radius: 0; -fx-border-radius: 0; }
 
 /* --------------------------- input number --------------------------- */
-.ele-input-number { -fx-min-width: 180px; -fx-pref-width: 180px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.ele-input-number { -fx-min-width: 180px; -fx-pref-width: 180px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-input-number:hover { -fx-border-color: -elefx-ct-placeholder; }.ele-input-number:focused, .ele-input-number:focused:hover { -fx-border-color: -elefx-cp-1; }.ele-input-number:disabled { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; }
 .ele-input-number__input-wrapper { -fx-alignment: center; }.ele-input-number__input, .ele-input-number__input:focused { -fx-padding: 0 8px; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }.ele-input-number__prefix, .ele-input-number__suffix { -fx-text-fill: -elefx-ct-secondary; }.ele-input-number__right-adornment { -fx-alignment: center-right; }.ele-input-number__prefix-adornment { -fx-padding: 0 0 0 6px; -fx-alignment: center-left; }.ele-input-number__suffix-adornment { -fx-padding: 0 6px 0 0; -fx-alignment: center-right; }
 .ele-input-number__decrease, .ele-input-number__increase { -fx-min-width: 32px; -fx-pref-width: 32px; -fx-max-width: 32px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-max-height: 30px; -fx-padding: 0; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; }.ele-input-number__decrease:hover, .ele-input-number__increase:hover { -fx-background-color: -elefx-cf-light; }.ele-input-number__decrease:hover .ele-icon__svg, .ele-input-number__increase:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-input-number__decrease:disabled, .ele-input-number__increase:disabled { -fx-opacity: 1; -fx-cursor: default; }.ele-input-number__decrease:disabled .ele-icon__svg, .ele-input-number__increase:disabled .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }.ele-input-number__decrease { -fx-background-radius: 3px 0 0 3px; -fx-border-color: transparent -elefx-cb-darker transparent transparent; -fx-border-width: 0 1px 0 0; }.ele-input-number__increase { -fx-background-radius: 0 3px 3px 0; -fx-border-color: transparent transparent transparent -elefx-cb-darker; -fx-border-width: 0 0 0 1px; }.ele-input-number__decrease .ele-icon__svg, .ele-input-number__increase .ele-icon__svg { -fx-fill: -elefx-ct-regular; }
@@ -605,7 +611,7 @@
 
 /* ------------------------------ autocomplete ------------------------------ */
 .ele-autocomplete { -fx-alignment: center-left; -fx-spacing: -1px; }
-.ele-autocomplete__input { -fx-min-height: 32px; -fx-padding: 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; }
+.ele-autocomplete__input { -fx-min-height: 32px; -fx-padding: 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 14px; }
 .ele-autocomplete__input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-autocomplete__clear { -fx-padding: 2px 7px; -fx-background-color: transparent; -fx-text-fill: -elefx-ct-secondary; -fx-font-size: 16px; -fx-cursor: hand; }
 .ele-autocomplete__popup { -fx-background-color: -elefx-co-white-bg; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-radius: 4px; }
@@ -615,7 +621,7 @@
 /* ------------------------------ select ------------------------------ */
 .ele-select { -fx-alignment: center-left; -fx-spacing: 4px; }
 .ele-select:disabled { -fx-opacity: 1; -fx-cursor: default; }
-.ele-select__trigger { -fx-min-height: 32px; -fx-padding: 7px 10px 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-alignment: center-left; -fx-cursor: hand; }
+.ele-select__trigger { -fx-min-height: 32px; -fx-padding: 7px 10px 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-alignment: center-left; -fx-cursor: hand; }
 .ele-select:disabled .ele-select__trigger { -fx-opacity: 1; -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; -fx-cursor: default; }
 .ele-select__trigger:hover { -fx-border-color: -elefx-ct-placeholder; }
 .ele-select__trigger:focused, .ele-select__trigger--focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
@@ -732,7 +738,7 @@
 
 /* ------------------------------ cascader ------------------------------ */
 .ele-cascader { -fx-alignment: center-left; -fx-spacing: 4px; }
-.ele-cascader__trigger { -fx-min-height: 32px; -fx-padding: 7px 10px 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-alignment: center-left; -fx-content-display: right; -fx-graphic-text-gap: 10px; }
+.ele-cascader__trigger { -fx-min-height: 32px; -fx-padding: 7px 10px 7px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-alignment: center-left; -fx-content-display: right; -fx-graphic-text-gap: 10px; }
 .ele-cascader__trigger:hover { -fx-border-color: -elefx-ct-placeholder; }
 .ele-cascader__trigger:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-cascader__arrow .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
@@ -783,7 +789,7 @@
 .ele-color-picker-panel__wrapper { -fx-spacing: 8px; }
 .ele-color-picker-panel__alpha-row { -fx-alignment: center-left; }
 .ele-color-picker-panel__footer { -fx-alignment: center-left; }
-.ele-color-picker-panel__input { -fx-min-height: 26px; -fx-pref-height: 26px; -fx-max-height: 26px; -fx-padding: 3px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-co-basic-black; -fx-font-size: 12px; }
+.ele-color-picker-panel__input { -fx-min-height: 26px; -fx-pref-height: 26px; -fx-max-height: 26px; -fx-padding: 3px 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-co-basic-black; -fx-font-size: 12px; }
 .ele-color-picker-panel__input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-color-picker-panel__predefine { -fx-pref-width: 280px; -fx-padding: 0; }
 .ele-color-picker-panel__swatch { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-min-height: 20px; -fx-pref-height: 20px; -fx-max-height: 20px; -fx-padding: 0; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 3px; -fx-border-radius: 3px; -fx-cursor: hand; }
@@ -811,7 +817,7 @@
 .ele-date-picker-panel__range { -fx-padding: 0; }
 .ele-date-picker-panel__range-panel { -fx-padding: 0; }
 .ele-date-picker-panel__time { -fx-padding: 0 0 8px 0; -fx-border-color: transparent transparent -elefx-cb-lighter transparent; -fx-border-width: 0 0 1px 0; }
-.ele-date-picker-panel__date-input, .ele-date-picker-panel__time-input { -fx-min-width: 137px; -fx-pref-width: 137px; -fx-max-width: 137px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-padding: 0 8px; -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 12px; }
+.ele-date-picker-panel__date-input, .ele-date-picker-panel__time-input { -fx-min-width: 137px; -fx-pref-width: 137px; -fx-max-width: 137px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-padding: 0 8px; -fx-alignment: center; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; -fx-font-size: 12px; }
 .ele-date-picker-panel__time--compact-range .ele-date-picker-panel__date-input, .ele-date-picker-panel__time--compact-range .ele-date-picker-panel__time-input { -fx-min-width: 71px; -fx-pref-width: 71px; -fx-max-width: 71px; }
 .ele-date-picker-panel__time-input { -fx-cursor: hand; }
 .ele-date-picker-panel__date-input:focused, .ele-date-picker-panel__date-input--focused, .ele-date-picker-panel__time-input:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-background-radius: 4px; }
@@ -946,7 +952,7 @@
 .ele-slider__stop, .ele-slider__mark-stop { -fx-background-color: -elefx-co-basic-white; -fx-background-radius: 50%; }.ele-slider__mark-text { -fx-font-size: 12px; -fx-text-fill: -elefx-ct-regular; }
 .ele-slider__tooltip { -fx-alignment: center; -fx-padding: 6px 3px; -fx-background-color: -elefx-ct-primary; -fx-background-radius: 4px; -fx-text-fill: -elefx-co-basic-white; -fx-font-size: 12px; }
 .ele-slider__tooltip-arrow { -fx-background-color: -elefx-ct-primary; -fx-rotate: 45; }
-.ele-slider__input-box { -fx-alignment: center; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 1px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-border-width: 1px; }
+.ele-slider__input-box { -fx-alignment: center; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-max-height: 32px; -fx-padding: 1px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-border-width: 1px; }
 .ele-slider__input-box:focused { -fx-border-color: -elefx-cp-1; }
 .ele-slider__input { -fx-pref-width: 74px; -fx-min-width: 64px; -fx-min-height: 30px; -fx-pref-height: 30px; -fx-max-height: 30px; -fx-alignment: center; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-padding: 0 8px; -fx-text-fill: -elefx-ct-regular; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
 .ele-slider__input-control { -fx-min-width: 30px; -fx-pref-width: 30px; -fx-max-width: 30px; -fx-min-height: 28px; -fx-pref-height: 28px; -fx-max-height: 28px; -fx-padding: 0; -fx-background-color: -elefx-cf-light; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-cursor: hand; }.ele-slider__input-control:hover { -fx-text-fill: -elefx-cp-1; -fx-background-color: -elefx-cp-l8; }
@@ -962,7 +968,7 @@
 .ele-transfer-panel__count { -fx-text-fill: -elefx-ct-secondary; }
 .ele-transfer-panel__header .check-box { -fx-padding: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
 .ele-transfer-panel__filter-wrapper { -fx-min-height: 32px; -fx-pref-height: 32px; }
-.ele-transfer-panel__filter { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 0 11px 0 32px; -fx-font-size: 14px; -fx-prompt-text-fill: -elefx-ct-placeholder; }
+.ele-transfer-panel__filter { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 0 11px 0 32px; -fx-font-size: 14px; -fx-prompt-text-fill: -elefx-ct-placeholder; }
 .ele-transfer-panel__filter-icon .ele-icon__svg { -fx-fill: -elefx-ct-placeholder; }
 .ele-transfer-panel__filter:focused { -fx-background-insets: 0; -fx-border-insets: 0; -fx-border-color: -elefx-cp-1; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
 .ele-transfer-panel__list, .ele-transfer-panel__list .viewport { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
@@ -1046,7 +1052,7 @@
 .ele-pagination__prev .ele-icon__svg, .ele-pagination__next .ele-icon__svg { -fx-fill: -elefx-ct-regular; }.ele-pagination__prev:hover .ele-icon__svg, .ele-pagination__next:hover .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-pagination__prev:disabled .ele-icon__svg, .ele-pagination__next:disabled .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
 .ele-pagination__more .ele-icon__svg { -fx-fill: -elefx-cp-1; }
 .ele-pagination--background .ele-pagination__prev, .ele-pagination--background .ele-pagination__next, .ele-pagination--background .ele-pagination__page, .ele-pagination--background .ele-pagination__more { -fx-background-color: -elefx-cf-base; }.ele-pagination--background .ele-pagination__page--active { -fx-background-color: -elefx-cp-1; -fx-text-fill: white; }
-.ele-pagination__sizes, .ele-pagination__sizes:focused { -fx-min-width: 72px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-padding: 0 6px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 12px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }.ele-pagination__sizes--open, .ele-pagination__sizes--open:focused { -fx-border-color: -elefx-cp-1; }.ele-pagination__sizes:disabled { -fx-opacity: 1; -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }.ele-pagination__sizes .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-pagination__sizes:disabled .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
+.ele-pagination__sizes, .ele-pagination__sizes:focused { -fx-min-width: 72px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-padding: 0 6px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 12px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }.ele-pagination__sizes--open, .ele-pagination__sizes--open:focused { -fx-border-color: -elefx-cp-1; }.ele-pagination__sizes:disabled { -fx-opacity: 1; -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }.ele-pagination__sizes .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-pagination__sizes:disabled .ele-icon__svg { -fx-fill: -elefx-ct-disabled; }
 .ele-pagination__sizes-menu { -fx-padding: 4px 0; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-border-color: -elefx-cb-light; -fx-border-insets: 0; -fx-border-radius: 4px; }.ele-pagination__sizes-menu .menu-item { -fx-padding: 6px 12px; -fx-background-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-font-size: 12px; }.ele-pagination__sizes-menu .menu-item:focused { -fx-background-color: -elefx-cf-light; }.ele-pagination__sizes-menu .menu-item .label { -fx-text-fill: -elefx-ct-regular; }
 .ele-pagination__jumper { -fx-spacing: 4px; }.ele-pagination__jumper .text-field { -fx-pref-width: 48px; -fx-min-height: 32px; -fx-pref-height: 32px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-focus-color: -elefx-cp-1; -fx-faint-focus-color: transparent; }
 .ele-pagination--small { -fx-spacing: 6px; }.ele-pagination--small .ele-pagination__prev, .ele-pagination--small .ele-pagination__next, .ele-pagination--small .ele-pagination__page, .ele-pagination--small .ele-pagination__more { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-font-size: 12px; }.ele-pagination--small .ele-pagination__jumper .text-field { -fx-min-height: 24px; -fx-pref-height: 24px; }
@@ -1378,4 +1384,204 @@
 .ele-notification { -elefx-notification-main: -elefx-ci-1; -fx-padding: 14px 26px 14px 13px; -fx-background-color: white; -fx-background-insets: 0; -fx-background-radius: 8px; -fx-border-color: -elefx-cb-lighter; -fx-border-width: 1px; -fx-border-insets: 0; -fx-border-radius: 8px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 12, 0, 0, 2); -fx-font-family: "Roboto"; }.ele-notification--primary { -elefx-notification-main: -elefx-cp-1; }.ele-notification--success { -elefx-notification-main: -elefx-cs-1; }.ele-notification--info { -elefx-notification-main: -elefx-ci-1; }.ele-notification--warning { -elefx-notification-main: -elefx-cw-1; }.ele-notification--error { -elefx-notification-main: -elefx-cd-1; }.ele-notification__icon { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-alignment: top-center; }.ele-notification__icon .ele-icon__svg { -fx-fill: -elefx-notification-main; }.ele-notification__body { -fx-pref-width: 248px; }.ele-notification__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 16px; -fx-font-weight: bold; }.ele-notification__message { -fx-alignment: top-left; }.ele-notification__content { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }.ele-notification__close, .ele-notification__close:focused { -fx-min-width: 18px; -fx-pref-width: 18px; -fx-max-width: 18px; -fx-min-height: 18px; -fx-pref-height: 18px; -fx-max-height: 18px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 3px; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 1px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; }.ele-notification__close .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-notification__close:hover { -fx-background-color: rgba(0,0,0,.06); }.ele-notification__close:focused { -fx-border-color: -elefx-notification-main; }.ele-notification__progress { -fx-pref-height: 3px; -fx-min-height: 3px; -fx-max-height: 3px; -fx-padding: 0; -fx-background-insets: 0; -fx-accent: -elefx-notification-main; }.ele-notification__progress .track { -fx-background-color: rgba(0,0,0,.06); -fx-background-insets: 0; -fx-background-radius: 0 0 8px 8px; }.ele-notification__progress .bar { -fx-background-insets: 0; -fx-background-radius: 0 0 8px 8px; }
 
 /* ---------------------------- message box ---------------------------- */
-.ele-message-box__wrapper { -fx-alignment: center; -fx-background-color: transparent; -fx-background-insets: 0; }.ele-message-box__wrapper--modal { -fx-background-color: rgba(0,0,0,.5); }.ele-message-box { -fx-min-width: 0; -fx-pref-width: 420px; -fx-max-width: 420px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 18, .16, 0, 4); -fx-font-family: "Roboto"; }.ele-message-box__header { -fx-padding: 15px 15px 10px 15px; -fx-spacing: 12px; -fx-alignment: center-left; }.ele-message-box__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 18px; }.ele-message-box__headerbtn, .ele-message-box__headerbtn:hover, .ele-message-box__headerbtn:armed, .ele-message-box__headerbtn:focused, .ele-message-box__headerbtn:hover:armed, .ele-message-box__headerbtn:focused:hover, .ele-message-box__headerbtn:focused:armed, .ele-message-box__headerbtn:focused:hover:armed { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; } .ele-message-box__headerbtn .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-message-box__headerbtn:hover .ele-icon__svg, .ele-message-box__headerbtn:armed .ele-icon__svg, .ele-message-box__headerbtn:focused .ele-icon__svg { -fx-fill: -elefx-cp-1; } .ele-message-box__content { -fx-padding: 10px 15px; -fx-spacing: 12px; -fx-alignment: top-left; }.ele-message-box__status { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-alignment: top-center; }.ele-message-box__status .ele-icon__svg { -fx-fill: -elefx-ci-1; }.ele-message-box__status--primary .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-message-box__status--success .ele-icon__svg { -fx-fill: -elefx-cs-1; }.ele-message-box__status--warning .ele-icon__svg { -fx-fill: -elefx-cw-1; }.ele-message-box__status--error .ele-icon__svg { -fx-fill: -elefx-cd-1; }.ele-message-box__message-area { -fx-spacing: 10px; -fx-alignment: center-left; }.ele-message-box__message { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }.ele-message-box__input, .ele-message-box__input:focused { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-padding: 0 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-darker; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }.ele-message-box__input:hover { -fx-border-color: -elefx-ct-placeholder; }.ele-message-box__input:focused { -fx-border-color: -elefx-cp-1; }.ele-message-box__input--invalid, .ele-message-box__input--invalid:hover, .ele-message-box__input--invalid:focused { -fx-border-color: -elefx-cd-1; }.ele-message-box__input-error { -fx-text-fill: -elefx-cd-1; -fx-font-size: 12px; }.ele-message-box__btns { -fx-padding: 5px 15px 15px 15px; -fx-spacing: 12px; -fx-alignment: center-right; }.ele-message-box--center .ele-message-box__header { -fx-padding: 10px 15px 8px 15px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__status { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__content { -fx-padding: 8px 15px 6px 15px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__message-area, .ele-message-box--center .ele-message-box__btns { -fx-alignment: center; }.ele-message-box--center .ele-message-box__btns { -fx-padding: 8px 15px 12px 15px; }.ele-message-box--center .ele-message-box__message { -fx-text-alignment: center; }
+.ele-message-box__wrapper { -fx-alignment: center; -fx-background-color: transparent; -fx-background-insets: 0; }.ele-message-box__wrapper--modal { -fx-background-color: rgba(0,0,0,.5); }.ele-message-box { -fx-min-width: 0; -fx-pref-width: 420px; -fx-max-width: 420px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-background-radius: 4px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,.14), 18, .16, 0, 4); -fx-font-family: "Roboto"; }.ele-message-box__header { -fx-padding: 15px 15px 10px 15px; -fx-spacing: 12px; -fx-alignment: center-left; }.ele-message-box__title { -fx-text-fill: -elefx-ct-primary; -fx-font-size: 18px; }.ele-message-box__headerbtn, .ele-message-box__headerbtn:hover, .ele-message-box__headerbtn:armed, .ele-message-box__headerbtn:focused, .ele-message-box__headerbtn:hover:armed, .ele-message-box__headerbtn:focused:hover, .ele-message-box__headerbtn:focused:armed, .ele-message-box__headerbtn:focused:hover:armed { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-min-height: 24px; -fx-pref-height: 24px; -fx-max-height: 24px; -fx-padding: 0; -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-insets: 0; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-cursor: hand; } .ele-message-box__headerbtn .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }.ele-message-box__headerbtn:hover .ele-icon__svg, .ele-message-box__headerbtn:armed .ele-icon__svg, .ele-message-box__headerbtn:focused .ele-icon__svg { -fx-fill: -elefx-cp-1; } .ele-message-box__content { -fx-padding: 10px 15px; -fx-spacing: 12px; -fx-alignment: top-left; }.ele-message-box__status { -fx-min-width: 24px; -fx-pref-width: 24px; -fx-max-width: 24px; -fx-alignment: top-center; }.ele-message-box__status .ele-icon__svg { -fx-fill: -elefx-ci-1; }.ele-message-box__status--primary .ele-icon__svg { -fx-fill: -elefx-cp-1; }.ele-message-box__status--success .ele-icon__svg { -fx-fill: -elefx-cs-1; }.ele-message-box__status--warning .ele-icon__svg { -fx-fill: -elefx-cw-1; }.ele-message-box__status--error .ele-icon__svg { -fx-fill: -elefx-cd-1; }.ele-message-box__message-area { -fx-spacing: 10px; -fx-alignment: center-left; }.ele-message-box__message { -fx-text-fill: -elefx-ct-regular; -fx-font-size: 14px; -fx-line-spacing: 2px; }.ele-message-box__input, .ele-message-box__input:focused { -fx-min-height: 32px; -fx-pref-height: 32px; -fx-padding: 0 11px; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-text-fill: -elefx-ct-regular; -fx-prompt-text-fill: -elefx-ct-placeholder; }.ele-message-box__input:hover { -fx-border-color: -elefx-ct-placeholder; }.ele-message-box__input:focused { -fx-border-color: -elefx-cp-1; }.ele-message-box__input--invalid, .ele-message-box__input--invalid:hover, .ele-message-box__input--invalid:focused { -fx-border-color: -elefx-cd-1; }.ele-message-box__input-error { -fx-text-fill: -elefx-cd-1; -fx-font-size: 12px; }.ele-message-box__btns { -fx-padding: 5px 15px 15px 15px; -fx-spacing: 12px; -fx-alignment: center-right; }.ele-message-box--center .ele-message-box__header { -fx-padding: 10px 15px 8px 15px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__status { -fx-min-width: 20px; -fx-pref-width: 20px; -fx-max-width: 20px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__content { -fx-padding: 8px 15px 6px 15px; -fx-alignment: center; }.ele-message-box--center .ele-message-box__message-area, .ele-message-box--center .ele-message-box__btns { -fx-alignment: center; }.ele-message-box--center .ele-message-box__btns { -fx-padding: 8px 15px 12px 15px; }.ele-message-box--center .ele-message-box__message { -fx-text-alignment: center; }
+
+/* The untyped plain button retains a white surface in every state. */
+.ele-button--default.ele-button--plain {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+    -fx-text-fill: -elefx-ct-regular;
+    -elefx-button-icon-color: -elefx-ct-regular;
+}
+.ele-button--default.ele-button--plain:hover {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cp-1;
+    -fx-text-fill: -elefx-cp-1;
+    -elefx-button-icon-color: -elefx-cp-1;
+}
+.ele-button--default.ele-button--plain:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cp-d2;
+    -fx-text-fill: -elefx-cp-d2;
+    -elefx-button-icon-color: -elefx-cp-d2;
+}
+.ele-button--default.ele-button--plain:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-light;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+.ele-button--default:hover { -elefx-button-icon-color: -elefx-cp-1; }
+.ele-button--default:pressed {
+    -fx-opacity: 1;
+    -fx-text-fill: -elefx-cp-d2;
+    -elefx-button-icon-color: -elefx-cp-d2;
+    -fx-background-color: -elefx-cp-l8;
+    -fx-border-color: -elefx-cp-d2;
+}
+.ele-button--default:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-light;
+}
+
+/* Link treatment takes precedence over the default button surface. */
+.ele-button.ele-button--link,
+.ele-button.ele-button--link:focused {
+    -fx-padding: 2px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.ele-button.ele-button--link:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-hover;
+    -elefx-button-icon-color: -elefx-button-hover;
+}
+.ele-button--default.ele-button--link:hover {
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+.ele-button--default.ele-button--link:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-primary;
+    -elefx-button-icon-color: -elefx-ct-primary;
+}
+.ele-button.ele-button--link:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+.ele-button--primary.ele-button--link { -elefx-button-link-hover: -elefx-cp-l5; -elefx-button-link-active: -elefx-cp-d2; -elefx-button-link-disabled: -elefx-cp-l5; }
+
+.ele-button--success.ele-button--link { -elefx-button-link-hover: -elefx-cs-l5; -elefx-button-link-active: -elefx-cs-d2; -elefx-button-link-disabled: -elefx-cs-l5; }
+
+.ele-button--info.ele-button--link { -elefx-button-link-hover: -elefx-ci-l5; -elefx-button-link-active: -elefx-ci-d2; -elefx-button-link-disabled: -elefx-ci-l5; }
+
+.ele-button--warning.ele-button--link { -elefx-button-link-hover: -elefx-cw-l5; -elefx-button-link-active: -elefx-cw-d2; -elefx-button-link-disabled: -elefx-cw-l5; }
+
+.ele-button--danger.ele-button--link { -elefx-button-link-hover: -elefx-cd-l5; -elefx-button-link-active: -elefx-cd-d2; -elefx-button-link-disabled: -elefx-cd-l5; }
+.ele-button.ele-button--link:hover {
+    -fx-text-fill: -elefx-button-link-hover;
+    -elefx-button-icon-color: -elefx-button-link-hover;
+}
+.ele-button.ele-button--link:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-link-active;
+    -elefx-button-icon-color: -elefx-button-link-active;
+}
+.ele-button--default.ele-button--link {
+    -elefx-button-link-hover: -elefx-ct-placeholder;
+    -elefx-button-link-active: -elefx-ct-primary;
+    -elefx-button-link-disabled: -elefx-ct-placeholder;
+}
+.ele-button.ele-button--link:disabled {
+    -fx-text-fill: -elefx-button-link-disabled;
+    -elefx-button-icon-color: -elefx-button-link-disabled;
+}
+
+/* Text buttons keep their semantic foreground throughout interaction. */
+.ele-button.ele-button--text,
+.ele-button.ele-button--text:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text:hover {
+    -fx-background-color: -elefx-cf-light;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-cf-base;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text-bg,
+.ele-button.ele-button--text-bg:focused { -fx-background-color: -elefx-cf-light; }
+.ele-button.ele-button--text-bg:hover { -fx-background-color: -elefx-cf-base; }
+.ele-button.ele-button--text-bg:pressed { -fx-background-color: -elefx-cf-dark; }
+.ele-button.ele-button--text:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+/* A translucent white edge separates contiguous semantic buttons. */
+.ele-button-group > .ele-button-group__horizontal-divider {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: -elefx-button-main rgba(255,255,255,0.5) -elefx-button-main -elefx-button-main;
+}
+.ele-button-group > .ele-button-group__vertical-divider {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: -elefx-button-main -elefx-button-main rgba(255,255,255,0.5) -elefx-button-main;
+}
+.ele-button-group > .ele-button-group__horizontal-first {
+    -fx-background-radius: 4px 0 0 4px;
+    -fx-border-radius: 4px 0 0 4px;
+}
+.ele-button-group > .ele-button-group__vertical-first {
+    -fx-background-radius: 4px 4px 0 0;
+    -fx-border-radius: 4px 4px 0 0;
+}
+
+/* Loading masks interaction without changing the underlying button variant. */
+.ele-button.ele-button--loading:hover,
+.ele-button.ele-button--loading:pressed {
+    -fx-opacity: 0.72;
+    -fx-cursor: default;
+    -fx-background-color: -elefx-button-main;
+    -fx-border-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-solid-text;
+    -elefx-button-icon-color: -elefx-button-solid-text;
+}
+.ele-button--default.ele-button--loading:hover,
+.ele-button--default.ele-button--loading:pressed {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+}
+.ele-button--plain.ele-button--loading:hover,
+.ele-button--plain.ele-button--loading:pressed {
+    -fx-background-color: -elefx-button-light;
+    -fx-border-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button--default.ele-button--plain.ele-button--loading:hover,
+.ele-button--default.ele-button--plain.ele-button--loading:pressed {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+}
+.ele-button--text.ele-button--loading:hover,
+.ele-button--text.ele-button--loading:pressed,
+.ele-button--link.ele-button--loading:hover,
+.ele-button--link.ele-button--loading:pressed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button--text-bg.ele-button--loading:hover,
+.ele-button--text-bg.ele-button--loading:pressed {
+    -fx-background-color: -elefx-cf-light;
+}

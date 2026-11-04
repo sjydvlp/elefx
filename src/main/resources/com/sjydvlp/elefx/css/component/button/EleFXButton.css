@@ -2,7 +2,7 @@
 @import "../../common/EleFXColor.css";
 
 .ele-button {
-    -fx-padding: 7px 15px;
+    -fx-padding: 0 15px; -fx-pref-height: 32px; -fx-graphic-text-gap: 6px;
     -fx-min-height: 32px;
     -fx-background-insets: 0;
     -fx-border-insets: 0;
@@ -13,8 +13,8 @@
     -fx-cursor: hand;
 }
 
-.ele-button--size-large { -fx-padding: 10px 19px; -fx-min-height: 40px; }
-.ele-button--size-small { -fx-padding: 5px 11px; -fx-min-height: 24px; -fx-font-size: 12px; }
+.ele-button--size-large { -fx-padding: 0 19px; -fx-pref-height: 40px; -fx-min-height: 40px; }
+.ele-button--size-small { -fx-padding: 0 11px; -fx-pref-height: 24px; -fx-min-height: 24px; -fx-font-size: 12px; }
 
 .ele-button--default {
     -elefx-button-main: -elefx-ct-regular;
@@ -24,7 +24,7 @@
     -elefx-button-icon-color: -elefx-ct-regular;
     -fx-text-fill: -elefx-button-solid-text;
     -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
+    -fx-border-color: -elefx-cb-base;
 }
 
 .ele-button--primary {
@@ -59,7 +59,7 @@
 
 .ele-button--default:focused {
     -fx-background-color: -elefx-co-white-bg;
-    -fx-border-color: -elefx-cb-darker;
+    -fx-border-color: -elefx-cb-base;
 }
 
 .ele-button--primary:focused,
@@ -142,7 +142,7 @@
 
 .ele-button--text-bg { -fx-background-color: -elefx-button-light; }
 .ele-button--text-bg:hover { -fx-background-color: -elefx-button-light; }
-.ele-button--loading { -fx-opacity: 0.72; -fx-cursor: wait; }
+.ele-button--loading { -fx-opacity: 0.72; -fx-cursor: default; }
 .ele-button:disabled { -fx-opacity: 0.5; -fx-cursor: default; }
 
 .ele-button .ele-icon .ele-icon__svg { -fx-fill: -elefx-button-icon-color; }
@@ -195,4 +195,210 @@
 .ele-button-group__vertical-last:focused {
     -fx-background-radius: 0 0 4px 4px;
     -fx-border-radius: 0 0 4px 4px;
+}
+
+.ele-button--default:hover { -fx-text-fill: -elefx-cp-1; -fx-background-color: -elefx-cp-l8; -fx-border-color: -elefx-cp-l6; }
+.ele-button--text:hover, .ele-button--text:focused { -fx-text-fill: -elefx-button-main; -fx-background-color: -elefx-cf-light; -fx-border-color: transparent; }
+.ele-button--text-bg { -fx-background-color: -elefx-cf-light; }
+.ele-button--text-bg:hover, .ele-button--text:pressed { -fx-background-color: -elefx-cf-base; -fx-border-color: transparent; }
+.ele-button--link { -fx-padding: 2px 0; -fx-min-height: 0; -fx-pref-height: -1; }
+
+/* The untyped plain button retains a white surface in every state. */
+.ele-button--default.ele-button--plain {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+    -fx-text-fill: -elefx-ct-regular;
+    -elefx-button-icon-color: -elefx-ct-regular;
+}
+.ele-button--default.ele-button--plain:hover {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cp-1;
+    -fx-text-fill: -elefx-cp-1;
+    -elefx-button-icon-color: -elefx-cp-1;
+}
+.ele-button--default.ele-button--plain:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cp-d2;
+    -fx-text-fill: -elefx-cp-d2;
+    -elefx-button-icon-color: -elefx-cp-d2;
+}
+.ele-button--default.ele-button--plain:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-light;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+.ele-button--default:hover { -elefx-button-icon-color: -elefx-cp-1; }
+.ele-button--default:pressed {
+    -fx-opacity: 1;
+    -fx-text-fill: -elefx-cp-d2;
+    -elefx-button-icon-color: -elefx-cp-d2;
+    -fx-background-color: -elefx-cp-l8;
+    -fx-border-color: -elefx-cp-d2;
+}
+.ele-button--default:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-light;
+}
+
+/* Link treatment takes precedence over the default button surface. */
+.ele-button.ele-button--link,
+.ele-button.ele-button--link:focused {
+    -fx-padding: 2px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.ele-button.ele-button--link:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-hover;
+    -elefx-button-icon-color: -elefx-button-hover;
+}
+.ele-button--default.ele-button--link:hover {
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+.ele-button--default.ele-button--link:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-primary;
+    -elefx-button-icon-color: -elefx-ct-primary;
+}
+.ele-button.ele-button--link:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+.ele-button--primary.ele-button--link { -elefx-button-link-hover: -elefx-cp-l5; -elefx-button-link-active: -elefx-cp-d2; -elefx-button-link-disabled: -elefx-cp-l5; }
+
+.ele-button--success.ele-button--link { -elefx-button-link-hover: -elefx-cs-l5; -elefx-button-link-active: -elefx-cs-d2; -elefx-button-link-disabled: -elefx-cs-l5; }
+
+.ele-button--info.ele-button--link { -elefx-button-link-hover: -elefx-ci-l5; -elefx-button-link-active: -elefx-ci-d2; -elefx-button-link-disabled: -elefx-ci-l5; }
+
+.ele-button--warning.ele-button--link { -elefx-button-link-hover: -elefx-cw-l5; -elefx-button-link-active: -elefx-cw-d2; -elefx-button-link-disabled: -elefx-cw-l5; }
+
+.ele-button--danger.ele-button--link { -elefx-button-link-hover: -elefx-cd-l5; -elefx-button-link-active: -elefx-cd-d2; -elefx-button-link-disabled: -elefx-cd-l5; }
+.ele-button.ele-button--link:hover {
+    -fx-text-fill: -elefx-button-link-hover;
+    -elefx-button-icon-color: -elefx-button-link-hover;
+}
+.ele-button.ele-button--link:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-link-active;
+    -elefx-button-icon-color: -elefx-button-link-active;
+}
+.ele-button--default.ele-button--link {
+    -elefx-button-link-hover: -elefx-ct-placeholder;
+    -elefx-button-link-active: -elefx-ct-primary;
+    -elefx-button-link-disabled: -elefx-ct-placeholder;
+}
+.ele-button.ele-button--link:disabled {
+    -fx-text-fill: -elefx-button-link-disabled;
+    -elefx-button-icon-color: -elefx-button-link-disabled;
+}
+
+/* Text buttons keep their semantic foreground throughout interaction. */
+.ele-button.ele-button--text,
+.ele-button.ele-button--text:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text:hover {
+    -fx-background-color: -elefx-cf-light;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text:pressed {
+    -fx-opacity: 1;
+    -fx-background-color: -elefx-cf-base;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button.ele-button--text-bg,
+.ele-button.ele-button--text-bg:focused { -fx-background-color: -elefx-cf-light; }
+.ele-button.ele-button--text-bg:hover { -fx-background-color: -elefx-cf-base; }
+.ele-button.ele-button--text-bg:pressed { -fx-background-color: -elefx-cf-dark; }
+.ele-button.ele-button--text:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-ct-placeholder;
+    -elefx-button-icon-color: -elefx-ct-placeholder;
+}
+
+/* A translucent white edge separates contiguous semantic buttons. */
+.ele-button-group > .ele-button-group__horizontal-divider {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: -elefx-button-main rgba(255,255,255,0.5) -elefx-button-main -elefx-button-main;
+}
+.ele-button-group > .ele-button-group__vertical-divider {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: -elefx-button-main -elefx-button-main rgba(255,255,255,0.5) -elefx-button-main;
+}
+.ele-button-group > .ele-button-group__horizontal-first {
+    -fx-background-radius: 4px 0 0 4px;
+    -fx-border-radius: 4px 0 0 4px;
+}
+.ele-button-group > .ele-button-group__vertical-first {
+    -fx-background-radius: 4px 4px 0 0;
+    -fx-border-radius: 4px 4px 0 0;
+}
+
+/* Loading masks interaction without changing the underlying button variant. */
+.ele-button.ele-button--loading:hover,
+.ele-button.ele-button--loading:pressed {
+    -fx-opacity: 0.72;
+    -fx-cursor: default;
+    -fx-background-color: -elefx-button-main;
+    -fx-border-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-solid-text;
+    -elefx-button-icon-color: -elefx-button-solid-text;
+}
+.ele-button--default.ele-button--loading:hover,
+.ele-button--default.ele-button--loading:pressed {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+}
+.ele-button--plain.ele-button--loading:hover,
+.ele-button--plain.ele-button--loading:pressed {
+    -fx-background-color: -elefx-button-light;
+    -fx-border-color: -elefx-button-main;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button--default.ele-button--plain.ele-button--loading:hover,
+.ele-button--default.ele-button--plain.ele-button--loading:pressed {
+    -fx-background-color: -elefx-co-white-bg;
+    -fx-border-color: -elefx-cb-base;
+}
+.ele-button--text.ele-button--loading:hover,
+.ele-button--text.ele-button--loading:pressed,
+.ele-button--link.ele-button--loading:hover,
+.ele-button--link.ele-button--loading:pressed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -elefx-button-main;
+    -elefx-button-icon-color: -elefx-button-main;
+}
+.ele-button--text-bg.ele-button--loading:hover,
+.ele-button--text-bg.ele-button--loading:pressed {
+    -fx-background-color: -elefx-cf-light;
 }
