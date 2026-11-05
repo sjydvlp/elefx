@@ -8,6 +8,7 @@ import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -22,6 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -33,6 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Popup;
 import javafx.stage.Screen;
@@ -50,7 +53,7 @@ import javafx.util.Duration;
  */
 public final class EleFXPopconfirm {
 
-    private static final double GAP = 10;
+    private static final double GAP = 10, SHADOW_MARGIN = 24;
 
     private final ObjectProperty<Node> reference = new SimpleObjectProperty<>(this, "reference");
 
@@ -73,7 +76,7 @@ public final class EleFXPopconfirm {
             "cancelButtonType", EleFXButtonType.DEFAULT);
 
     private final ObjectProperty<Node> icon = new SimpleObjectProperty<>(this, "icon",
-            new EleFXIcon(EleFXIconType.QUESTION_FILLED, 16));
+            new EleFXIcon(EleFXIconType.QUESTION_FILLED, 14));
 
     private final ObjectProperty<Paint> iconColor = new SimpleObjectProperty<>(this, "iconColor",
             Paint.valueOf("#f90"));
@@ -100,6 +103,8 @@ public final class EleFXPopconfirm {
 
     private VBox root;
 
+    private StackPane wrapper;
+
     private HBox message;
 
     private Region arrow;
@@ -107,6 +112,14 @@ public final class EleFXPopconfirm {
     private PauseTransition hideDelay;
 
     private Scene observedScene;
+
+    private Window observedOwner;
+
+    // Popup focus follows its owner, so interacting with popup controls does not
+    // count as leaving the application. Do not apply hideAfter on deactivation.
+    private final ChangeListener<Boolean> ownerActiveListener = (observable, oldValue, active) -> {
+        if (!active) hideNow();
+    };
 
     private final javafx.event.EventHandler<MouseEvent> referenceClickHandler = e -> Platform.runLater(this::toggle);
 
@@ -169,6 +182,7 @@ public final class EleFXPopconfirm {
         if (!isPersistent()) {
             popup = null;
             root = null;
+            wrapper = null;
         }
     }
 
@@ -450,6 +464,7 @@ public final class EleFXPopconfirm {
     private void createPopup() {
         if (popup != null) return;
         popup = new Popup();
+        popup.setAnchorLocation(javafx.stage.PopupWindow.AnchorLocation.WINDOW_TOP_LEFT);
         popup.setAutoHide(false);
         popup.setAutoFix(false);
         root = new VBox();
@@ -458,27 +473,38 @@ public final class EleFXPopconfirm {
         root.getStylesheets().add(EleFXThemes.POPCONFIRM.toData());
         arrow = new Region();
         arrow.getStyleClass().add("ele-popconfirm__arrow");
-        popup.getContent().add(root);
+        arrow.setManaged(false);
+        arrow.setMouseTransparent(true);
+        wrapper = new StackPane(root);
+        wrapper.setPadding(new Insets(SHADOW_MARGIN));
+        wrapper.setStyle("-fx-background-color: transparent;");
+        popup.getContent().add(wrapper);
     }
 
     private void refresh() {
         if (root == null) return;
         root.getStyleClass().removeIf(c -> c.startsWith("ele-popconfirm--"));
         root.getStyleClass().add("ele-popconfirm--" + getEffect().name().toLowerCase());
+        root.setStyle("-elefx-popconfirm-icon: "
+                + (getIconColor() == null ? "#ff9900" : getIconColor().toString().replace("0x", "#")) + ";");
         root.setMinWidth(getWidth());
         root.setPrefWidth(getWidth());
+        root.setMaxWidth(getWidth());
         message = new HBox();
         message.getStyleClass().add("ele-popconfirm__main");
-        message.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+        message.setAlignment(Pos.CENTER_LEFT);
+        message.setMinWidth(0);
         Node currentIcon = getIcon();
         if (!isHideIcon() && currentIcon != null) {
-            currentIcon.getStyleClass().add("ele-popconfirm__icon");
+            if (!currentIcon.getStyleClass().contains("ele-popconfirm__icon"))
+                currentIcon.getStyleClass().add("ele-popconfirm__icon");
             if (currentIcon instanceof EleFXIcon iconNode) iconNode.setColor(getIconColor());
             message.getChildren().add(currentIcon);
         }
         Label label = new Label(getTitle());
         label.getStyleClass().add("ele-popconfirm__message");
         label.setWrapText(true);
+        label.setMinWidth(0);
         label.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(label, Priority.ALWAYS);
         message.getChildren().add(label);
@@ -492,6 +518,7 @@ public final class EleFXPopconfirm {
     private HBox defaultActions() {
         EleFXButton cancel = new EleFXButton(getCancelButtonText(), getCancelButtonType(), EleFXButtonSize.SMALL);
         cancel.getStyleClass().add("ele-popconfirm__cancel");
+        cancel.setTextButton(getCancelButtonType() == EleFXButtonType.DEFAULT);
         cancel.setOnAction(e -> cancel());
         EleFXButton confirm = new EleFXButton(getConfirmButtonText(), getConfirmButtonType(), EleFXButtonSize.SMALL);
         confirm.getStyleClass().add("ele-popconfirm__confirm");
@@ -518,9 +545,10 @@ public final class EleFXPopconfirm {
         if (anchor == null || root == null || !popup.isShowing()) return;
         Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
         if (b == null) return;
-        root.applyCss();
-        root.autosize();
-        double w = root.prefWidth(-1), h = root.prefHeight(w);
+        wrapper.applyCss();
+        wrapper.autosize();
+        wrapper.layout();
+        double w = root.getWidth(), h = root.getHeight();
         double x, y;
         EleFXPopconfirmPlacement p = getPlacement();
         boolean top = p == EleFXPopconfirmPlacement.TOP || p == EleFXPopconfirmPlacement.TOP_START
@@ -540,16 +568,18 @@ public final class EleFXPopconfirm {
         }
         Rectangle2D screen = Screen.getScreensForRectangle(b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight()).get(0)
                 .getVisualBounds();
-        popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - w)));
-        popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - h)));
+        popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - w)) - SHADOW_MARGIN);
+        popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - h)) - SHADOW_MARGIN);
         positionArrow(w, h, b);
     }
 
     private void positionArrow(double width, double height, Bounds anchorBounds) {
         double x = Math.max(8,
-                Math.min(width - 18, anchorBounds.getMinX() + anchorBounds.getWidth() / 2 - popup.getX() - 5));
+                Math.min(width - 18,
+                        anchorBounds.getMinX() + anchorBounds.getWidth() / 2 - popup.getX() - SHADOW_MARGIN - 5));
         double y = Math.max(8,
-                Math.min(height - 18, anchorBounds.getMinY() + anchorBounds.getHeight() / 2 - popup.getY() - 5));
+                Math.min(height - 18,
+                        anchorBounds.getMinY() + anchorBounds.getHeight() / 2 - popup.getY() - SHADOW_MARGIN - 5));
         switch (getPlacement()) {
             case TOP_START, TOP, TOP_END -> arrow.resizeRelocate(x, height - 5, 10, 10);
             case BOTTOM_START, BOTTOM, BOTTOM_END -> arrow.resizeRelocate(x, -5, 10, 10);
@@ -564,9 +594,19 @@ public final class EleFXPopconfirm {
         observedScene = scene;
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, outsideClickHandler);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, escapeHandler);
+        observedOwner = scene.getWindow();
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().addListener(ownerActiveListener);
+            observedOwner.showingProperty().addListener(ownerActiveListener);
+        }
     }
 
     private void unobserveScene() {
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().removeListener(ownerActiveListener);
+            observedOwner.showingProperty().removeListener(ownerActiveListener);
+            observedOwner = null;
+        }
         if (observedScene != null) {
             observedScene.removeEventFilter(MouseEvent.MOUSE_PRESSED, outsideClickHandler);
             observedScene.removeEventFilter(KeyEvent.KEY_PRESSED, escapeHandler);
