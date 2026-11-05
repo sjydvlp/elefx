@@ -1,5 +1,7 @@
 package com.sjydvlp.elefx.component.notification;
 
+import com.sjydvlp.elefx.component.progress.EleFXProgressColorStop;
+import java.util.List;
 import javafx.scene.Node;
 import javafx.stage.Window;
 
@@ -35,6 +37,8 @@ public final class EleFXNotificationOptions {
     private boolean progress;
 
     private String progressColor = "";
+
+    private List<EleFXProgressColorStop> progressColors = List.of();
 
     private boolean pauseOnHover = true;
 
@@ -170,6 +174,19 @@ public final class EleFXNotificationOptions {
 
     public EleFXNotificationOptions progressColor(String value) {
         progressColor = value == null ? "" : value;
+        return this;
+    }
+
+    public List<EleFXProgressColorStop> getProgressColors() {
+        return progressColors;
+    }
+
+    /**
+     * Sets colour thresholds for remaining progress (0–100). Order is irrelevant.
+     * A nonempty fixed progressColor takes precedence over these thresholds.
+     */
+    public EleFXNotificationOptions progressColors(EleFXProgressColorStop... values) {
+        progressColors = values == null ? List.of() : List.of(values);
         return this;
     }
 

@@ -1,22 +1,29 @@
 package com.sjydvlp.elefx.component.notification;
 
 import com.sjydvlp.elefx.component.icon.EleFXIcon;
+import com.sjydvlp.elefx.component.progress.EleFXProgressColorStop;
 import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
 import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.beans.property.*;
+import javafx.beans.InvalidationListener;
 import javafx.geometry.Pos;
+import javafx.geometry.Orientation;
+import javafx.geometry.Insets;
+import javafx.scene.layout.Priority;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -40,7 +47,7 @@ public class EleFXNotification extends BorderPane implements Themable {
 
     private static final Map<StackKey, List<EleFXNotification>> INSTANCES = new HashMap<>();
 
-    private static final double EDGE_MARGIN = 16, GAP = 16;
+    private static final double EDGE_MARGIN = 16, GAP = 16, SHADOW_MARGIN = 16;
 
     private final StringProperty title = new SimpleStringProperty(this, "title", "");
 
@@ -67,6 +74,8 @@ public class EleFXNotification extends BorderPane implements Themable {
 
     private final StringProperty progressColor = new SimpleStringProperty(this, "progressColor", "");
 
+    private List<EleFXProgressColorStop> progressColors = List.of();
+
     private final BooleanProperty pauseOnHover = new SimpleBooleanProperty(this, "pauseOnHover", true);
 
     private final ObjectProperty<Runnable> onClose = new SimpleObjectProperty<>(this, "onClose");
@@ -79,11 +88,19 @@ public class EleFXNotification extends BorderPane implements Themable {
 
     private final Label messageLabel = new Label();
 
-    private final StackPane messageBox = new StackPane();
+    private final StackPane messageBox = new StackPane() {
+
+        @Override
+        public Orientation getContentBias() {
+            return Orientation.HORIZONTAL;
+        }
+    };
 
     private final Button closeButton = new Button();
 
     private final ProgressBar progressBar = new ProgressBar(1);
+
+    private final Rectangle progressClip = new Rectangle();
 
     private final Set<String> appliedClasses = new HashSet<>();
 
@@ -91,9 +108,15 @@ public class EleFXNotification extends BorderPane implements Themable {
 
     private StackKey stackKey;
 
+    private final InvalidationListener ownerGeometryListener = observable -> {
+        if (stackKey != null) positionAll(stackKey);
+    };
+
     private PauseTransition timeout;
 
     private Timeline progressTimeline;
+
+    private ParallelTransition entranceAnimation;
 
     private long timerStartedAt, remainingMillis;
 
@@ -330,6 +353,24 @@ public class EleFXNotification extends BorderPane implements Themable {
         progressColor.set(v == null ? "" : v);
     }
 
+    /** Immutable thresholds, sorted by percentage of remaining progress. */
+    public List<EleFXProgressColorStop> getProgressColors() {
+        return progressColors;
+    }
+
+    /**
+     * Sets remaining-progress colour thresholds. The first threshold at least as
+     * large as the remaining percentage wins; above all thresholds, the last wins.
+     * A nonblank fixed progressColor takes precedence. Null or empty clears stops.
+     */
+    public void setProgressColors(EleFXProgressColorStop... values) {
+        List<EleFXProgressColorStop> stops = values == null ? List.of() : List.of(values);
+        progressColors = stops.stream()
+                .sorted(Comparator.comparingDouble(EleFXProgressColorStop::getPercentage))
+                .toList();
+        refreshProgressColor();
+    }
+
     public boolean isPauseOnHover() {
         return pauseOnHover.get();
     }
@@ -374,20 +415,18 @@ public class EleFXNotification extends BorderPane implements Themable {
         if (closing) return;
         closing = true;
         stopTimer();
+        stopEntranceAnimation();
         if (stage == null || !stage.isShowing()) {
             dispose();
             return;
         }
         FadeTransition fade = new FadeTransition(Duration.millis(180), this);
         fade.setToValue(0);
-        TranslateTransition slide = new TranslateTransition(Duration.millis(180), this);
-        slide.setByX(getPosition().isLeft() ? -24 : 24);
         fade.setOnFinished(e -> {
             stage.hide();
             dispose();
         });
         fade.play();
-        slide.play();
     }
 
     @Override
@@ -407,13 +446,23 @@ public class EleFXNotification extends BorderPane implements Themable {
         setMaxWidth(330);
         iconBox.getStyleClass().add("ele-notification__icon");
         titleLabel.getStyleClass().add("ele-notification__title");
+        titleLabel.setWrapText(true);
+        titleLabel.setMinWidth(0);
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
         messageLabel.getStyleClass().add("ele-notification__content");
         messageLabel.setWrapText(true);
-        messageLabel.setMaxWidth(258);
+        messageLabel.setMaxWidth(Double.MAX_VALUE);
+        messageLabel.setMinWidth(0);
         messageBox.getStyleClass().add("ele-notification__message");
-        VBox content = new VBox(8, titleLabel, messageBox);
+        messageBox.setMinWidth(0);
+        VBox content = new VBox(6, titleLabel, messageBox);
         content.getStyleClass().add("ele-notification__body");
-        HBox main = new HBox(12, iconBox, content);
+        content.setMinWidth(0);
+        content.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(content, Priority.ALWAYS);
+        content.setPadding(new Insets(0, 8, 0, 13));
+        HBox main = new HBox(0, iconBox, content);
+        main.setMinWidth(0);
         main.setAlignment(Pos.TOP_LEFT);
         setCenter(main);
         closeButton.getStyleClass().add("ele-notification__close");
@@ -421,10 +470,16 @@ public class EleFXNotification extends BorderPane implements Themable {
         closeButton.setAccessibleText("Close notification");
         closeButton.setOnMouseClicked(e -> e.consume());
         closeButton.setOnAction(e -> close());
-        setRight(closeButton);
+        // Keep the close button outside the text flow, like Element Plus.
+        closeButton.setManaged(false);
+        getChildren().add(closeButton);
         progressBar.getStyleClass().add("ele-notification__progress");
         progressBar.setMaxWidth(Double.MAX_VALUE);
-        setBottom(progressBar);
+        // Overlay the progress bar at the card edge, independently of content padding.
+        progressBar.setManaged(false);
+        progressBar.setMouseTransparent(true);
+        progressBar.setClip(progressClip);
+        getChildren().add(progressBar);
         title.addListener(o -> titleLabel.setText(getTitle()));
         message.addListener(o -> refreshMessage());
         messageNode.addListener(o -> refreshMessage());
@@ -437,6 +492,7 @@ public class EleFXNotification extends BorderPane implements Themable {
         showClose.addListener(o -> refreshClose());
         progress.addListener(o -> refreshProgress());
         progressColor.addListener(o -> refreshProgressColor());
+        progressBar.progressProperty().addListener(o -> refreshProgressColor());
         setOnMouseClicked(e -> {
             if (e.getTarget() != closeButton) {
                 Runnable action = getOnClick();
@@ -471,6 +527,7 @@ public class EleFXNotification extends BorderPane implements Themable {
         setOffset(o.getOffset());
         setProgress(o.isProgress());
         setProgressColor(o.getProgressColor());
+        setProgressColors(o.getProgressColors().toArray(EleFXProgressColorStop[]::new));
         setPauseOnHover(o.isPauseOnHover());
         setOnClose(o.getOnClose());
         setOnClick(o.getOnClick());
@@ -478,23 +535,27 @@ public class EleFXNotification extends BorderPane implements Themable {
 
     private void open() {
         stage = new Stage(StageStyle.TRANSPARENT);
-        Scene scene = new Scene(new StackPane(this));
+        StackPane wrapper = new StackPane(this);
+        wrapper.setPadding(new Insets(SHADOW_MARGIN));
+        wrapper.setStyle("-fx-background-color: transparent;");
+        Scene scene = new Scene(wrapper);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         scene.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         scene.getStylesheets().add(EleFXThemes.NOTIFICATION.toData());
         stage.setScene(scene);
         if (stackKey.owner != null) stage.initOwner(stackKey.owner);
-        stage.setAlwaysOnTop(true);
-        stage.show();
-        positionAll(stackKey);
         setOpacity(0);
         setTranslateX(getPosition().isLeft() ? -24 : 24);
+        stage.show();
+        observeOwnerGeometry(true);
+        positionAll(stackKey);
         FadeTransition fade = new FadeTransition(Duration.millis(220), this);
         fade.setToValue(1);
         TranslateTransition slide = new TranslateTransition(Duration.millis(220), this);
         slide.setToX(0);
-        fade.play();
-        slide.play();
+        entranceAnimation = new ParallelTransition(fade, slide);
+        entranceAnimation.setOnFinished(e -> entranceAnimation = null);
+        entranceAnimation.play();
         restartTimer();
     }
 
@@ -531,11 +592,36 @@ public class EleFXNotification extends BorderPane implements Themable {
     private void stopTimer() {
         if (timeout != null) timeout.stop();
         timeout = null;
-        if (progressTimeline != null) progressTimeline.stop();
+        // Pause preserves the displayed progress; stop rewinds it before fading out.
+        if (progressTimeline != null) progressTimeline.pause();
         progressTimeline = null;
     }
 
+    private void stopEntranceAnimation() {
+        if (entranceAnimation == null) return;
+        double opacity = getOpacity();
+        double translateX = getTranslateX();
+        entranceAnimation.stop();
+        entranceAnimation = null;
+        // stop() rewinds the animation: restore its current visual state.
+        setOpacity(opacity);
+        setTranslateX(translateX);
+    }
+
+    private void observeOwnerGeometry(boolean observe) {
+        Window owner = stackKey == null ? null : stackKey.owner;
+        if (owner == null) return;
+        for (javafx.beans.Observable geometry : List.of(
+                owner.xProperty(), owner.yProperty(), owner.widthProperty(), owner.heightProperty())) {
+            if (observe)
+                geometry.addListener(ownerGeometryListener);
+            else
+                geometry.removeListener(ownerGeometryListener);
+        }
+    }
+
     private void dispose() {
+        observeOwnerGeometry(false);
         Runnable callback = getOnClose();
         if (callback != null) callback.run();
         synchronized (INSTANCES) {
@@ -560,20 +646,26 @@ public class EleFXNotification extends BorderPane implements Themable {
                     ? Screen.getPrimary().getVisualBounds()
                     : new Rectangle2D(key.owner.getX(), key.owner.getY(), key.owner.getWidth(), key.owner.getHeight());
             double x = key.position.isLeft()
-                    ? area.getMinX() + EDGE_MARGIN
-                    : area.getMaxX() - n.stage.getWidth() - EDGE_MARGIN;
+                    ? area.getMinX() + EDGE_MARGIN - SHADOW_MARGIN
+                    : area.getMaxX() - n.stage.getWidth() - EDGE_MARGIN + SHADOW_MARGIN;
             double y = key.position.isBottom()
-                    ? area.getMaxY() - cursor - n.stage.getHeight()
-                    : area.getMinY() + cursor;
+                    ? area.getMaxY() - cursor - n.stage.getHeight() + SHADOW_MARGIN
+                    : area.getMinY() + cursor - SHADOW_MARGIN;
             n.stage.setX(x);
             n.stage.setY(y);
-            cursor += n.stage.getHeight() + GAP;
+            cursor += n.stage.getHeight() - 2 * SHADOW_MARGIN + GAP;
         }
     }
 
     private void refreshMessage() {
         messageLabel.setText(getMessage());
-        messageBox.getChildren().setAll(getMessageNode() == null ? messageLabel : getMessageNode());
+        Node content = getMessageNode() == null ? messageLabel : getMessageNode();
+        if (content instanceof Label label) {
+            label.setWrapText(true);
+            label.setMinWidth(0);
+            label.setMaxWidth(Double.MAX_VALUE);
+        }
+        messageBox.getChildren().setAll(content);
     }
 
     private void refreshIcon() {
@@ -589,18 +681,70 @@ public class EleFXNotification extends BorderPane implements Themable {
         iconBox.setVisible(value != null);
     }
 
+    @Override
+    protected double computePrefHeight(double width) {
+        double cardWidth = width < 0 ? getPrefWidth() : width;
+        double iconWidth = iconBox.isManaged() ? iconBox.prefWidth(-1) : 0;
+        double textWidth = Math.max(0, cardWidth - snappedLeftInset() - snappedRightInset()
+                - iconWidth - 13 - 8);
+        // CSS minimum heights and pixel snapping must also be included. Otherwise
+        // the title takes space from the wrapped message during VBox layout.
+        double titleHeight = snapSizeY(Math.max(titleLabel.minHeight(textWidth),
+                titleLabel.prefHeight(textWidth)));
+        double messageHeight = snapSizeY(Math.max(messageBox.minHeight(textWidth),
+                messageBox.prefHeight(textWidth)));
+        double bodyHeight = titleHeight + snapSpaceY(6) + messageHeight;
+        double iconHeight = iconBox.isManaged() ? iconBox.prefHeight(iconWidth) : 0;
+        return snappedTopInset() + Math.max(bodyHeight, iconHeight) + snappedBottomInset();
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        closeButton.resizeRelocate(getWidth() - 31, 18, 16, 16);
+        double border = getBorder() == null ? 0 : getBorder().getInsets().getBottom();
+        double width = Math.max(0, getWidth() - 2 * border);
+        double height = Math.max(0, getHeight() - 2 * border);
+        double barHeight = Math.min(3, height);
+        double barY = getHeight() - border - barHeight;
+        progressBar.resizeRelocate(border, barY, width, barHeight);
+        // Clip only the overlay, so the card's shadow remains intact.
+        progressClip.setX(0);
+        progressClip.setY(border - barY);
+        progressClip.setWidth(width);
+        progressClip.setHeight(height);
+        double radius = getBackground() == null || getBackground().getFills().isEmpty()
+                ? 8
+                : getBackground().getFills().get(0).getRadii().getBottomLeftHorizontalRadius();
+        progressClip.setArcWidth(Math.max(0, radius - border) * 2);
+        progressClip.setArcHeight(Math.max(0, radius - border) * 2);
+    }
+
     private void refreshClose() {
         closeButton.setVisible(isShowClose());
-        closeButton.setManaged(isShowClose());
+        closeButton.setManaged(false);
     }
 
     private void refreshProgress() {
         progressBar.setVisible(isProgress() && getDuration() > 0);
-        progressBar.setManaged(isProgress() && getDuration() > 0);
+        progressBar.setManaged(false);
     }
 
     private void refreshProgressColor() {
-        progressBar.setStyle(getProgressColor().isBlank() ? "" : "-fx-accent: " + getProgressColor() + ";");
+        String color = getProgressColor();
+        if (color.isBlank() && !progressColors.isEmpty()) {
+            double percentage = progressBar.getProgress() * 100;
+            EleFXProgressColorStop selected = progressColors.get(progressColors.size() - 1);
+            for (EleFXProgressColorStop stop : progressColors) {
+                if (percentage <= stop.getPercentage()) {
+                    selected = stop;
+                    break;
+                }
+            }
+            color = selected.getColor().toString().replace("0x", "#");
+        }
+        String style = color.isBlank() ? "" : "-fx-accent: " + color + ";";
+        if (!style.equals(progressBar.getStyle())) progressBar.setStyle(style);
     }
 
     private void refreshClasses() {
