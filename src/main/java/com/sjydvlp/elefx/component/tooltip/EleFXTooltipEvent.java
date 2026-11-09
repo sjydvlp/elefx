@@ -10,11 +10,13 @@ public final class EleFXTooltipEvent extends Event {
     public static final EventType<EleFXTooltipEvent> BEFORE_SHOW = new EventType<>(Event.ANY,
             "ELEFX_TOOLTIP_BEFORE_SHOW");
 
+    /** Emitted after the enter animation completes. */
     public static final EventType<EleFXTooltipEvent> SHOW = new EventType<>(Event.ANY, "ELEFX_TOOLTIP_SHOW");
 
     public static final EventType<EleFXTooltipEvent> BEFORE_HIDE = new EventType<>(Event.ANY,
             "ELEFX_TOOLTIP_BEFORE_HIDE");
 
+    /** Emitted after the leave animation completes and the popup closes. */
     public static final EventType<EleFXTooltipEvent> HIDE = new EventType<>(Event.ANY, "ELEFX_TOOLTIP_HIDE");
 
     private final boolean visible;

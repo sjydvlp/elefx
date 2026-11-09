@@ -1,6 +1,7 @@
 package com.sjydvlp.elefx.component.popover;
 
 import com.sjydvlp.elefx.theme.EleFXThemes;
+import com.sjydvlp.elefx.internal.ScenePopupOverlay;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -23,6 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Screen;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 /**
@@ -103,6 +105,8 @@ public final class EleFXPopover {
 
     private Popup popup;
 
+    private ScenePopupOverlay sceneOverlay;
+
     private VBox root;
 
     private StackPane popupContainer;
@@ -116,6 +120,12 @@ public final class EleFXPopover {
     private PauseTransition autoCloseTimer = new PauseTransition();
 
     private Scene observedScene;
+
+    private Window observedOwner;
+
+    private boolean suspendedForOwner;
+
+    private final ChangeListener<Boolean> ownerStateChanged = (o, oldValue, newValue) -> updateOwnerState();
 
     private boolean pointerInReference;
 
@@ -201,6 +211,7 @@ public final class EleFXPopover {
         requestVisibility(!isShowing());
     }
 
+    /** Native popup handle; background hover content is hosted in the owner's Scene instead. */
     public Popup getPopperRef() {
         return popup;
     }
@@ -636,13 +647,30 @@ public final class EleFXPopover {
         if (isDisabled() || isShowing()) return;
         Node anchor = getReference();
         if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null) return;
+        Window owner = anchor.getScene().getWindow();
+        if (!owner.isShowing()) return;
+        // A fresh hover over an exposed reference is valid even when another
+        // window owns keyboard focus. Delayed/programmatic background shows
+        // remain suppressed.
+        if (!owner.isFocused() && !(getTrigger() == EleFXPopoverTrigger.HOVER && pointerInReference)) {
+            if (Boolean.TRUE.equals(getVisible())) {
+                observe(anchor.getScene());
+                suspendedForOwner = true;
+            }
+            return;
+        }
         createPopup();
         refresh();
         popupContainer.applyCss();
         popupContainer.autosize();
         popupContainer.layout();
         emit(EleFXPopoverEvent.BEFORE_ENTER, true, getOnBeforeEnter());
-        popup.show(anchor.getScene().getWindow(), 0, 0);
+        if (owner.isFocused()) {
+            popup.show(owner, 0, 0);
+        } else {
+            popup.getContent().remove(popupContainer);
+            sceneOverlay = new ScenePopupOverlay(anchor.getScene(), popupContainer);
+        }
         reposition();
         showing.set(true);
         observe(anchor.getScene());
@@ -659,8 +687,16 @@ public final class EleFXPopover {
         showTimer.stop();
         hideTimer.stop();
         autoCloseTimer.stop();
-        if (!isShowing()) return;
+        if (!isShowing()) {
+            unobserve();
+            return;
+        }
         emit(EleFXPopoverEvent.BEFORE_LEAVE, false, getOnBeforeLeave());
+        if (sceneOverlay != null) {
+            sceneOverlay.hide();
+            sceneOverlay = null;
+            popup.getContent().add(popupContainer);
+        }
         popup.hide();
         pointerInPopover = false;
         showing.set(false);
@@ -686,6 +722,7 @@ public final class EleFXPopover {
         root.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         root.getStylesheets().add(EleFXThemes.POPOVER.toData());
         popupContainer = new StackPane(root);
+        popupContainer.setPickOnBounds(false);
         popupContainer.setPadding(new Insets(SHADOW_MARGIN));
         popup.getContent().add(popupContainer);
         // The popup window also covers the transparent shadow padding. Treat it
@@ -738,7 +775,11 @@ public final class EleFXPopover {
             root.getChildren().setAll(body, arrow);
         } else
             root.getChildren().setAll(body);
-        if (popup.isShowing()) reposition();
+        if (isLayerShowing()) reposition();
+    }
+
+    private boolean isLayerShowing() {
+        return popup != null && (popup.isShowing() || (sceneOverlay != null && sceneOverlay.isShowing()));
     }
 
     private void updateArrowClass() {
@@ -754,7 +795,7 @@ public final class EleFXPopover {
 
     private void reposition() {
         Node anchor = getReference();
-        if (anchor == null || root == null || popup == null || !popup.isShowing()) return;
+        if (anchor == null || root == null || !isLayerShowing()) return;
         if (arrow != null && isShowArrow()) updateArrowClass();
         // Focus effects can expand boundsInLocal when the popup takes focus.
         Bounds b = anchor.localToScreen(anchor.getLayoutBounds());
@@ -781,6 +822,7 @@ public final class EleFXPopover {
                 .getVisualBounds();
         popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - w)) - SHADOW_MARGIN);
         popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - h)) - SHADOW_MARGIN);
+        if (sceneOverlay != null) sceneOverlay.moveTo(popup.getX(), popup.getY());
         positionArrow(w, h, b);
     }
 
@@ -803,13 +845,48 @@ public final class EleFXPopover {
         observedScene = scene;
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, outsidePressed);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, escapePressed);
+        observedOwner = scene.getWindow();
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().addListener(ownerStateChanged);
+            observedOwner.showingProperty().addListener(ownerStateChanged);
+        }
     }
 
     private void unobserve() {
+        suspendedForOwner = false;
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().removeListener(ownerStateChanged);
+            observedOwner.showingProperty().removeListener(ownerStateChanged);
+            observedOwner = null;
+        }
         if (observedScene != null) {
             observedScene.removeEventFilter(MouseEvent.MOUSE_PRESSED, outsidePressed);
             observedScene.removeEventFilter(KeyEvent.KEY_PRESSED, escapePressed);
             observedScene = null;
+        }
+    }
+
+    private void updateOwnerState() {
+        Window owner = observedOwner;
+        if (owner == null) return;
+        if (!owner.isFocused()) pointerInReference = false;
+        if (!owner.isShowing()) {
+            hideNow();
+        } else if (!owner.isFocused() && !suspendedForOwner) {
+            Scene scene = observedScene;
+            boolean restore = Boolean.TRUE.equals(getVisible());
+            hideNow();
+            if (restore && Boolean.TRUE.equals(getVisible()) && owner.isShowing()) {
+                observe(scene);
+                suspendedForOwner = true;
+                if (owner.isFocused()) updateOwnerState();
+            }
+        } else if (owner.isFocused() && suspendedForOwner) {
+            suspendedForOwner = false;
+            if (Boolean.TRUE.equals(getVisible()))
+                showNow();
+            else
+                unobserve();
         }
     }
 

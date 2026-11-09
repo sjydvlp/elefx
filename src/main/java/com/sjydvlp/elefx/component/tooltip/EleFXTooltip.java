@@ -1,7 +1,8 @@
 package com.sjydvlp.elefx.component.tooltip;
 
 import com.sjydvlp.elefx.theme.EleFXThemes;
-import javafx.animation.FadeTransition;
+import com.sjydvlp.elefx.internal.ScenePopupOverlay;
+import javafx.animation.Animation;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -19,7 +20,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -32,7 +35,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 import javafx.stage.Screen;
+import javafx.stage.Window;
 import javafx.util.Duration;
+
+import java.util.function.Function;
 
 /**
  * Element Plus-inspired tooltip attached to a JavaFX node. It supports the
@@ -43,7 +49,7 @@ public final class EleFXTooltip {
 
     private static final double ARROW_SIZE = 10;
 
-    private static final Duration FADE_DURATION = Duration.millis(150);
+    private static final double POPUP_MARGIN = 12;
 
     private final ObjectProperty<Node> reference = new SimpleObjectProperty<>(this, "reference");
 
@@ -103,6 +109,10 @@ public final class EleFXTooltip {
 
     private final StringProperty popperStyle = new SimpleStringProperty(this, "popperStyle", "");
 
+    private final StringProperty arrowStyle = new SimpleStringProperty(this, "arrowStyle", "");
+
+    private final StringProperty contentStyle = new SimpleStringProperty(this, "contentStyle", "");
+
     private final ReadOnlyBooleanWrapper showing = new ReadOnlyBooleanWrapper(this, "showing", false);
 
     private final ObjectProperty<EventHandler<EleFXTooltipEvent>> onBeforeShow = new SimpleObjectProperty<>(this,
@@ -117,7 +127,11 @@ public final class EleFXTooltip {
 
     private Popup popup;
 
+    private ScenePopupOverlay sceneOverlay;
+
     private StackPane root;
+
+    private StackPane popupContainer;
 
     private Region arrow;
 
@@ -129,9 +143,33 @@ public final class EleFXTooltip {
 
     private Scene observedScene;
 
+    private Window observedOwner;
+
+    private boolean suspendedForOwner;
+
+    private final ChangeListener<Boolean> ownerStateChanged = (o, oldValue, newValue) -> updateOwnerState();
+
     private boolean pointerInReference;
 
     private boolean pointerInTooltip;
+
+    private boolean hoverHidePending;
+
+    private Animation activeAnimation;
+
+    private boolean hiding;
+
+    private boolean targetVisible;
+
+    private long animationGeneration;
+
+    private double basePopupX;
+
+    private double basePopupY;
+
+    private final DoubleProperty transitionOffsetX = new SimpleDoubleProperty();
+
+    private final DoubleProperty transitionOffsetY = new SimpleDoubleProperty();
 
     private final EventHandler<MouseEvent> mouseEntered = e -> {
         pointerInReference = true;
@@ -143,21 +181,23 @@ public final class EleFXTooltip {
 
     private final EventHandler<MouseEvent> mouseExited = e -> {
         pointerInReference = false;
-        if (getTrigger() == EleFXTooltipTrigger.HOVER) scheduleHide();
+        if (getTrigger() == EleFXTooltipTrigger.HOVER) scheduleHoverHide();
     };
 
     private final EventHandler<MouseEvent> mouseClicked = e -> {
+        if (getVisible() != null) return;
         if (getTrigger() == EleFXTooltipTrigger.CLICK) toggle();
     };
 
     private final EventHandler<ContextMenuEvent> contextMenu = e -> {
-        if (getTrigger() == EleFXTooltipTrigger.CONTEXT_MENU) {
+        if (getVisible() == null && getTrigger() == EleFXTooltipTrigger.CONTEXT_MENU) {
             showAt(e.getScreenX(), e.getScreenY());
             e.consume();
         }
     };
 
     private final EventHandler<KeyEvent> keyPressed = e -> {
+        if (getVisible() != null) return;
         if (e.getCode() == KeyCode.ESCAPE)
             hide();
         else if (getTrigger() != EleFXTooltipTrigger.MANUAL && triggerKeys.contains(e.getCode())) {
@@ -198,7 +238,7 @@ public final class EleFXTooltip {
     }
 
     public void toggle() {
-        requestVisibility(!isShowing());
+        requestVisibility(!targetVisible);
     }
 
     /** Alias for Element Plus's exposed onOpen API. */
@@ -216,6 +256,7 @@ public final class EleFXTooltip {
         reposition();
     }
 
+    /** Native popup handle; background hover content is hosted in the owner's Scene instead. */
     public Popup getPopperRef() {
         return popup;
     }
@@ -523,7 +564,9 @@ public final class EleFXTooltip {
         return transition.get();
     }
 
+    /** Selects a registered animation name; null or blank disables enter/leave animations. */
     public void setTransition(String value) {
+        EleFXTooltipTransitions.resolve(value);
         transition.set(value == null ? "" : value);
     }
 
@@ -553,6 +596,32 @@ public final class EleFXTooltip {
 
     public StringProperty popperStyleProperty() {
         return popperStyle;
+    }
+
+    public String getArrowStyle() {
+        return arrowStyle.get();
+    }
+
+    /** Inline JavaFX CSS for the tooltip arrow. */
+    public void setArrowStyle(String value) {
+        arrowStyle.set(value == null ? "" : value);
+    }
+
+    public StringProperty arrowStyleProperty() {
+        return arrowStyle;
+    }
+
+    public String getContentStyle() {
+        return contentStyle.get();
+    }
+
+    /** Inline CSS for the built-in text label; style custom content nodes directly. */
+    public void setContentStyle(String value) {
+        contentStyle.set(value == null ? "" : value);
+    }
+
+    public StringProperty contentStyleProperty() {
+        return contentStyle;
     }
 
     public EventHandler<EleFXTooltipEvent> getOnBeforeShow() {
@@ -630,8 +699,10 @@ public final class EleFXTooltip {
             }
         });
         disabled.addListener((o, oldValue, value) -> {
-            if (value) hideNow();
+            if (value) hideNow(false);
         });
+        transitionOffsetX.addListener(o -> updateAnimatedPosition());
+        transitionOffsetY.addListener(o -> updateAnimatedPosition());
         content.addListener(o -> refresh());
         contentNode.addListener(o -> refresh());
         rawContent.addListener(o -> refresh());
@@ -639,12 +710,17 @@ public final class EleFXTooltip {
         showArrow.addListener(o -> refresh());
         popperClass.addListener(o -> refresh());
         popperStyle.addListener(o -> refresh());
+        arrowStyle.addListener(o -> refresh());
+        contentStyle.addListener(o -> refresh());
         ariaLabel.addListener(o -> refresh());
         placement.addListener(o -> reposition());
         offset.addListener(o -> reposition());
         arrowOffset.addListener(o -> reposition());
         showTimer.setOnFinished(e -> showNow());
-        hideTimer.setOnFinished(e -> hideNow());
+        hideTimer.setOnFinished(e -> {
+            if (hoverHidePending && (pointerInReference || (isEnterable() && pointerInTooltip))) return;
+            hideNow();
+        });
         autoCloseTimer.setOnFinished(e -> hide());
     }
 
@@ -682,17 +758,30 @@ public final class EleFXTooltip {
     }
 
     private void scheduleShow() {
-        if (isDisabled() || isShowing()) return;
         hideTimer.stop();
+        if (getVisible() != null || isDisabled()) return;
+        if (hiding) {
+            showNow();
+            return;
+        }
+        if (isShowing()) return;
         showTimer.setDuration(Duration.millis(getShowAfter()));
         showTimer.playFromStart();
     }
 
     private void scheduleHide() {
+        if (getVisible() != null) return;
+        hoverHidePending = false;
         showTimer.stop();
         if (!isShowing()) return;
         hideTimer.setDuration(Duration.millis(getHideAfter()));
         hideTimer.playFromStart();
+    }
+
+    private void scheduleHoverHide() {
+        if (pointerInReference || (isEnterable() && pointerInTooltip)) return;
+        scheduleHide();
+        hoverHidePending = true;
     }
 
     private void showAt(double x, double y) {
@@ -706,48 +795,175 @@ public final class EleFXTooltip {
     }
 
     private void showNow(double contextX, double contextY) {
-        if (isDisabled() || isShowing()) return;
+        if (isDisabled() || (isShowing() && !hiding)) return;
         Node anchor = activeReference();
         if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null) return;
+        Window owner = anchor.getScene().getWindow();
+        if (!owner.isShowing()) return;
+        // Hover does not require keyboard focus: an exposed part of an inactive
+        // application can still receive a fresh mouse-enter event.
+        if (!owner.isFocused() && !(getTrigger() == EleFXTooltipTrigger.HOVER && pointerInReference)) {
+            if (Boolean.TRUE.equals(getVisible())) {
+                observe(anchor.getScene());
+                suspendedForOwner = true;
+            }
+            return;
+        }
+        EleFXTooltipTransitions.Definition definition = EleFXTooltipTransitions.resolve(getTransition());
+        boolean wasShowing = isShowing();
+        boolean interrupted = activeAnimation != null;
+        cancelAnimation();
+        long generation = animationGeneration;
+        hiding = false;
+        targetVisible = true;
         createPopup();
         refresh();
-        root.applyCss();
-        root.autosize();
+        layoutPopup();
+        if (!wasShowing) resetAnimationValues();
         emit(EleFXTooltipEvent.BEFORE_SHOW, true, getOnBeforeShow());
-        popup.show(anchor.getScene().getWindow(), 0, 0);
+        if (generation != animationGeneration || !targetVisible) return;
+        if (!wasShowing) {
+            if (owner.isFocused()) {
+                popup.show(owner, 0, 0);
+            } else {
+                popup.getContent().remove(popupContainer);
+                sceneOverlay = new ScenePopupOverlay(anchor.getScene(), popupContainer);
+            }
+        }
         if (Double.isFinite(contextX)) {
-            popup.setX(contextX);
-            popup.setY(contextY);
+            basePopupX = contextX - POPUP_MARGIN;
+            basePopupY = contextY - POPUP_MARGIN;
+            updateAnimatedPosition();
+            layoutPopup();
+            Bounds bounds = anchor.localToScreen(anchor.getLayoutBounds());
+            if (bounds != null) positionArrow(root.getWidth(), root.getHeight(), bounds, getPlacement());
         } else
             reposition();
         showing.set(true);
         observe(anchor.getScene());
-        emit(EleFXTooltipEvent.SHOW, true, getOnShow());
-        if (!getTransition().isBlank()) {
-            root.setOpacity(0);
-            FadeTransition fade = new FadeTransition(FADE_DURATION, root);
-            fade.setToValue(1);
-            fade.play();
-        }
-        if (getAutoClose() > 0 && getVisible() == null) {
-            autoCloseTimer.setDuration(Duration.millis(getAutoClose()));
-            autoCloseTimer.playFromStart();
-        }
+        playAnimation(definition.enter(), interrupted, () -> {
+            emit(EleFXTooltipEvent.SHOW, true, getOnShow());
+            if (generation == animationGeneration && targetVisible && getAutoClose() > 0 && getVisible() == null) {
+                autoCloseTimer.setDuration(Duration.millis(getAutoClose()));
+                autoCloseTimer.playFromStart();
+            }
+        });
     }
 
     private void hideNow() {
+        // Do not leave an animated native popup above the foreground window
+        // after the user leaves a background hover target.
+        hideNow(observedOwner == null || observedOwner.isFocused());
+    }
+
+    private void hideNow(boolean animate) {
         stopTimers();
-        if (!isShowing()) return;
-        emit(EleFXTooltipEvent.BEFORE_HIDE, false, getOnBeforeHide());
-        popup.hide();
+        targetVisible = false;
+        if (animate && hiding) return;
+        boolean interrupted = activeAnimation != null;
+        boolean alreadyHiding = hiding;
+        cancelAnimation();
+        long generation = animationGeneration;
+        if (!isShowing()) {
+            unobserve();
+            return;
+        }
+        hiding = true;
+        if (!alreadyHiding) emit(EleFXTooltipEvent.BEFORE_HIDE, false, getOnBeforeHide());
+        if (generation != animationGeneration || targetVisible) return;
+        if (animate) {
+            playAnimation(EleFXTooltipTransitions.resolve(getTransition()).leave(), interrupted, this::finishHide);
+        } else {
+            finishHide();
+        }
+    }
+
+    private void finishHide() {
         showing.set(false);
+        hiding = false;
+        targetVisible = false;
+        if (sceneOverlay != null) {
+            sceneOverlay.hide();
+            sceneOverlay = null;
+            popup.getContent().add(popupContainer);
+        }
+        popup.hide();
+        pointerInTooltip = false;
         unobserve();
-        emit(EleFXTooltipEvent.HIDE, false, getOnHide());
+        resetAnimationValues();
         if (!isPersistent()) {
             popup = null;
             root = null;
+            popupContainer = null;
             arrow = null;
         }
+        emit(EleFXTooltipEvent.HIDE, false, getOnHide());
+    }
+
+    private void cancelAnimation() {
+        animationGeneration++;
+        if (activeAnimation != null) {
+            activeAnimation.setOnFinished(null);
+            activeAnimation.stop();
+            activeAnimation = null;
+        }
+    }
+
+    private void playAnimation(Function<EleFXTooltipTransitionContext, Animation> factory,
+                               boolean interrupted, Runnable finished) {
+        long generation = animationGeneration;
+        Animation animation;
+        try {
+            animation = factory.apply(new EleFXTooltipTransitionContext(root,
+                    transitionOffsetX, transitionOffsetY, interrupted));
+            if (animation != null && (animation.getTotalDuration().isIndefinite()
+                    || animation.getTotalDuration().isUnknown())) {
+                throw new IllegalArgumentException("Tooltip animations must have a finite duration");
+            }
+        } catch (RuntimeException failure) {
+            if (generation == animationGeneration && root != null) {
+                resetAnimationValues();
+                finished.run();
+            }
+            throw failure;
+        }
+        if (generation != animationGeneration) return;
+        if (animation == null) {
+            finished.run();
+            return;
+        }
+        activeAnimation = animation;
+        EventHandler<ActionEvent> callback = animation.getOnFinished();
+        Runnable complete = () -> {
+            if (generation != animationGeneration || activeAnimation != animation) return;
+            activeAnimation = null;
+            try {
+                if (callback != null) callback.handle(new ActionEvent(animation, null));
+            } finally {
+                if (generation == animationGeneration) finished.run();
+            }
+        };
+        animation.setOnFinished(e -> complete.run());
+        animation.playFromStart();
+        if (animation.getTotalDuration().lessThanOrEqualTo(Duration.ZERO)) complete.run();
+    }
+
+    private void resetAnimationValues() {
+        root.setOpacity(1);
+        transitionOffsetX.set(0);
+        transitionOffsetY.set(0);
+    }
+
+    private void updateAnimatedPosition() {
+        if (isLayerShowing()) {
+            popup.setX(basePopupX + transitionOffsetX.get());
+            popup.setY(basePopupY + transitionOffsetY.get());
+            if (sceneOverlay != null) sceneOverlay.moveTo(popup.getX(), popup.getY());
+        }
+    }
+
+    private boolean isLayerShowing() {
+        return popup != null && (popup.isShowing() || (sceneOverlay != null && sceneOverlay.isShowing()));
     }
 
     private void stopTimers() {
@@ -761,18 +977,31 @@ public final class EleFXTooltip {
         popup = new Popup();
         popup.setAutoFix(false);
         popup.setAutoHide(false);
+        popup.setOnHidden(e -> {
+            if (isShowing()) {
+                stopTimers();
+                cancelAnimation();
+                finishHide();
+            }
+        });
         root = new StackPane();
         root.getStyleClass().add("ele-tooltip");
         root.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         root.getStylesheets().add(EleFXThemes.TOOLTIP.toData());
-        popup.getContent().add(root);
-        root.setOnMouseEntered(e -> {
+        popupContainer = new StackPane(root);
+        popupContainer.setPickOnBounds(false);
+        popupContainer.setPadding(new Insets(POPUP_MARGIN));
+        popup.getContent().add(popupContainer);
+        popupContainer.setOnMouseEntered(e -> {
             pointerInTooltip = true;
-            if (isEnterable()) hideTimer.stop();
+            if (isEnterable()) {
+                hideTimer.stop();
+                if (getVisible() == null && hiding && getTrigger() == EleFXTooltipTrigger.HOVER) showNow();
+            }
         });
-        root.setOnMouseExited(e -> {
+        popupContainer.setOnMouseExited(e -> {
             pointerInTooltip = false;
-            if (isEnterable() && getTrigger() == EleFXTooltipTrigger.HOVER && !pointerInReference) scheduleHide();
+            if (isEnterable() && getTrigger() == EleFXTooltipTrigger.HOVER) scheduleHoverHide();
         });
     }
 
@@ -786,6 +1015,7 @@ public final class EleFXTooltip {
         Node value = getContentNode();
         if (value == null) {
             Label label = new Label(getContent());
+            label.setStyle(getContentStyle());
             label.setWrapText(true);
             label.setMaxWidth(Double.MAX_VALUE);
             value = label;
@@ -794,21 +1024,30 @@ public final class EleFXTooltip {
         if (isShowArrow()) {
             if (arrow == null) {
                 arrow = new Region();
+                arrow.setManaged(false);
+                arrow.setMouseTransparent(true);
                 arrow.getStyleClass().add("ele-tooltip__arrow");
             }
+            arrow.setStyle(getArrowStyle());
             root.getChildren().setAll(value, arrow);
         } else
             root.getChildren().setAll(value);
+        if (isLayerShowing()) reposition();
+    }
+
+    private void layoutPopup() {
+        popupContainer.applyCss();
+        popupContainer.autosize();
+        popupContainer.layout();
     }
 
     private void reposition() {
         Node anchor = activeReference();
-        if (anchor == null || root == null || popup == null || !popup.isShowing()) return;
-        Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
+        if (anchor == null || root == null || !isLayerShowing()) return;
+        Bounds bounds = anchor.localToScreen(anchor.getLayoutBounds());
         if (bounds == null) return;
-        root.applyCss();
-        root.autosize();
-        double width = root.prefWidth(-1), height = root.prefHeight(width);
+        layoutPopup();
+        double width = root.getWidth(), height = root.getHeight();
         EleFXTooltipPlacement resolved = resolvePlacement(bounds, width, height);
         double x, y;
         if (isHorizontal(resolved)) {
@@ -833,8 +1072,9 @@ public final class EleFXTooltip {
         Rectangle2D screen = Screen
                 .getScreensForRectangle(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight())
                 .get(0).getVisualBounds();
-        popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - width)));
-        popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - height)));
+        basePopupX = Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - width)) - POPUP_MARGIN;
+        basePopupY = Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - height)) - POPUP_MARGIN;
+        updateAnimatedPosition();
         positionArrow(width, height, bounds, resolved);
     }
 
@@ -867,11 +1107,20 @@ public final class EleFXTooltip {
     }
 
     private void positionArrow(double w, double h, Bounds b, EleFXTooltipPlacement p) {
-        if (arrow == null) return;
+        if (arrow == null || !isShowArrow()) return;
+        arrow.getStyleClass().removeIf(s -> s.startsWith("ele-tooltip__arrow--"));
+        String side = p.name().startsWith("TOP")
+                ? "bottom"
+                : p.name().startsWith("BOTTOM")
+                        ? "top"
+                        : p.name().startsWith("LEFT") ? "right" : "left";
+        arrow.getStyleClass().add("ele-tooltip__arrow--" + side);
         double minimum = getArrowOffset(), x = Math.max(minimum,
-                Math.min(w - ARROW_SIZE - minimum, b.getMinX() + b.getWidth() / 2 - popup.getX() - ARROW_SIZE / 2));
+                Math.min(w - ARROW_SIZE - minimum,
+                        b.getMinX() + b.getWidth() / 2 - basePopupX - POPUP_MARGIN - ARROW_SIZE / 2));
         double y = Math.max(minimum,
-                Math.min(h - ARROW_SIZE - minimum, b.getMinY() + b.getHeight() / 2 - popup.getY() - ARROW_SIZE / 2));
+                Math.min(h - ARROW_SIZE - minimum,
+                        b.getMinY() + b.getHeight() / 2 - basePopupY - POPUP_MARGIN - ARROW_SIZE / 2));
         if (p.name().startsWith("TOP"))
             arrow.resizeRelocate(x, h - ARROW_SIZE / 2, ARROW_SIZE, ARROW_SIZE);
         else if (p.name().startsWith("BOTTOM"))
@@ -886,12 +1135,48 @@ public final class EleFXTooltip {
         unobserve();
         observedScene = scene;
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, outsidePressed);
+        observedOwner = scene.getWindow();
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().addListener(ownerStateChanged);
+            observedOwner.showingProperty().addListener(ownerStateChanged);
+        }
     }
 
     private void unobserve() {
+        suspendedForOwner = false;
+        if (observedOwner != null) {
+            observedOwner.focusedProperty().removeListener(ownerStateChanged);
+            observedOwner.showingProperty().removeListener(ownerStateChanged);
+            observedOwner = null;
+        }
         if (observedScene != null) {
             observedScene.removeEventFilter(MouseEvent.MOUSE_PRESSED, outsidePressed);
             observedScene = null;
+        }
+    }
+
+    private void updateOwnerState() {
+        Window owner = observedOwner;
+        if (owner == null) return;
+        if (!owner.isFocused()) pointerInReference = false;
+        if (!owner.isShowing()) {
+            hideNow(false);
+        } else if (!owner.isFocused() && !suspendedForOwner) {
+            Scene scene = observedScene;
+            boolean restore = Boolean.TRUE.equals(getVisible());
+            // Deactivation must bypass hideAfter and the leave animation.
+            hideNow(false);
+            if (restore && Boolean.TRUE.equals(getVisible()) && owner.isShowing()) {
+                observe(scene);
+                suspendedForOwner = true;
+                if (owner.isFocused()) updateOwnerState();
+            }
+        } else if (owner.isFocused() && suspendedForOwner) {
+            suspendedForOwner = false;
+            if (Boolean.TRUE.equals(getVisible()))
+                showNow();
+            else
+                unobserve();
         }
     }
 
