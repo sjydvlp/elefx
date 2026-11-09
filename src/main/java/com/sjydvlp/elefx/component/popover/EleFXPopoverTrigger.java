@@ -5,6 +5,5 @@ public enum EleFXPopoverTrigger {
     HOVER,
     CLICK,
     FOCUS,
-    CONTEXT_MENU,
-    MANUAL
+    CONTEXT_MENU
 }

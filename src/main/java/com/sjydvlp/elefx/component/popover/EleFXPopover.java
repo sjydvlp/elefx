@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,27 +16,27 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Screen;
-import javafx.stage.Window;
 import javafx.util.Duration;
 
 /**
  * Element Plus-inspired floating content panel. A popover can display text or
- * arbitrary JavaFX content next to a reference node, including virtual anchors.
+ * arbitrary JavaFX content next to a reference node.
  */
 public final class EleFXPopover {
 
     private static final double ARROW_SIZE = 10;
 
+    // Keep the shadow and rotated arrow inside stable popup window bounds.
+    private static final double SHADOW_MARGIN = 24;
+
     private final ObjectProperty<Node> reference = new SimpleObjectProperty<>(this, "reference");
-
-    private final ObjectProperty<Node> virtualRef = new SimpleObjectProperty<>(this, "virtualRef");
-
-    private final BooleanProperty virtualTriggering = new SimpleBooleanProperty(this, "virtualTriggering", false);
 
     private final ObjectProperty<EleFXPopoverTrigger> trigger = new SimpleObjectProperty<>(this, "trigger",
             EleFXPopoverTrigger.HOVER);
@@ -62,7 +63,7 @@ public final class EleFXPopover {
 
     private final BooleanProperty disabled = new SimpleBooleanProperty(this, "disabled", false);
 
-    /** Null means uncontrolled; a non-null value makes visibility externally controlled. */
+    /** Null enables automatic triggers; a non-null value gives visibility control to the caller. */
     private final ObjectProperty<Boolean> visible = new SimpleObjectProperty<>(this, "visible", null);
 
     private final IntegerProperty showAfter = new SimpleIntegerProperty(this, "showAfter", 0);
@@ -104,6 +105,8 @@ public final class EleFXPopover {
 
     private VBox root;
 
+    private StackPane popupContainer;
+
     private Region arrow;
 
     private PauseTransition showTimer = new PauseTransition();
@@ -118,6 +121,8 @@ public final class EleFXPopover {
 
     private boolean pointerInPopover;
 
+    private boolean hoverHidePending;
+
     private final EventHandler<MouseEvent> mouseEntered = e -> {
         pointerInReference = true;
         if (getTrigger() == EleFXPopoverTrigger.HOVER) scheduleShow();
@@ -125,24 +130,30 @@ public final class EleFXPopover {
 
     private final EventHandler<MouseEvent> mouseExited = e -> {
         pointerInReference = false;
-        if (getTrigger() == EleFXPopoverTrigger.HOVER) scheduleHide();
+        if (getTrigger() == EleFXPopoverTrigger.HOVER) scheduleHoverHide();
     };
 
     private final EventHandler<MouseEvent> mouseClicked = e -> {
-        if (getTrigger() == EleFXPopoverTrigger.CLICK) toggle();
+        if (getVisible() != null) return;
+        if (getTrigger() == EleFXPopoverTrigger.CLICK)
+            toggle();
+        else if (getTrigger() == EleFXPopoverTrigger.CONTEXT_MENU && e.getButton() == MouseButton.PRIMARY) hide();
     };
 
     private final EventHandler<ContextMenuEvent> contextMenu = e -> {
-        if (getTrigger() == EleFXPopoverTrigger.CONTEXT_MENU) {
-            showAt(e.getScreenX(), e.getScreenY());
+        if (getVisible() == null && getTrigger() == EleFXPopoverTrigger.CONTEXT_MENU) {
+            showTimer.stop();
+            hideTimer.stop();
+            showNow();
             e.consume();
         }
     };
 
     private final EventHandler<KeyEvent> keyPressed = e -> {
+        if (getVisible() != null) return;
         if (e.getCode() == KeyCode.ESCAPE)
             hide();
-        else if (getTrigger() != EleFXPopoverTrigger.MANUAL && triggerKeys.contains(e.getCode())) {
+        else if (triggerKeys.contains(e.getCode())) {
             toggle();
             e.consume();
         }
@@ -158,11 +169,11 @@ public final class EleFXPopover {
     };
 
     private final EventHandler<MouseEvent> outsidePressed = e -> {
-        if (isShowing() && !isInside(e.getTarget(), activeReference())) hide();
+        if (getVisible() == null && isShowing() && !isInside(e.getTarget(), getReference())) hide();
     };
 
     private final EventHandler<KeyEvent> escapePressed = e -> {
-        if (e.getCode() == KeyCode.ESCAPE && isShowing()) {
+        if (getVisible() == null && e.getCode() == KeyCode.ESCAPE && isShowing()) {
             hide();
             e.consume();
         }
@@ -212,30 +223,6 @@ public final class EleFXPopover {
 
     public ObjectProperty<Node> referenceProperty() {
         return reference;
-    }
-
-    public Node getVirtualRef() {
-        return virtualRef.get();
-    }
-
-    public void setVirtualRef(Node value) {
-        virtualRef.set(value);
-    }
-
-    public ObjectProperty<Node> virtualRefProperty() {
-        return virtualRef;
-    }
-
-    public boolean isVirtualTriggering() {
-        return virtualTriggering.get();
-    }
-
-    public void setVirtualTriggering(boolean value) {
-        virtualTriggering.set(value);
-    }
-
-    public BooleanProperty virtualTriggeringProperty() {
-        return virtualTriggering;
     }
 
     public EleFXPopoverTrigger getTrigger() {
@@ -552,25 +539,14 @@ public final class EleFXPopover {
 
     private void initialize() {
         reference.addListener((o, oldNode, newNode) -> {
-            if (!isVirtualTriggering()) {
-                detach(oldNode);
-                attach(newNode);
-            }
-        });
-        virtualRef.addListener((o, oldNode, newNode) -> {
-            if (isVirtualTriggering()) {
-                detach(oldNode);
-                attach(newNode);
-            }
-        });
-        virtualTriggering.addListener((o, wasVirtual, isVirtual) -> {
-            detach(wasVirtual ? getVirtualRef() : getReference());
-            attach(activeReference());
+            detach(oldNode);
+            attach(newNode);
         });
         visible.addListener((o, oldValue, newValue) -> {
             if (newValue != null) {
                 showTimer.stop();
                 hideTimer.stop();
+                autoCloseTimer.stop();
                 if (newValue)
                     showNow();
                 else
@@ -590,12 +566,13 @@ public final class EleFXPopover {
         placement.addListener(o -> reposition());
         offset.addListener(o -> reposition());
         showTimer.setOnFinished(e -> showNow());
-        hideTimer.setOnFinished(e -> hideNow());
-        autoCloseTimer.setOnFinished(e -> hide());
-    }
-
-    private Node activeReference() {
-        return isVirtualTriggering() ? getVirtualRef() : getReference();
+        hideTimer.setOnFinished(e -> {
+            if (hoverHidePending && (pointerInReference || pointerInPopover)) return;
+            hideNow();
+        });
+        autoCloseTimer.setOnFinished(e -> {
+            if (getVisible() == null) hide();
+        });
     }
 
     private void attach(Node node) {
@@ -634,51 +611,45 @@ public final class EleFXPopover {
     }
 
     private void scheduleShow() {
-        if (isDisabled() || isShowing()) return;
         hideTimer.stop();
+        if (getVisible() != null || isDisabled() || isShowing()) return;
         showTimer.setDuration(Duration.millis(getShowAfter()));
         showTimer.playFromStart();
     }
 
     private void scheduleHide() {
+        if (getVisible() != null) return;
+        hoverHidePending = false;
         showTimer.stop();
         if (!isShowing()) return;
         hideTimer.setDuration(Duration.millis(getHideAfter()));
         hideTimer.playFromStart();
     }
 
-    private void showAt(double x, double y) {
-        if (isDisabled()) return;
-        showTimer.stop();
-        hideTimer.stop();
-        showNow(x, y);
+    private void scheduleHoverHide() {
+        if (pointerInReference || pointerInPopover) return;
+        scheduleHide();
+        hoverHidePending = true;
     }
 
     private void showNow() {
-        showNow(Double.NaN, Double.NaN);
-    }
-
-    private void showNow(double contextX, double contextY) {
         if (isDisabled() || isShowing()) return;
-        Node anchor = activeReference();
+        Node anchor = getReference();
         if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null) return;
         createPopup();
         refresh();
-        root.applyCss();
-        root.autosize();
+        popupContainer.applyCss();
+        popupContainer.autosize();
+        popupContainer.layout();
         emit(EleFXPopoverEvent.BEFORE_ENTER, true, getOnBeforeEnter());
         popup.show(anchor.getScene().getWindow(), 0, 0);
-        if (Double.isFinite(contextX)) {
-            popup.setX(contextX);
-            popup.setY(contextY);
-        } else
-            reposition();
+        reposition();
         showing.set(true);
         observe(anchor.getScene());
         emit(EleFXPopoverEvent.SHOW, true, getOnShow());
         emit(EleFXPopoverEvent.AFTER_ENTER, true, getOnAfterEnter());
         emit(EleFXPopoverEvent.VISIBLE_CHANGE, true, getOnVisibleChange());
-        if (getAutoClose() > 0) {
+        if (getVisible() == null && getAutoClose() > 0) {
             autoCloseTimer.setDuration(Duration.millis(getAutoClose()));
             autoCloseTimer.playFromStart();
         }
@@ -691,6 +662,7 @@ public final class EleFXPopover {
         if (!isShowing()) return;
         emit(EleFXPopoverEvent.BEFORE_LEAVE, false, getOnBeforeLeave());
         popup.hide();
+        pointerInPopover = false;
         showing.set(false);
         unobserve();
         emit(EleFXPopoverEvent.HIDE, false, getOnHide());
@@ -699,6 +671,7 @@ public final class EleFXPopover {
         if (!isPersistent()) {
             popup = null;
             root = null;
+            popupContainer = null;
             arrow = null;
         }
     }
@@ -712,14 +685,18 @@ public final class EleFXPopover {
         root.getStyleClass().add("ele-popover");
         root.getStylesheets().add(EleFXThemes.DEFAULT.toData());
         root.getStylesheets().add(EleFXThemes.POPOVER.toData());
-        popup.getContent().add(root);
-        root.setOnMouseEntered(e -> {
+        popupContainer = new StackPane(root);
+        popupContainer.setPadding(new Insets(SHADOW_MARGIN));
+        popup.getContent().add(popupContainer);
+        // The popup window also covers the transparent shadow padding. Treat it
+        // as part of the hover surface so crossing it cannot close the panel.
+        popupContainer.setOnMouseEntered(e -> {
             pointerInPopover = true;
             hideTimer.stop();
         });
-        root.setOnMouseExited(e -> {
+        popupContainer.setOnMouseExited(e -> {
             pointerInPopover = false;
-            if (getTrigger() == EleFXPopoverTrigger.HOVER && !pointerInReference) scheduleHide();
+            if (getTrigger() == EleFXPopoverTrigger.HOVER) scheduleHoverHide();
         });
     }
 
@@ -730,6 +707,7 @@ public final class EleFXPopover {
         if (!getPopperClass().isBlank()) root.getStyleClass().add(getPopperClass());
         root.setPrefWidth(getWidth());
         root.setMinWidth(getWidth());
+        root.setMaxWidth(getWidth());
         VBox body = new VBox();
         body.getStyleClass().add("ele-popover__body");
         if (!getTitle().isBlank()) {
@@ -751,12 +729,16 @@ public final class EleFXPopover {
         if (isShowArrow()) {
             if (arrow == null) {
                 arrow = new Region();
+                // Unmanaged overlay: VBox must not allocate a row for the arrow.
+                arrow.setManaged(false);
+                arrow.setMouseTransparent(true);
                 arrow.getStyleClass().add("ele-popover__arrow");
             }
             updateArrowClass();
             root.getChildren().setAll(body, arrow);
         } else
             root.getChildren().setAll(body);
+        if (popup.isShowing()) reposition();
     }
 
     private void updateArrowClass() {
@@ -771,13 +753,16 @@ public final class EleFXPopover {
     }
 
     private void reposition() {
-        Node anchor = activeReference();
+        Node anchor = getReference();
         if (anchor == null || root == null || popup == null || !popup.isShowing()) return;
-        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        if (arrow != null && isShowArrow()) updateArrowClass();
+        // Focus effects can expand boundsInLocal when the popup takes focus.
+        Bounds b = anchor.localToScreen(anchor.getLayoutBounds());
         if (b == null) return;
-        root.applyCss();
-        root.autosize();
-        double w = root.prefWidth(-1), h = root.prefHeight(w);
+        popupContainer.applyCss();
+        popupContainer.autosize();
+        popupContainer.layout();
+        double w = root.getWidth(), h = root.getHeight();
         EleFXPopoverPlacement p = getPlacement();
         boolean horizontal = p.name().startsWith("TOP") || p.name().startsWith("BOTTOM");
         double x, y;
@@ -794,15 +779,17 @@ public final class EleFXPopover {
         }
         Rectangle2D screen = Screen.getScreensForRectangle(b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight()).get(0)
                 .getVisualBounds();
-        popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - w)));
-        popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - h)));
+        popup.setX(Math.max(screen.getMinX(), Math.min(x, screen.getMaxX() - w)) - SHADOW_MARGIN);
+        popup.setY(Math.max(screen.getMinY(), Math.min(y, screen.getMaxY() - h)) - SHADOW_MARGIN);
         positionArrow(w, h, b);
     }
 
     private void positionArrow(double w, double h, Bounds b) {
         if (arrow == null || popup == null) return;
-        double x = Math.max(8, Math.min(w - 18, b.getMinX() + b.getWidth() / 2 - popup.getX() - ARROW_SIZE / 2));
-        double y = Math.max(8, Math.min(h - 18, b.getMinY() + b.getHeight() / 2 - popup.getY() - ARROW_SIZE / 2));
+        double x = Math.max(8,
+                Math.min(w - 18, b.getMinX() + b.getWidth() / 2 - popup.getX() - SHADOW_MARGIN - ARROW_SIZE / 2));
+        double y = Math.max(8,
+                Math.min(h - 18, b.getMinY() + b.getHeight() / 2 - popup.getY() - SHADOW_MARGIN - ARROW_SIZE / 2));
         switch (getPlacement()) {
             case TOP_START, TOP, TOP_END -> arrow.resizeRelocate(x, h - ARROW_SIZE / 2, ARROW_SIZE, ARROW_SIZE);
             case BOTTOM_START, BOTTOM, BOTTOM_END -> arrow.resizeRelocate(x, -ARROW_SIZE / 2, ARROW_SIZE, ARROW_SIZE);
