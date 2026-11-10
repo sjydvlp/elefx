@@ -246,6 +246,8 @@ public class EleFXFormItem extends VBox implements Themable {
     private void updateLayout() {
         EleFXFormLabelPosition position = getLabelPosition() == null ? inheritedLabelPosition : getLabelPosition();
         double width = getLabelWidth() < 0 ? inheritedLabelWidth : getLabelWidth();
+        // Top labels occupy the field width. labelWidth only aligns side labels.
+        if (position == EleFXFormLabelPosition.TOP) width = -1;
         labelNode.setText(getLabel());
         labelBox.setVisible(!getLabel().isBlank() || isRequired());
         labelBox.setManaged(labelBox.isVisible());
