@@ -158,12 +158,14 @@ public class EleFXDivider extends Pane implements Themable {
 
     @Override
     protected double computeMinWidth(double height) {
-        return snappedLeftInset() + snappedRightInset();
+        return snappedLeftInset() + snappedRightInset()
+                + (getDirection() == EleFXDividerDirection.VERTICAL ? lineThickness() : 0);
     }
 
     @Override
     protected double computePrefWidth(double height) {
-        if (getDirection() == EleFXDividerDirection.VERTICAL) return snappedLeftInset() + snappedRightInset() + 1;
+        if (getDirection() == EleFXDividerDirection.VERTICAL)
+            return snappedLeftInset() + snappedRightInset() + lineThickness();
         return snappedLeftInset() + snappedRightInset()
                 + (hasContent() ? contentContainer.prefWidth(-1) + CONTENT_GAP * 2 : 0);
     }
@@ -197,32 +199,32 @@ public class EleFXDivider extends Pane implements Themable {
             contentContainer.resizeRelocate(0, 0, 0, 0);
             return;
         }
-        double contentWidth = Math.min(contentContainer.prefWidth(height), Math.max(0, width - CONTENT_GAP * 2));
-        double contentHeight = Math.min(contentContainer.prefHeight(contentWidth), height);
-        double freeLineWidth = Math.max(0, width - contentWidth - CONTENT_GAP * 2);
-        double leadingRatio = switch (getContentPosition()) {
-            case LEFT -> .1;
-            case RIGHT -> .9;
-            case CENTER -> .5;
+        // Text padding belongs to the container; do not add it again to the lines.
+        double contentWidth = Math.min(contentContainer.prefWidth(-1), width);
+        double contentHeight = contentContainer.prefHeight(contentWidth);
+        double offset = Math.min(CONTENT_GAP, Math.max(0, (width - contentWidth) / 2));
+        double contentX = x + switch (getContentPosition()) {
+            case LEFT -> offset;
+            case RIGHT -> width - contentWidth - offset;
+            case CENTER -> (width - contentWidth) / 2;
         };
-        double firstWidth = freeLineWidth * leadingRatio;
-        double contentX = x + firstWidth + CONTENT_GAP;
-        firstLine.resizeRelocate(x, lineY, firstWidth, thickness);
-        contentContainer.resizeRelocate(contentX, y + (height - contentHeight) / 2, contentWidth, contentHeight);
-        secondLine.resizeRelocate(contentX + contentWidth + CONTENT_GAP, lineY,
-                Math.max(0, x + width - (contentX + contentWidth + CONTENT_GAP)), thickness);
+        firstLine.resizeRelocate(x, lineY, Math.max(0, contentX - x), thickness);
+        contentContainer.resizeRelocate(contentX, lineY + thickness / 2 - contentHeight / 2,
+                contentWidth, contentHeight);
+        secondLine.resizeRelocate(contentX + contentWidth, lineY,
+                Math.max(0, x + width - contentX - contentWidth), thickness);
     }
 
     private double computeHeight(double width, boolean minimum) {
-        double contentHeight = hasContent()
-                ? (minimum ? contentContainer.minHeight(width) : contentContainer.prefHeight(width))
-                : 1;
-        if (getDirection() == EleFXDividerDirection.VERTICAL) contentHeight = 14;
+        // Horizontal content overlays the line instead of increasing its height.
+        double contentHeight = getDirection() == EleFXDividerDirection.VERTICAL ? 14 : lineThickness();
         return snappedTopInset() + snappedBottomInset() + Math.max(lineThickness(), contentHeight);
     }
 
     private double lineThickness() {
-        return getBorderStyle() == EleFXDividerBorderStyle.DOUBLE ? 3 : 1;
+        // Element Plus keeps border-width at 1px even for double. At this width,
+        // browsers render it as a single line rather than expanding it to 3px.
+        return 1;
     }
 
     private void initialize() {
@@ -233,7 +235,10 @@ public class EleFXDivider extends Pane implements Themable {
         textContent.getStyleClass().add("ele-divider__text-label");
         textContent.textProperty().bind(text);
         getChildren().addAll(firstLine, secondLine, contentContainer);
-        direction.addListener((o, oldValue, newValue) -> refreshStyles());
+        direction.addListener((o, oldValue, newValue) -> {
+            refreshStyles();
+            refreshContent();
+        });
         contentPosition.addListener((o, oldValue, newValue) -> refreshStyles());
         borderStyle.addListener((o, oldValue, newValue) -> refreshStyles());
         text.addListener(o -> refreshContent());
