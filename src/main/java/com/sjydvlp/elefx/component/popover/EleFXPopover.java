@@ -1,7 +1,6 @@
 package com.sjydvlp.elefx.component.popover;
 
 import com.sjydvlp.elefx.theme.EleFXThemes;
-import com.sjydvlp.elefx.internal.ScenePopupOverlay;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -32,6 +31,9 @@ import javafx.util.Duration;
  * arbitrary JavaFX content next to a reference node.
  */
 public final class EleFXPopover {
+
+    /** Sizes the popover to the preferred width of its content. */
+    public static final double AUTO_WIDTH = Region.USE_COMPUTED_SIZE;
 
     private static final double ARROW_SIZE = 10;
 
@@ -147,6 +149,10 @@ public final class EleFXPopover {
         if (getVisible() != null) return;
         if (getTrigger() == EleFXPopoverTrigger.CLICK)
             toggle();
+        else if (getTrigger() == EleFXPopoverTrigger.FOCUS && e.getButton() == MouseButton.PRIMARY
+                && getReference().isFocused())
+            // Clicking a non-focusable area can dismiss the popup while the reference keeps focus.
+            scheduleShow();
         else if (getTrigger() == EleFXPopoverTrigger.CONTEXT_MENU && e.getButton() == MouseButton.PRIMARY) hide();
     };
 
@@ -316,9 +322,10 @@ public final class EleFXPopover {
         return width.get();
     }
 
+    /** Sets a fixed width in pixels or {@link #AUTO_WIDTH} to fit the content. */
     public void setWidth(double value) {
-        if (value < 0 || !Double.isFinite(value))
-            throw new IllegalArgumentException("width must be finite and non-negative");
+        if (value != AUTO_WIDTH && (value < 0 || !Double.isFinite(value)))
+            throw new IllegalArgumentException("width must be AUTO_WIDTH or a finite non-negative number");
         width.set(value);
     }
 
@@ -661,9 +668,6 @@ public final class EleFXPopover {
         }
         createPopup();
         refresh();
-        popupContainer.applyCss();
-        popupContainer.autosize();
-        popupContainer.layout();
         emit(EleFXPopoverEvent.BEFORE_ENTER, true, getOnBeforeEnter());
         if (owner.isFocused()) {
             popup.show(owner, 0, 0);
@@ -671,6 +675,10 @@ public final class EleFXPopover {
             popup.getContent().remove(popupContainer);
             sceneOverlay = new ScenePopupOverlay(anchor.getScene(), popupContainer);
         }
+        // Resolve CSS after the popup has inherited its owner's stylesheets.
+        popupContainer.applyCss();
+        popupContainer.autosize();
+        popupContainer.layout();
         reposition();
         showing.set(true);
         observe(anchor.getScene());

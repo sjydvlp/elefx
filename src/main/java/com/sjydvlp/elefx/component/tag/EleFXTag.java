@@ -243,7 +243,13 @@ public class EleFXTag extends StackPane implements Themable {
         return EleFXThemes.TAG;
     }
 
+    @Override
+    protected double computeMinWidth(double height) {
+        return prefWidth(height);
+    }
+
     private void initialize() {
+        setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         getStyleClass().add(STYLE_CLASS);
         getChildren().add(contentBox);
         setAlignment(Pos.CENTER_LEFT);

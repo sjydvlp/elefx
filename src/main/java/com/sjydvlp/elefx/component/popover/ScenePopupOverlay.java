@@ -1,4 +1,4 @@
-package com.sjydvlp.elefx.internal;
+package com.sjydvlp.elefx.component.popover;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -11,7 +11,10 @@ import javafx.scene.layout.Pane;
  * Internal host for background hover content. Painting in the owner's Scene
  * preserves native window occlusion without activating or raising the owner.
  */
-public final class ScenePopupOverlay {
+final class ScenePopupOverlay {
+
+    // Shared by tooltip and popover layers, including when their hide order differs.
+    private static final String RESTORE_ROOT = "com.sjydvlp.elefx.sceneOverlay.restoreRoot";
 
     private final Scene scene;
 
@@ -23,7 +26,7 @@ public final class ScenePopupOverlay {
 
     private final boolean managed;
 
-    public ScenePopupOverlay(Scene scene, Node content) {
+    ScenePopupOverlay(Scene scene, Node content) {
         this.scene = scene;
         this.content = content;
         this.managed = content.isManaged();
@@ -62,12 +65,8 @@ public final class ScenePopupOverlay {
             pane.getChildren().remove(layer);
         else
             ((Group) host).getChildren().remove(layer);
-        // Multiple popups can share a wrapper around a non-Pane scene root.
-        // The final popup restores the original root, regardless of hide order.
-        if (host instanceof RootHost wrapper && scene.getRoot() == wrapper
-                && wrapper.getChildren().size() == 1) {
-            wrapper.getChildren().remove(wrapper.original);
-            scene.setRoot(wrapper.original);
+        if (host.hasProperties() && host.getProperties().get(RESTORE_ROOT)instanceof Runnable restore) {
+            restore.run();
         }
     }
 
@@ -77,6 +76,14 @@ public final class ScenePopupOverlay {
 
         private RootHost(Parent original) {
             this.original = original;
+            getProperties().put(RESTORE_ROOT, (Runnable) () -> {
+                Scene owner = getScene();
+                if (owner != null && owner.getRoot() == this && getChildren().size() == 1
+                        && getChildren().get(0) == original) {
+                    getChildren().remove(original);
+                    owner.setRoot(original);
+                }
+            });
         }
 
         @Override

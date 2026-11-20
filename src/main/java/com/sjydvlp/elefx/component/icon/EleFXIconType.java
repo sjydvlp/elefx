@@ -76,6 +76,7 @@ public enum EleFXIconType {
     COLD_DRINK("cold-drink", "svg/cold-drink.svg"),
     COLLECTION_TAG("collection-tag", "svg/collection-tag.svg"),
     COLLECTION("collection", "svg/collection.svg"),
+    COLUMN_RESIZE("column-resize", "svg/column-resize.svg"),
     COMMENT("comment", "svg/comment.svg"),
     COMPASS("compass", "svg/compass.svg"),
     CONNECTION("connection", "svg/connection.svg"),

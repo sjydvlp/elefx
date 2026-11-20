@@ -1,7 +1,6 @@
 package com.sjydvlp.elefx.component.tooltip;
 
 import com.sjydvlp.elefx.theme.EleFXThemes;
-import com.sjydvlp.elefx.internal.ScenePopupOverlay;
 import javafx.animation.Animation;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;

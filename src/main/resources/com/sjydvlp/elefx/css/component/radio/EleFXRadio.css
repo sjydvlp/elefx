@@ -23,8 +23,9 @@
 .ele-radio-group--size-small > .ele-radio-button { -fx-min-height: 24px; -fx-padding: 0 11px; -fx-font-size: 12px; }
 .ele-radio-button { -fx-min-height: 32px; -fx-padding: 0 15px; -fx-alignment: center; -fx-content-display: text-only; -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cb-base; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; -fx-text-fill: -elefx-ct-regular; -fx-cursor: hand; }
 .ele-radio-button:hover { -fx-text-fill: -elefx-cp-1; }
-.ele-radio-button:focused { -fx-background-color: -elefx-co-white-bg; -fx-background-insets: 0; -fx-border-color: -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-background-radius: 4px; -fx-border-radius: 4px; }
 .ele-radio-button:selected, .ele-radio-button:selected:focused { -fx-background-color: -elefx-radio-fill, -elefx-cp-1; -fx-background-insets: 0; -fx-border-color: -elefx-radio-fill, -elefx-cp-1; -fx-border-insets: 0; -fx-border-width: 1px; -fx-text-fill: -elefx-radio-text-color, -elefx-co-white-bg; }
+.ele-radio-button:focused:keyboard-focus { -fx-border-color: -elefx-cp-1; }
+.ele-radio-button:selected:focused:keyboard-focus { -fx-border-color: -elefx-cp-d2; }
 .ele-radio-button:disabled { -fx-background-color: -elefx-cf-light; -fx-border-color: -elefx-cb-light; -fx-text-fill: -elefx-ct-disabled; }
 .ele-radio-button:disabled:selected { -fx-background-color: -elefx-cp-l5; -fx-border-color: -elefx-cp-l5; -fx-text-fill: -elefx-co-white-bg; }
 .ele-radio-button.ele-radio--size-large { -fx-min-height: 40px; }
