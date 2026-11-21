@@ -1,0 +1,73 @@
+@import "../checkbox/EleFXCheckbox.css";
+
+.ele-tree, .ele-tree > .tree-view, .ele-tree > .tree-view:focused {
+    -fx-background-color: -elefx-cf-blank;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 0;
+}
+.ele-tree .tree-cell { -fx-cell-size: 26px; }
+.ele-tree .tree-cell {
+    -fx-background-color: -elefx-cf-blank;
+    -fx-background-insets: 0;
+    -fx-padding: 0 4px 0 0;
+    -fx-indent: 18px;
+    -fx-text-fill: -elefx-ct-regular;
+    -fx-font-size: 14px;
+}
+.ele-tree .tree-cell .label { -fx-text-fill: -elefx-ct-regular; }
+.ele-tree .ele-tree__label {
+    -fx-padding: 0;
+    -fx-translate-y: -1.5px;
+}
+.ele-tree > .tree-view > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected {
+    -fx-background-color: -elefx-cf-blank;
+    -fx-background-insets: 0;
+}
+.ele-tree > .tree-view > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:hover,
+.ele-tree > .tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:focused {
+    -fx-background-color: -elefx-cf-light;
+    -fx-background-insets: 0;
+    -fx-border-width: 0;
+}
+.ele-tree:highlight-current > .tree-view > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
+.ele-tree:highlight-current > .tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:focused:selected,
+.ele-tree .tree-cell:drop-inside { -fx-background-color: -elefx-cp-l8; }
+.ele-tree .tree-cell:drop-before { -fx-border-color: -elefx-cp-1; -fx-border-width: 2px 0 0 0; }
+.ele-tree .tree-cell:drop-after { -fx-border-color: -elefx-cp-1; -fx-border-width: 0 0 2px 0; }
+.ele-tree .tree-cell > .tree-disclosure-node {
+    -fx-pref-width: 24px;
+    -fx-pref-height: 26px;
+    -fx-snap-to-pixel: false;
+    -fx-alignment: center;
+    -fx-padding: 0 6px;
+}
+.ele-tree .tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: -elefx-ct-placeholder;
+    /* CaretRight occupies 384 by 640 units in a 1024-unit, 12px icon. */
+    -fx-padding: 0;
+    -fx-min-width: 4.5px;
+    -fx-pref-width: 4.5px;
+    -fx-max-width: 4.5px;
+    -fx-min-height: 7.5px;
+    -fx-pref-height: 7.5px;
+    -fx-max-height: 7.5px;
+    -fx-shape: "M384 192v640l384-320.064z";
+    /* The glyph is offset from the center of the 12px icon box. */
+    -fx-translate-x: 0.75px;
+}
+.ele-tree .tree-cell .ele-checkbox { -fx-min-height: 14px; }
+.ele-tree .tree-cell:expanded > .tree-disclosure-node > .arrow {
+    -fx-rotate: 90;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0.75px;
+}
+.ele-tree .tree-cell:loading > .tree-disclosure-node > .arrow {
+    -fx-rotate: 0;
+    -fx-translate-x: 0.75px;
+    -fx-translate-y: 0;
+}
+.ele-tree .ele-tree__loading-icon .ele-icon__svg { -fx-fill: -elefx-ct-secondary; }
+.ele-tree .ele-tree__empty { -fx-text-fill: -elefx-ct-secondary; }

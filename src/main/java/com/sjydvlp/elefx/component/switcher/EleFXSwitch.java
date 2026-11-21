@@ -3,6 +3,7 @@ package com.sjydvlp.elefx.component.switcher;
 import com.sjydvlp.elefx.theme.EleFXThemes;
 import com.sjydvlp.elefx.theme.Theme;
 import com.sjydvlp.elefx.theme.Themable;
+import com.sjydvlp.elefx.component.icon.EleFXCursors;
 import com.sjydvlp.elefx.component.icon.EleFXIcon;
 import com.sjydvlp.elefx.component.icon.EleFXIconType;
 import javafx.animation.Interpolator;
@@ -20,10 +21,8 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.AccessibleRole;
 import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -33,7 +32,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
 
 import java.util.Objects;
@@ -68,7 +66,7 @@ public class EleFXSwitch extends HBox implements Themable {
 
     private final EleFXIcon loadingIcon = new EleFXIcon(EleFXIconType.LOADING, 10);
 
-    private final Cursor blockedCursor = createBlockedCursor();
+    private final Cursor blockedCursor = EleFXCursors.createBlockedCursor();
 
     private final EventHandler<MouseEvent> sceneMouseMovedHandler = this::handleSceneMouseMoved;
 
@@ -616,15 +614,6 @@ public class EleFXSwitch extends HBox implements Themable {
         } else if (getScene().getCursor() == blockedCursor) {
             getScene().setCursor(null);
         }
-    }
-
-    private static Cursor createBlockedCursor() {
-        EleFXIcon icon = new EleFXIcon(EleFXIconType.FORBIDDEN, 20);
-        icon.setFill(Color.web("#606266"));
-        SnapshotParameters parameters = new SnapshotParameters();
-        parameters.setFill(Color.TRANSPARENT);
-        WritableImage image = icon.snapshot(parameters, null);
-        return new ImageCursor(image, 10, 10);
     }
 
     private String cssPaint(Paint paint) {

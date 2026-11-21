@@ -70,6 +70,7 @@ public enum EleFXThemes implements Theme {
     STATISTIC("css/component/statistic/EleFXStatistic.css"),
     SEGMENTED("css/component/segmented/EleFXSegmented.css"),
     TABS("css/component/tabs/EleFXTabs.css"),
+    TREE("css/component/tree/EleFXTree.css"),
     TABLE("css/component/table/EleFXTable.css"),
     ;
 
