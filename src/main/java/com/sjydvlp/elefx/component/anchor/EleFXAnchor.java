@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
@@ -281,6 +282,7 @@ public class EleFXAnchor extends StackPane implements Themable {
 
     private void initialize() {
         getStyleClass().add("ele-anchor");
+        setMaxHeight(USE_PREF_SIZE);
         markerNode.getStyleClass().add("ele-anchor__marker");
         markerNode.setManaged(false);
         verticalLinks.getStyleClass().add("ele-anchor__list");
@@ -306,7 +308,7 @@ public class EleFXAnchor extends StackPane implements Themable {
     private void rebuild() {
         if (getDirection() == EleFXAnchorDirection.VERTICAL) {
             verticalLinks.getChildren().setAll(links);
-            getChildren().setAll(markerNode, verticalLinks);
+            getChildren().setAll(verticalLinks, markerNode);
         } else {
             horizontalLinks.getChildren().setAll(links);
             getChildren().setAll(markerNode, horizontalLinks);
@@ -317,6 +319,9 @@ public class EleFXAnchor extends StackPane implements Themable {
     }
 
     private void updateClasses() {
+        boolean underline = getType() == EleFXAnchorType.UNDERLINE;
+        verticalLinks.setMaxHeight(underline ? USE_PREF_SIZE : Double.MAX_VALUE);
+        StackPane.setAlignment(verticalLinks, underline ? Pos.TOP_LEFT : null);
         getStyleClass().removeIf(s -> s.startsWith("ele-anchor--"));
         getStyleClass().add("ele-anchor--" + getDirection().name().toLowerCase());
         getStyleClass().add("ele-anchor--" + getType().name().toLowerCase());
@@ -354,12 +359,16 @@ public class EleFXAnchor extends StackPane implements Themable {
         if (viewport == null) return;
         final EleFXAnchorLink[] candidate = {null};
         final double[] candidateY = {Double.NEGATIVE_INFINITY};
-        double trigger = viewport.getMinY() + getOffset() + getBound();
+        // At the bottom, a visible section may never reach the offset line.
+        boolean atBottom = verticalRange(pane) > 0 && pane.getVvalue() >= pane.getVmax();
+        double trigger = atBottom ? viewport.getMaxY() : viewport.getMinY() + getOffset() + getBound();
         forEachNavigableLink(link -> {
             Node target = resolveTarget(link);
             if (target == null || !target.isVisible()) return;
             Bounds targetBounds = target.localToScene(target.getBoundsInLocal());
-            if (targetBounds == null || targetBounds.getMinY() > trigger) return;
+            if (targetBounds == null || targetBounds.getMinY() > trigger
+                    || (atBottom && targetBounds.getMinY() == trigger))
+                return;
             double targetY = targetBounds.getMinY();
             if (targetY > candidateY[0]
                     || (Double.compare(targetY, candidateY[0]) == 0 && link == preferredDuplicateTargetLink)) {
@@ -390,8 +399,7 @@ public class EleFXAnchor extends StackPane implements Themable {
 
     private void updateMarker() {
         EleFXAnchorLink current = getActiveLink();
-        if (!isMarker() || current == null || getDirection() != EleFXAnchorDirection.VERTICAL
-                || getType() == EleFXAnchorType.UNDERLINE) {
+        if (!isMarker() || current == null || getDirection() != EleFXAnchorDirection.VERTICAL) {
             markerNode.setVisible(false);
             return;
         }
