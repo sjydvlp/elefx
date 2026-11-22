@@ -2371,6 +2371,8 @@
 .ele-tree .tree-cell {
     -fx-background-color: -elefx-cf-blank;
     -fx-background-insets: 0;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
     -fx-padding: 0 4px 0 0;
     -fx-indent: 18px;
     -fx-text-fill: -elefx-ct-regular;
@@ -2389,13 +2391,14 @@
 .ele-tree > .tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:focused {
     -fx-background-color: -elefx-cf-light;
     -fx-background-insets: 0;
-    -fx-border-width: 0;
 }
 .ele-tree:highlight-current > .tree-view > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
 .ele-tree:highlight-current > .tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:focused:selected,
 .ele-tree .tree-cell:drop-inside { -fx-background-color: -elefx-cp-l8; }
-.ele-tree .tree-cell:drop-before { -fx-border-color: -elefx-cp-1; -fx-border-width: 2px 0 0 0; }
-.ele-tree .tree-cell:drop-after { -fx-border-color: -elefx-cp-1; -fx-border-width: 0 0 2px 0; }
+.ele-tree .ele-tree__drop-indicator {
+    -fx-background-color: -elefx-cp-1;
+    -fx-pref-height: 1px;
+}
 .ele-tree .tree-cell > .tree-disclosure-node {
     -fx-pref-width: 24px;
     -fx-pref-height: 26px;

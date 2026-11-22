@@ -14,11 +14,14 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 final class EleFXTreeCell<T> extends TreeCell<T> {
 
     private static final PseudoClass LOADING = PseudoClass.getPseudoClass("loading");
+
+    private static final PseudoClass DROP_INSIDE = PseudoClass.getPseudoClass("drop-inside");
 
     private final EleFXTree<T> tree;
 
@@ -33,6 +36,10 @@ final class EleFXTreeCell<T> extends TreeCell<T> {
     }
 
     private final HBox content = new HBox(8);
+
+    private final Region dropIndicator = new Region();
+
+    private EleFXTree.DropPosition dropPosition;
 
     private final Label label = new Label();
 
@@ -65,9 +72,15 @@ final class EleFXTreeCell<T> extends TreeCell<T> {
         this.tree = tree;
         setMinHeight(0);
         tree.animationRevision.addListener(new javafx.beans.WeakInvalidationListener(expansionChanged));
-        treeItemProperty().addListener(o -> updateExpansion());
+        treeItemProperty().addListener(o -> {
+            indicate(null);
+            updateExpansion();
+        });
         revealClip.widthProperty().bind(widthProperty());
         content.setAlignment(Pos.CENTER_LEFT);
+        dropIndicator.getStyleClass().add("ele-tree__drop-indicator");
+        dropIndicator.setManaged(false);
+        dropIndicator.setMouseTransparent(true);
         label.getStyleClass().add("ele-tree__label");
         content.setMinHeight(EleFXTree.ROW_HEIGHT);
         loadingIcon.getStyleClass().add("ele-tree__loading-icon");
@@ -188,10 +201,27 @@ final class EleFXTreeCell<T> extends TreeCell<T> {
     }
 
     private void indicate(EleFXTree.Drop<T> drop) {
-        for (var pos : EleFXTree.DropPosition.values()) {
-            var state = PseudoClass.getPseudoClass("drop-" + pos.name().toLowerCase(java.util.Locale.ROOT));
-            pseudoClassStateChanged(state, drop != null && drop.position() == pos);
+        var position = drop == null ? null : drop.position();
+        if (dropPosition == position) return;
+        dropPosition = position;
+        pseudoClassStateChanged(DROP_INSIDE, position == EleFXTree.DropPosition.INSIDE);
+        if (position == EleFXTree.DropPosition.BEFORE || position == EleFXTree.DropPosition.AFTER) {
+            if (!getChildren().contains(dropIndicator)) getChildren().add(dropIndicator);
+        } else {
+            getChildren().remove(dropIndicator);
         }
+        requestLayout();
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        if (dropPosition != EleFXTree.DropPosition.BEFORE && dropPosition != EleFXTree.DropPosition.AFTER) return;
+        // The content starts at the trailing edge of the expansion icon slot, including on leaf rows.
+        double left = content.getLayoutX();
+        double height = snapSizeY(dropIndicator.prefHeight(-1));
+        double y = dropPosition == EleFXTree.DropPosition.BEFORE ? 0 : getHeight() - height;
+        dropIndicator.resizeRelocate(left, y, Math.max(0, getWidth() - left), height);
     }
 
     private void observeLoading(TreeItem<T> item) {
