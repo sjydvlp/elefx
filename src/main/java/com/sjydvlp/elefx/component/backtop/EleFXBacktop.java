@@ -217,7 +217,10 @@ public class EleFXBacktop extends StackPane implements Themable {
         setMinSize(SIZE, SIZE);
         setPrefSize(SIZE, SIZE);
         setMaxSize(SIZE, SIZE);
-        setContent(new EleFXIcon(EleFXIconType.CARET_TOP, 18));
+        EleFXIcon caret = new EleFXIcon(EleFXIconType.CARET_TOP, 18);
+        // The filled triangle's visual center is below the center of its bounds.
+        caret.setTranslateY(-1);
+        setContent(caret);
         setOnMouseClicked(event -> {
             if (!isDisabled() && isShowing()) scrollToTop();
         });
